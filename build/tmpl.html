@@ -1,0 +1,1608 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>聞き取れなかった英文 — 音読と発音チェック</title>
+<style>
+  :root {
+    --paper:   #F2F1EE;
+    --surface: #FFFFFF;
+    --ink:     #1B1D22;
+    --muted:   #5F6570;
+    --faint:   #8D939D;
+    --accent:  #2E4B7A;
+    --accent-tint: #E4EAF3;
+    --amber:   #9C5A15;
+    --amber-tint: #F7EADA;
+    --rule:    #D9D8D4;
+    --rule-soft: #E7E6E3;
+    --ok:      #1F6B4E;
+    --ok-tint: #E1EFE8;
+    --near:    #8A6410;
+    --near-tint: #F7EED8;
+    --ng:      #A3372F;
+    --ng-tint: #F7E2E0;
+    --on-accent: #FFFFFF;
+
+    --font-en: "Palatino Linotype", Palatino, "Iowan Old Style", Georgia, serif;
+    --font-jp: "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, system-ui, sans-serif;
+    --font-mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:   #12141A;
+      --surface: #1A1D25;
+      --ink:     #E8EAEE;
+      --muted:   #A0A6B0;
+      --faint:   #79808B;
+      --accent:  #7FA6DC;
+      --accent-tint: #1D2941;
+      --amber:   #E0A253;
+      --amber-tint: #332616;
+      --rule:    #2C313B;
+      --rule-soft: #232830;
+      --ok:      #63C79A;
+      --ok-tint: #16311F;
+      --near:    #DCB45C;
+      --near-tint: #322A15;
+      --ng:      #E58279;
+      --ng-tint: #35201E;
+      --on-accent: #12141A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:   #12141A;
+    --surface: #1A1D25;
+    --ink:     #E8EAEE;
+    --muted:   #A0A6B0;
+    --faint:   #79808B;
+    --accent:  #7FA6DC;
+    --accent-tint: #1D2941;
+    --amber:   #E0A253;
+    --amber-tint: #332616;
+    --rule:    #2C313B;
+    --rule-soft: #232830;
+    --ok:      #63C79A;
+    --ok-tint: #16311F;
+    --near:    #DCB45C;
+    --near-tint: #322A15;
+    --ng:      #E58279;
+    --ng-tint: #35201E;
+    --on-accent: #12141A;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-jp);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 18px 80px; }
+
+  header.top {
+    padding: 34px 0 18px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 18px;
+  }
+  header.top h1 { margin: 0 0 6px; font-size: 1.6rem; line-height: 1.35; letter-spacing: .01em; }
+  header.top p  { margin: 0; color: var(--muted); font-size: .9rem; }
+
+  /* ---------- 説明 ---------- */
+  details.howto {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 0 16px;
+    margin-bottom: 16px;
+  }
+  details.howto > summary {
+    cursor: pointer; padding: 12px 0; font-weight: 700; font-size: .95rem;
+    list-style: none;
+  }
+  details.howto > summary::-webkit-details-marker { display: none; }
+  details.howto > summary::before { content: "▸ "; color: var(--accent); }
+  details.howto[open] > summary::before { content: "▾ "; }
+  details.howto ol, details.howto ul { margin: 0 0 14px; padding-left: 1.3em; }
+  details.howto li { margin: 6px 0; font-size: .92rem; }
+  details.howto p { font-size: .92rem; color: var(--muted); }
+
+  /* ---------- ツールバー ---------- */
+  .toolbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    padding: 10px 0;
+    margin-bottom: 4px;
+  }
+  .bar-label { font-size: .74rem; color: var(--faint); letter-spacing: .08em; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    border: 0; background: var(--surface); color: var(--muted);
+    padding: 7px 12px; font-size: .85rem; cursor: pointer;
+  }
+  .seg button + button { border-left: 1px solid var(--rule); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+  select.jump {
+    font-family: inherit; font-size: .85rem; padding: 7px 10px;
+    border: 1px solid var(--rule); border-radius: 8px;
+    background: var(--surface); color: var(--ink); max-width: 190px;
+  }
+  .tbtn {
+    border: 1px solid var(--rule); background: var(--surface); color: var(--muted);
+    border-radius: 8px; padding: 7px 12px; font-size: .85rem; cursor: pointer;
+  }
+  .tbtn[aria-pressed="true"] { background: var(--amber); color: var(--on-accent); border-color: var(--amber); }
+  .tally { font-size: .82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .vstat { font-size: .78rem; color: var(--faint); }
+
+  .note-bar {
+    background: var(--amber-tint); border: 1px solid var(--rule);
+    border-radius: 8px; padding: 10px 14px; margin: 10px 0;
+    font-size: .87rem; line-height: 1.65;
+  }
+  .note-bar code { font-family: var(--font-mono); font-size: .85em; }
+
+  /* ---------- マイク確認 ---------- */
+  .miccheck {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 10px; padding: 14px 16px; margin: 10px 0;
+  }
+  .mc-dev { margin: 0 0 10px; font-size: .84rem; color: var(--muted); }
+  .mc-dev span { font-family: var(--font-mono); font-size: .82em; }
+  .mc-bar {
+    position: relative; height: 14px; border-radius: 7px;
+    background: var(--rule-soft); overflow: hidden;
+  }
+  .mc-fill { height: 100%; width: 0; background: var(--accent); transition: width .05s linear; }
+  .mc-fill.loud { background: var(--ok); }
+  .mc-peak { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--amber); left: 0; }
+  .mc-scale { display: flex; justify-content: space-between; font-size: .7rem; color: var(--faint); margin-top: 4px; }
+  .mc-verdict { margin: 8px 0 0; font-size: .85rem; font-weight: 700; }
+  .mc-verdict.good { color: var(--ok); }
+  .mc-verdict.bad  { color: var(--ng); }
+  .mc-note { margin: 8px 0 0; font-size: .8rem; color: var(--muted); line-height: 1.6; }
+
+  /* ---------- 回の見出し ---------- */
+  .ep {
+    margin: 26px 0 0;
+    scroll-margin-top: 64px;
+  }
+  .ep-head {
+    display: flex; align-items: baseline; gap: 10px;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 6px; margin-bottom: 10px;
+  }
+  .ep-no {
+    font-family: var(--font-mono); font-size: 1.15rem; font-weight: 700;
+    color: var(--accent); letter-spacing: .02em;
+  }
+  .ep-theme { font-size: .9rem; color: var(--muted); }
+  .ep-count { margin-left: auto; font-size: .76rem; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+  /* ---------- 1文のカード ---------- */
+  .item {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--rule);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .item.done-ok   { border-left-color: var(--ok); }
+  .item.done-near { border-left-color: var(--near); }
+  .item.done-ng   { border-left-color: var(--ng); }
+
+  .item .en {
+    font-family: var(--font-en);
+    font-size: 1.16rem;
+    line-height: 1.55;
+    margin: 0 0 8px;
+  }
+  .item .ctx {
+    margin: 0 0 8px; font-size: .82rem; color: var(--faint);
+    font-family: var(--font-en); line-height: 1.5;
+    padding-left: 10px; border-left: 2px solid var(--rule-soft);
+  }
+  .item .memo {
+    margin: 0 0 8px; font-size: .82rem; color: var(--amber);
+  }
+  .item .sub-say {
+    margin: 0 0 8px; font-size: .78rem; color: var(--faint);
+  }
+
+  /* ---------- 英文を隠す ---------- */
+  .item .mask { display: none; }
+  body.mask-on .item:not(.revealed) .en,
+  body.mask-on .item:not(.revealed) .ctx,
+  body.mask-on .item:not(.revealed) .memo,
+  body.mask-on .item:not(.revealed) .sub-say { display: none; }
+  body.mask-on .item:not(.revealed) .mask {
+    display: block;
+    font-family: var(--font-en);
+    font-size: 1.16rem;
+    line-height: 1.55;
+    letter-spacing: .06em;
+    color: var(--faint);
+    margin: 0 0 8px;
+    user-select: none;
+  }
+  /* 隠しているあいだは常に出す。開いたあとも押せば閉じられる。
+     ラベルの出し分けはCSSでやる。JS側で書き換えると、全体の切り替えや
+     判定による自動表示と食い違う。 */
+  .acts .reveal { display: none; }
+  body.mask-on .acts .reveal { display: inline-flex; }
+  .reveal .lbl-hide { display: none; }
+  .item.revealed .reveal .lbl-show { display: none; }
+  .item.revealed .reveal .lbl-hide { display: inline; }
+
+  /* ---------- 日本語訳 ---------- */
+  .item .ja {
+    margin: 0 0 8px; font-size: .92rem; color: var(--muted); line-height: 1.75;
+  }
+  .item .ja-mask {
+    display: none;
+    margin: 0 0 8px; font-size: .92rem; color: var(--faint);
+    line-height: 1.75; letter-spacing: .06em; user-select: none;
+  }
+  body.jamask-on .item:not(.ja-revealed) .ja { display: none; }
+  body.jamask-on .item:not(.ja-revealed) .ja-mask { display: block; }
+
+  .acts .reveal-ja { display: none; }
+  body.jamask-on .acts .reveal-ja { display: inline-flex; }
+  .reveal-ja .lbl-hide { display: none; }
+  .item.ja-revealed .reveal-ja .lbl-show { display: none; }
+  .item.ja-revealed .reveal-ja .lbl-hide { display: inline; }
+
+  /* ---------- 語をクリックしてそこから聞く ---------- */
+  .item .w {
+    border-radius: 3px;
+    padding: 0 1px;
+    cursor: pointer;
+  }
+  .item .w:hover { background: var(--accent-tint); }
+  .item .w.now  { background: var(--amber-tint); color: var(--amber); }
+  .item.no-seek .w { cursor: default; }
+  .item.no-seek .w:hover { background: none; }
+  .item .seek-hint {
+    margin: 0 0 8px; font-size: .74rem; color: var(--faint);
+  }
+
+  .acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .acts button {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--rule); background: var(--paper); color: var(--ink);
+    border-radius: 8px; padding: 8px 12px; font-size: .86rem; cursor: pointer;
+    font-family: inherit;
+  }
+  .acts button:hover { border-color: var(--accent); }
+  .acts .speak.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .acts .rec.on   { background: var(--ng); color: var(--on-accent); border-color: var(--ng); }
+  .acts svg { width: 17px; height: 17px; flex: none; }
+  .chip {
+    margin-left: auto; font-size: .76rem; padding: 3px 9px; border-radius: 999px;
+    background: var(--rule-soft); color: var(--faint);
+  }
+  .chip.ok   { background: var(--ok-tint);   color: var(--ok); }
+  .chip.near { background: var(--near-tint); color: var(--near); }
+  .chip.ng   { background: var(--ng-tint);   color: var(--ng); }
+
+  .rec-out { display: block; margin-top: 10px; font-size: .88rem; line-height: 1.7; }
+  .rec-out:empty { display: none; }
+  .rec-out.ok   { color: var(--ok); }
+  .rec-out.near { color: var(--near); }
+  .rec-out.ng   { color: var(--ng); }
+  .rec-out .verdict { font-weight: 700; }
+  .rec-out .heard { font-family: var(--font-en); }
+  .rec-out .miss { text-decoration: underline wavy; text-underline-offset: 3px; }
+  .rec-out .sub, .rec-out .fix {
+    display: block; color: var(--muted); font-size: .82rem; margin-top: 3px;
+  }
+  .rec-out .fix-head {
+    display: block; margin-top: 6px; font-size: .78rem; color: var(--faint);
+    letter-spacing: .06em;
+  }
+  .rec-out .interim { color: var(--faint); font-style: italic; }
+  .plays { display: flex; gap: 8px; margin-top: 8px; }
+  .plays button {
+    border: 1px solid var(--rule); background: var(--paper); color: var(--ink);
+    border-radius: 8px; padding: 6px 11px; font-size: .82rem; cursor: pointer;
+    font-family: inherit;
+  }
+  .plays button.mine { border-color: var(--amber); color: var(--amber); }
+
+  .empty { padding: 40px 0; text-align: center; color: var(--faint); font-size: .9rem; }
+
+  footer.bot {
+    margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--rule);
+    font-size: .8rem; color: var(--faint); line-height: 1.7;
+  }
+
+  @media (pointer: coarse) {
+    .acts button { padding: 11px 15px; font-size: .95rem; }
+    .acts svg { width: 20px; height: 20px; }
+    .seg button, .tbtn, select.jump { padding: 10px 14px; font-size: .9rem; }
+    .plays button { padding: 9px 14px; font-size: .88rem; }
+    .item .en { font-size: 1.22rem; }
+  }
+  @media print {
+    .toolbar, .acts, .rec-out, .miccheck, .note-bar, details.howto { display: none; }
+    body { background: #fff; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>聞き取れなかった英文</h1>
+  <p>ラジオ英会話2026 のスタディファイルで「全然聞こえない」と印を付けた文だけを集めたページ。<strong id="totalN"></strong></p>
+</header>
+
+<details class="howto">
+  <summary>使い方と、できること・できないこと</summary>
+  <ol>
+    <li><strong>スピーカーの印で聞く。</strong>端末の読み上げ音声です。<strong>ゆっくり</strong>は口の形をなぞる用、<strong>ふつう</strong>は覚える用、<strong>はやい</strong>は本来の速さに近く聞き取りの練習用。聞き取れなかった文なので、まず「はやい」で聞いて、分からなければ「ゆっくり」に落として音を確かめるのが順序です。</li>
+    <li><strong>途中から・少し戻して聞けます。</strong>文中の<strong>語を押すとそこから</strong>読み直します（伏字のあいだも、伏字の塊を押せば同じように効きます）。<strong>「◀ 少し戻る」</strong>は3語ぶん戻ります。聞き終わったあとに押せば、最後のところだけ繰り返せます。読み上げ中にもう一度「聞く」を押すと止まります。</li>
+    <li><strong>マイクの印で自分の発音を判定する。</strong>押してから声に出すと、端末の音声認識が<strong>何と聞き取ったか</strong>を返し、通らなかった語を指摘します。判定の下に<strong>「▶ 自分の声」「▶ お手本」</strong>が出るので、交互に押して聞き比べてください。文字の説明より耳のほうが速いです。</li>
+    <li><strong>英文を「隠す」にすると、伏字になります。</strong>文字を見てしまうと聞き取れた気になるので、聞き取りの練習はこちらで。語の数と長さ、句読点だけ残してあるので、何語の文かは分かります。答え合わせはカードの<strong>「英文を見る」</strong>、または発音チェックを実行すると自動で開きます。開いたあとに<strong>「英文を隠す」</strong>で1件ずつ閉じ直せるので、同じ文をもう一度音だけで確かめられます。設定は次に開いたときも残ります。</li>
+    <li><strong>日本語訳も同じように隠せます。</strong>ツールバーの<strong>訳</strong>で全体を切り替え、カードの<strong>「訳を見る／訳を隠す」</strong>で1件ずつ。英文とは<strong>別々に</strong>効くので、「英文は隠す・訳は見せる」（意味を知ったうえで英語を作る）や、両方隠して純粋な聞き取りに、といった使い分けができます。</li>
+    <li><strong>結果は端末に残ります。</strong>○△× の印がカードの左端と右上に付き、次に開いたときも残っています。ツールバーの<strong>表示</strong>で「まだ通っていないもの」だけに絞れます。</li>
+  </ol>
+  <p><strong>判定できるのは「通じたかどうか」まで</strong>です。発音の良し悪しは採点できません。音のお手本はスピーカーの印のほうを信じてください。音声認識には<strong>通信が必要</strong>で、オフラインでは動きません。</p>
+  <p>スマホでは<strong>録音と音声認識を同時に使えない</strong>ため、マイクを認識に譲ります。自分の声は判定が出たあとの「録って聞き比べる」で録れます。</p>
+</details>
+
+<div class="toolbar" id="toolbar">
+  <span class="bar-label">速さ</span>
+  <span class="seg" role="group" aria-label="読み上げ速度">
+    <button type="button" id="spd-s" aria-pressed="false">ゆっくり</button>
+    <button type="button" id="spd-n" aria-pressed="true">ふつう</button>
+    <button type="button" id="spd-f" aria-pressed="false">はやい</button>
+  </span>
+  <span class="bar-label">英文</span>
+  <span class="seg" role="group" aria-label="英文の表示">
+    <button type="button" id="msk-off" aria-pressed="true">見せる</button>
+    <button type="button" id="msk-on" aria-pressed="false">隠す</button>
+  </span>
+  <span class="bar-label">訳</span>
+  <span class="seg" role="group" aria-label="日本語訳の表示">
+    <button type="button" id="jam-off" aria-pressed="true">見せる</button>
+    <button type="button" id="jam-on" aria-pressed="false">隠す</button>
+  </span>
+  <span class="bar-label">表示</span>
+  <span class="seg" role="group" aria-label="表示する項目">
+    <button type="button" id="flt-a" aria-pressed="true">すべて</button>
+    <button type="button" id="flt-t" aria-pressed="false">未クリア</button>
+    <button type="button" id="flt-x" aria-pressed="false">要練習</button>
+  </span>
+  <select class="jump" id="jump" aria-label="回へ移動"></select>
+  <button type="button" class="tbtn" id="micCheckBtn" aria-pressed="false" aria-controls="micCheck">マイク確認</button>
+  <span class="tally" id="tally"></span>
+  <span class="vstat" id="vstat">音声を確認しています…</span>
+</div>
+
+<p class="note-bar" id="vhelp" hidden></p>
+<p class="note-bar" id="rhelp" hidden></p>
+
+<div class="miccheck" id="micCheck" hidden>
+  <p class="mc-dev"></p>
+  <div class="mc-bar"><div class="mc-fill"></div><div class="mc-peak"></div></div>
+  <div class="mc-scale"><span>無音</span><span>話し声の目安</span><span>大</span></div>
+  <p class="mc-verdict"></p>
+  <p class="mc-note">声を出して棒が動くかを見てください。動かないなら音声認識も拾えません。パソコンなら 設定 → システム → サウンド で、<b>入力デバイス</b>と<b>入力音量</b>を確認してください。マイクの形式が 16000 Hz（テープレコーダーの音質）だと英語はまず通りません。<b>48000 Hz（DVDの音質）</b>に上げてください。</p>
+</div>
+
+<main id="list"></main>
+
+<p class="empty" id="empty" hidden>この条件に当てはまる文はありません。</p>
+
+<footer class="bot">
+  出典: <code>ラジオ英会話_2026.xlsx</code> の 2026年度_main-part シートで「（全然聞こえない）」と印を付けた箇所。
+  Main part（教科書の正しい英文）と各回のキーフレーズ行から抽出しています。
+  聞き取りメモ（Main part without repeat）は誤字を含む書き取りのため、練習対象から外しています。
+  <br><strong>日本語訳は教科書の訳例ではなく、英文から起こした参考訳です。</strong>意味をつかむ目的で付けています。正式な訳はテキストを参照してください。
+  <br>記録はこの端末のブラウザだけに保存されます。パソコンとスマホでは別々になります。
+</footer>
+
+</div>
+
+<script>
+/* ============================================================
+   データ。Excel から抽出したもの。
+   ep=回, theme=主テーマ, en=表示する英文, say=読み上げ・判定に使う形,
+   ctx=元の行全体（対象が行の一部のときだけ）, note=補足メモ
+   ============================================================ */
+var DATA = /*__DATA__*/;
+</script>
+
+<script>
+/* ============================================================
+   読み上げ
+   ============================================================ */
+var TTS = (function () {
+  var synth = window.speechSynthesis;
+  var vstat = document.getElementById('vstat');
+  var vhelp = document.getElementById('vhelp');
+
+  if (!synth) {
+    vstat.textContent = 'このブラウザは読み上げに対応していません。';
+    return { speak: function () {}, stop: function () {}, setSpeed: function () {}, ok: false };
+  }
+
+  var RATES = { slow: 0.6, normal: 0.92, fast: 1.15 };
+  var speed = 'normal';
+  var voice = null, active = null;
+
+  function pick() {
+    var vs = synth.getVoices();
+    if (!vs.length) return;
+    var en = vs.filter(function (v) { return /^en(-|_)/i.test(v.lang); });
+    if (!en.length) {
+      vstat.textContent = '英語の音声が見つかりません。';
+      vhelp.innerHTML = '<strong>この端末に英語の読み上げ音声が入っていません。</strong> ' +
+        'Windows なら 設定 → 時刻と言語 → 音声認識 で英語の音声を追加できます。判定のほうは音声が無くても動きます。';
+      vhelp.hidden = false;
+      return;
+    }
+    /* 自然な声を優先。名前で選べない端末もあるので最後は先頭を使う */
+    var pref = ['Google US English', 'Microsoft Aria', 'Microsoft Jenny', 'Samantha', 'Microsoft Zira'];
+    for (var i = 0; i < pref.length && !voice; i++) {
+      for (var j = 0; j < en.length; j++) {
+        if (en[j].name.indexOf(pref[i]) >= 0) { voice = en[j]; break; }
+      }
+    }
+    if (!voice) {
+      for (var k = 0; k < en.length; k++) { if (/^en-US/i.test(en[k].lang)) { voice = en[k]; break; } }
+    }
+    if (!voice) voice = en[0];
+    vstat.textContent = '読み上げ: ' + voice.name;
+  }
+
+  pick();
+  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = pick;
+
+  /* 読み上げは途中から鳴らせない。シークの代わりに、語の途中から
+     読み直すことで「少し戻す」「ここから聞く」を実現する。 */
+
+  var cur = null;
+
+  function stop() {
+    var st = cur;
+    cur = null;
+    if (st) {
+      if (st.timer) clearInterval(st.timer);
+      if (st.btn) st.btn.classList.remove('on');
+      if (st.hooks.onStop) st.hooks.onStop();
+    }
+    if (active) { active.classList.remove('on'); active = null; }
+    synth.cancel();
+  }
+
+  /**
+   * words を from 番目から読む。
+   * hooks.onWord(index, accurate) — accurate=false は時間からの見積もり
+   */
+  function play(words, from, hooks, btn) {
+    stop();
+    if (!words.length) return;
+    from = Math.max(0, Math.min(from | 0, words.length - 1));
+    var chunk = words.slice(from);
+    var text = chunk.join(' ');
+
+    /* 読み上げ中の位置(charIndex)を語の番号に戻すための表 */
+    var offs = [], p = 0;
+    for (var i = 0; i < chunk.length; i++) { offs.push(p); p += chunk[i].length + 1; }
+
+    var u = new SpeechSynthesisUtterance(text);
+    if (voice) { u.voice = voice; u.lang = voice.lang; } else { u.lang = 'en-US'; }
+    u.rate = RATES[speed];
+
+    var st = { hooks: hooks || {}, btn: btn || null, idx: from, boundary: false, timer: null };
+    cur = st;
+
+    u.onboundary = function (e) {
+      if (cur !== st || typeof e.charIndex !== 'number') return;
+      st.boundary = true;
+      var k = 0;
+      for (var j = 0; j < offs.length; j++) {
+        if (offs[j] <= e.charIndex) k = j; else break;
+      }
+      st.idx = from + k;
+      if (st.hooks.onWord) st.hooks.onWord(st.idx, true);
+    };
+
+    u.onend = function () {
+      if (cur !== st) return;
+      cur = null;
+      if (st.timer) clearInterval(st.timer);
+      st.idx = words.length - 1;
+      if (st.btn) st.btn.classList.remove('on');
+      if (st.hooks.onEnd) st.hooks.onEnd(st.idx);
+    };
+    u.onerror = u.onend;
+
+    if (st.btn) st.btn.classList.add('on');
+
+    /* boundary を出さない音声がある（Chromeのネットワーク音声など）。
+       その場合は経過時間から位置を見積もる。目印は出さず、
+       「少し戻る」の起点にだけ使う。外れた目印を出すほうが害が大きい。 */
+    var t0 = Date.now();
+    st.timer = setInterval(function () {
+      if (cur !== st || st.boundary) return;
+      var wps = 2.6 * RATES[speed];
+      var k = Math.floor((Date.now() - t0) / 1000 * wps);
+      st.idx = Math.min(words.length - 1, from + k);
+      if (st.hooks.onWord) st.hooks.onWord(st.idx, false);
+    }, 120);
+
+    synth.speak(u);
+  }
+
+  /* 文字列をそのまま読む（お手本ボタン用） */
+  function speak(text, btn) { play(String(text).split(/\s+/), 0, {}, btn); }
+
+  return {
+    ok: true,
+    play: play,
+    speak: speak,
+    stop: stop,
+    speaking: function () { return !!cur; },
+    setSpeed: function (s) { speed = s; }
+  };
+})();
+
+/* ============================================================
+   記録（この端末のブラウザに保存）
+   ============================================================ */
+var Store = (function () {
+  var KEY = 'english-powerup-v1';
+  var data = {};
+  try {
+    var raw = window.localStorage.getItem(KEY);
+    if (raw) data = JSON.parse(raw) || {};
+  } catch (e) { data = {}; }
+
+  function save() {
+    try { window.localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+  }
+  return {
+    get: function (id) { return data[id] || null; },
+    set: function (id, result) { data[id] = { r: result, t: Date.now() }; save(); },
+    all: function () { return data; }
+  };
+})();
+</script>
+
+<script>
+/* ============================================================
+   発音チェック（英語）
+
+   端末の音声認識に自分の発音を聞かせ、何と聞き取られたかを返す。
+   長い文は途中で切れないよう continuous で拾い、確定ぶんを足していく。
+
+   スマホでは、マイクは最初に掴んだひとつが握ったままになる。
+   getUserMedia で録音していると認識側には無音しか届かないため、
+   指で押す端末では録音を諦めて認識を通す。聞き比べは判定のあとに録る。
+   ============================================================ */
+(function () {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var help = document.getElementById('rhelp');
+  var tallyEl = document.getElementById('tally');
+  var listEl = document.getElementById('list');
+  var emptyEl = document.getElementById('empty');
+  var jumpEl = document.getElementById('jump');
+
+  function note(html) { help.innerHTML = html; help.hidden = false; }
+
+  var SERVE_HINT =
+    'このフォルダで <code>npx serve -l 8000</code> を実行し、' +
+    '<code>http://localhost:8000/</code> から開いてください。読み上げのほうは今のままでも使えます。';
+
+  if (location.protocol === 'file:') {
+    note('<strong>ファイルを直接開いているあいだは、発音チェックのマイクが使えません。</strong> ' +
+         'ブラウザは <code>file://</code> のページにマイクの許可を出せない決まりになっています。' + SERVE_HINT);
+  }
+  if (!SR) {
+    note('<strong>このブラウザでは発音チェックが使えません。</strong> ' +
+         'Chrome、Edge、iPhone の Safari で開くと使えます。読み上げはこのままでも動きます。');
+  }
+
+  var MIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<rect x="9" y="2.5" width="6" height="11" rx="3"/>' +
+    '<path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3.5"/></svg>';
+  var SPK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/>' +
+    '<path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
+
+  /* ---------- 語に割る。数字は語に開いてそろえる ---------- */
+
+  var ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+              'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
+              'seventeen', 'eighteen', 'nineteen'];
+  var TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+
+  function numWords(n) {
+    var out = [];
+    if (n >= 1000) { out = out.concat(numWords(Math.floor(n / 1000)), ['thousand']); n = n % 1000; }
+    if (n >= 100)  { out = out.concat(numWords(Math.floor(n / 100)),  ['hundred']);  n = n % 100; }
+    if (n >= 20) {
+      out.push(TENS[Math.floor(n / 10)]);
+      n = n % 10;
+      if (n) out.push(ONES[n]);
+      return out;
+    }
+    if (n > 0 || !out.length) out.push(ONES[n]);
+    return out;
+  }
+
+  function tokens(s) {
+    var raw = String(s).toLowerCase().replace(/[^a-z0-9']+/g, ' ').replace(/\s+/g, ' ').trim();
+    var disp = [], key = [];
+    if (!raw) return { disp: disp, key: key };
+    var parts = raw.split(' ');
+    for (var i = 0; i < parts.length; i++) {
+      var w = parts[i].replace(/^'+|'+$/g, '');
+      if (!w) continue;
+      if (/^[0-9]{1,4}$/.test(w)) {
+        var words = numWords(parseInt(w, 10));
+        for (var k = 0; k < words.length; k++) { disp.push(words[k]); key.push(words[k]); }
+      } else {
+        disp.push(w); key.push(w);
+      }
+    }
+    return { disp: disp, key: key };
+  }
+
+  /** 編集距離をたどり直して、どこが置き換わり・余分・不足かを返す */
+  function align(a, b) {
+    var m = a.length, n = b.length, i, j;
+    var d = [], from = [];
+    for (i = 0; i <= m; i++) { d[i] = [i]; from[i] = ['u']; }
+    for (j = 0; j <= n; j++) { d[0][j] = j; from[0][j] = 'l'; }
+    from[0][0] = null;
+    for (i = 1; i <= m; i++) {
+      for (j = 1; j <= n; j++) {
+        var same = a[i - 1] === b[j - 1];
+        var sub = d[i - 1][j - 1] + (same ? 0 : 1);
+        var del = d[i - 1][j] + 1;
+        var ins = d[i][j - 1] + 1;
+        var best = Math.min(sub, del, ins);
+        d[i][j] = best;
+        from[i][j] = (best === sub) ? (same ? 'e' : 's') : (best === del ? 'u' : 'l');
+      }
+    }
+    var ops = [];
+    i = m; j = n;
+    while (i > 0 || j > 0) {
+      var dir = (i > 0 && j > 0) ? from[i][j] : (i > 0 ? 'u' : 'l');
+      if (dir === 'e' || dir === 's') {
+        ops.push({ op: dir === 'e' ? 'eq' : 'sub', ai: i - 1, bi: j - 1 });
+        i--; j--;
+      } else if (dir === 'u') {
+        ops.push({ op: 'del', ai: i - 1, bi: -1 }); i--;
+      } else {
+        ops.push({ op: 'ins', ai: -1, bi: j - 1 }); j--;
+      }
+    }
+    ops.reverse();
+    var max = Math.max(m, n);
+    return { ops: ops, score: max ? 1 - d[m][n] / max : 0 };
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  /* 英文を隠すときの伏字。文字だけ潰し、語の区切りと句読点は残す。
+     長さが見えないと、何語の文なのかも分からず聞き取りの手がかりが無くなる。 */
+  function maskOf(s) {
+    return String(s).replace(/[A-Za-z0-9']/g, '•');
+  }
+
+  /* 訳のほうも同じ考え方。句読点だけ残す */
+  function maskJa(s) {
+    return String(s).replace(/[^\s、。，．！？!?「」『』（）()［］…・—\-]/g, '•');
+  }
+
+  function paint(ops, heard) {
+    var out = [];
+    for (var i = 0; i < ops.length; i++) {
+      var o = ops[i];
+      if (o.bi < 0) continue;
+      var w = esc(heard.disp[o.bi]);
+      out.push(o.op === 'eq' ? w : '<span class="miss">' + w + '</span>');
+    }
+    return out.join(' ');
+  }
+
+  /* ---------- 表示 ---------- */
+
+  var tally = { ok: 0, near: 0, ng: 0 };
+
+  function renderTally() {
+    var st = Store.all(), done = 0;
+    for (var k in st) if (st.hasOwnProperty(k)) done++;
+    tallyEl.textContent = '今回 ○' + tally.ok + ' △' + tally.near + ' ×' + tally.ng +
+      '　／　通過 ' + countOk() + ' / ' + DATA.length;
+  }
+
+  function countOk() {
+    var st = Store.all(), n = 0;
+    for (var k in st) if (st.hasOwnProperty(k) && st[k].r === 'ok') n++;
+    return n;
+  }
+
+  function outFor(el) {
+    var o = el.querySelector('.rec-out');
+    if (o) return o;
+    o = document.createElement('span');
+    o.className = 'rec-out';
+    el.appendChild(o);
+    return o;
+  }
+
+  function say(el, cls, html) {
+    var out = outFor(el);
+    out.className = 'rec-out' + (cls ? ' ' + cls : '');
+    out.innerHTML = html;
+  }
+
+  function mark(el, item, result) {
+    Store.set(item.id, result);
+    /* 判定を出した時点でお手本も表示するので、隠していても開く */
+    el.classList.add('revealed');
+    el.classList.remove('done-ok', 'done-near', 'done-ng');
+    el.classList.add('done-' + result);
+    var chip = el.querySelector('.chip');
+    chip.className = 'chip ' + result;
+    chip.textContent = result === 'ok' ? '○ 通じた' : (result === 'near' ? '△ 惜しい' : '× 未通過');
+    tally[result]++;
+    renderTally();
+  }
+
+  /* ---------- 判定 ---------- */
+
+  function acceptable(item, text) {
+    if (!item.tok.key.length) return false;
+    var h = tokens(text);
+    var a = align(item.tok.key, h.key);
+    for (var i = 0; i < a.ops.length; i++) {
+      if (a.ops[i].op === 'sub' || a.ops[i].op === 'del') {
+        return align(item.tok.key.join('').split(''), h.key.join('').split('')).score >= 0.9;
+      }
+    }
+    return true;
+  }
+
+  function verdict(el, item, heardText) {
+    var heard = tokens(heardText);
+    var a = align(item.tok.key, heard.key);
+    var shown = paint(a.ops, heard) || '（無音）';
+
+    /* 語の単位だけで見ると厳しすぎる。認識は EasyCard を easy card に割るし、
+       one を wan と書くこともある。語の切れ目を無視した文字単位でも見る。 */
+    var flat = align(item.tok.key.join('').split(''), heard.key.join('').split('')).score;
+
+    var hard = 0, dels = 0, adds = 0;
+    for (var i = 0; i < a.ops.length; i++) {
+      var o = a.ops[i];
+      if (o.op === 'sub') hard++;
+      else if (o.op === 'del') dels++;
+      else if (o.op === 'ins') adds++;
+    }
+
+    /* 狙った語がすべて順番どおり出ていれば合格。認識は前後に語を足して返す */
+    if (hard === 0 && dels === 0 && item.tok.key.length) {
+      say(el, 'ok', '<span class="verdict">○ 通じました</span>　聞こえた：<span class="heard">' +
+        shown + '</span>' +
+        (adds ? '<span class="sub">余計な語も拾っていますが、狙った語はすべて出ています。</span>' : ''));
+      mark(el, item, 'ok');
+      return true;
+    }
+
+    if (flat >= 0.9) {
+      say(el, 'ok', '<span class="verdict">○ 通じました</span>　聞こえた：<span class="heard">' +
+        shown + '</span><span class="sub">語の切れ目や細かい綴りは違いますが、通じる範囲です。</span>');
+      mark(el, item, 'ok');
+      return true;
+    }
+
+    /* 語のどれが通らなかったかを直接見る。切れ目がずれると対応付けは当てにならない */
+    var heardFlat = heard.key.join('');
+    var missed = [];
+    for (var w = 0; w < item.tok.key.length; w++) {
+      if (heardFlat.indexOf(item.tok.key[w]) < 0) missed.push(item.tok.disp[w]);
+    }
+    var cls = flat >= 0.6 ? 'near' : 'ng';
+    var head = cls === 'near' ? '△ 惜しい' : '× 別の文に聞こえています';
+
+    say(el, cls, '<span class="verdict">' + head + '</span>　聞こえた：<span class="heard">' +
+      shown + '</span><span class="sub">お手本：' + esc(item.say) + '</span>' +
+      (missed.length
+        ? '<span class="fix-head">直すところ</span><span class="fix">通らなかった語：' +
+          esc(missed.slice(0, 8).join(' ')) + '</span><span class="fix">' +
+          'まずこの語だけを繰り返して、通るようになってから文に戻してください。</span>'
+        : '<span class="fix-head">直すところ</span><span class="fix">' +
+          '語は合っていますが、並びか区切りがずれています。文を通しで言い直してください。</span>'));
+    mark(el, item, cls);
+    return false;
+  }
+
+  /* ---------- 録音と聞き比べ ---------- */
+
+  function canRecord() {
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+  }
+  function closeStream(stream) {
+    if (!stream) return;
+    var t = stream.getTracks();
+    for (var i = 0; i < t.length; i++) t[i].stop();
+  }
+
+  var DUAL_KEY = 'english-powerup-dual';
+  var COARSE = false;
+  try { COARSE = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); } catch (e) {}
+
+  function dualBlocked() {
+    try {
+      var v = window.localStorage.getItem(DUAL_KEY);
+      if (v === 'no') return true;
+      if (v === 'ok') return false;
+    } catch (e) {}
+    return COARSE;
+  }
+  function markDualBlocked() {
+    try { window.localStorage.setItem(DUAL_KEY, 'no'); } catch (e) {}
+  }
+
+  function attachClip(el, item, chunks) {
+    if (!chunks.length) return;
+    var out = outFor(el);
+    if (out.clipUrl) { try { URL.revokeObjectURL(out.clipUrl); } catch (e) {} }
+    var url = URL.createObjectURL(new Blob(chunks, { type: chunks[0].type || 'audio/webm' }));
+    out.clipUrl = url;
+    var audio = new Audio(url);
+
+    var wrap = document.createElement('span');
+    wrap.className = 'plays';
+
+    var mine = document.createElement('button');
+    mine.type = 'button';
+    mine.className = 'mine';
+    mine.textContent = '▶ 自分の声';
+    mine.addEventListener('click', function (e) {
+      e.stopPropagation();
+      TTS.stop();
+      try { audio.currentTime = 0; } catch (err) {}
+      audio.play();
+    });
+
+    var model = document.createElement('button');
+    model.type = 'button';
+    model.textContent = '▶ お手本';
+    model.addEventListener('click', function (e) {
+      e.stopPropagation();
+      try { audio.pause(); } catch (err) {}
+      TTS.speak(item.say, null);
+    });
+
+    wrap.appendChild(mine);
+    wrap.appendChild(model);
+    out.appendChild(wrap);
+  }
+
+  /* 録音と認識を同時に使えない端末むけ。判定のあとに、もう一度言って録るだけのボタン */
+  function attachRetake(el, item) {
+    if (!canRecord()) return;
+    var wrap = document.createElement('span');
+    wrap.className = 'plays';
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = '🎤 録って聞き比べる';
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (b.dataset.on === '1') { if (b._stop) b._stop(); return; }
+      TTS.stop();
+      b.textContent = 'マイクを準備しています…';
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+        var chunks = [], mr2;
+        try { mr2 = new MediaRecorder(stream); } catch (err) {
+          closeStream(stream); b.textContent = '録音できませんでした'; return;
+        }
+        var done = false, timer = null;
+        mr2.ondataavailable = function (ev) { if (ev.data && ev.data.size) chunks.push(ev.data); };
+        mr2.onstop = function () {
+          closeStream(stream);
+          if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+          attachClip(el, item, chunks);
+        };
+        b._stop = function () {
+          if (done) return;
+          done = true;
+          if (timer) clearTimeout(timer);
+          if (mr2.state !== 'inactive') { try { mr2.stop(); } catch (err) { closeStream(stream); } }
+        };
+        mr2.start();
+        b.dataset.on = '1';
+        b.textContent = '■ 録音を止める（自動で止まります）';
+        timer = setTimeout(b._stop, Math.min(20000, 5000 + item.tok.key.length * 500));
+      }).catch(function () {
+        b.textContent = 'マイクが使えませんでした';
+      });
+    });
+    wrap.appendChild(b);
+    outFor(el).appendChild(wrap);
+  }
+
+  /* ---------- 認識の実行 ---------- */
+
+  var current = null;
+
+  function release(btn) {
+    btn.classList.remove('on');
+    btn.setAttribute('aria-pressed', 'false');
+    btn.innerHTML = MIC + '<span>発音チェック</span>';
+    current = null;
+  }
+
+  function start(btn, el, item) {
+    if (current) {
+      try { current.rec.abort(); } catch (e) {}
+      release(current.btn);
+    }
+    TTS.stop();
+    /* マイク確認の棒が出たままだとマイクを握っていて認識に音が届かない */
+    if (window.__stopMicCheck) { try { window.__stopMicCheck(); } catch (e) {} }
+
+    if (!canRecord() || dualBlocked()) { begin(btn, el, item, null); return; }
+
+    btn.classList.add('on');
+    say(el, '', '<span class="verdict">マイクを準備しています…</span>');
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      begin(btn, el, item, stream);
+    }).catch(function () {
+      begin(btn, el, item, null);   /* 録音が取れなくても判定だけは進める */
+    });
+  }
+
+  var NO_RESULT_HINT =
+    '<span class="sub">通信が切れているか、端末の音声認識が使えない状態です。' +
+    'iPhone は 設定 → 一般 → キーボード → <b>音声入力</b> をオンに。' +
+    'Android は Chrome のマイク権限と、Google アプリが有効かを確認してください。</span>';
+
+  function begin(btn, el, item, stream) {
+    var rec;
+    try { rec = new SR(); } catch (e) {
+      closeStream(stream); release(btn);
+      say(el, 'ng', '<span class="verdict">音声認識を開始できませんでした。</span>');
+      return;
+    }
+
+    var chunks = [], mr = null;
+    if (stream) {
+      try {
+        mr = new MediaRecorder(stream);
+        mr.ondataavailable = function (ev) { if (ev.data && ev.data.size) chunks.push(ev.data); };
+        mr.onstop = function () { attachClip(el, item, chunks); closeStream(stream); };
+        mr.start();
+      } catch (e) { mr = null; closeStream(stream); }
+    }
+
+    rec.lang = 'en-US';
+    rec.interimResults = true;
+    /* 長い文は途中の間で切れてしまうので、確定ぶんを足していく */
+    rec.continuous = true;
+    rec.maxAlternatives = 5;
+
+    var finals = [], alts = [], settled = false;
+    /* 語数に応じて待つ。短い文で長く待っても意味がない */
+    var limit = Math.min(25000, 7000 + item.tok.key.length * 600);
+    var guard = setTimeout(function () { try { rec.stop(); } catch (e) {} }, limit);
+
+    btn.classList.add('on');
+    btn.setAttribute('aria-pressed', 'true');
+    btn.innerHTML = MIC + '<span>■ 終わったら押す</span>';
+    say(el, '', '<span class="verdict">聞いています…</span>　英語で声に出してください' +
+      '<span class="sub">言い終わったらボタンをもう一度押すか、そのまま待つと判定します。</span>');
+
+    rec.onresult = function (e) {
+      var interim = '';
+      for (var i = e.resultIndex; i < e.results.length; i++) {
+        var r = e.results[i];
+        if (r.isFinal) {
+          finals.push(r[0].transcript);
+          for (var k = 0; k < r.length; k++) alts.push(r[k].transcript);
+        } else {
+          interim += r[0].transcript;
+        }
+      }
+      if (interim) {
+        say(el, '', '<span class="verdict">聞いています…</span>　<span class="interim">' +
+          esc((finals.join(' ') + ' ' + interim).trim()) + '</span>');
+      }
+    };
+
+    rec.onerror = function (e) {
+      var code = e.error || '';
+      if (code === 'aborted') { settled = true; say(el, '', ''); return; }
+      if (code === 'no-speech') {
+        if (finals.length) return;   /* 何か拾えているなら onend の判定に任せる */
+        settled = true;
+        if (mr) {
+          markDualBlocked();
+          say(el, 'ng', '<span class="verdict">聞き取れませんでした。</span>' +
+            '<span class="sub">この端末では録音と音声認識を同時に使えないようです。' +
+            '次からは録音をやめて認識だけを行います。<b>もう一度押してください。</b></span>');
+        } else {
+          say(el, 'ng', '<span class="verdict">聞き取れませんでした。</span>　マイクに近づいてもう一度どうぞ。');
+          attachRetake(el, item);
+        }
+        return;
+      }
+      settled = true;
+      if (code === 'not-allowed' || code === 'service-not-allowed') {
+        say(el, 'ng', '<span class="verdict">マイクが使えません。</span>　下の案内を見てください。');
+        note('<strong>マイクが使えません。</strong> ' +
+          (location.protocol === 'file:'
+            ? 'ファイルを直接開いているためです。' + SERVE_HINT
+            : 'アドレスバーの錠前アイコンから、このページのマイクを「許可」にしてください。'));
+        return;
+      }
+      if (code === 'network') {
+        say(el, 'ng', '<span class="verdict">認識サーバーに届きませんでした。</span>　音声認識はネット接続が要ります。');
+        return;
+      }
+      say(el, 'ng', '<span class="verdict">認識できませんでした（' + esc(code) + '）。</span>');
+    };
+
+    rec.onend = function () {
+      clearTimeout(guard);
+      var text = finals.join(' ').trim();
+      if (text) {
+        /* 第1候補が外れていても、候補の中に狙った音があるならそれで判定する。
+           ここで落とすと、正しく言えているのに何度やっても通らない。 */
+        var use = text;
+        if (!acceptable(item, text)) {
+          for (var k = 0; k < alts.length; k++) {
+            if (acceptable(item, alts[k])) { use = alts[k]; break; }
+          }
+        }
+        verdict(el, item, use);
+        if (use !== text) {
+          outFor(el).innerHTML += '<span class="sub">第1候補は「' + esc(text) +
+            '」でしたが、候補の中に狙った音があったので合格にしています。</span>';
+        }
+        if (!mr) attachRetake(el, item);
+      } else if (!settled) {
+        /* 結果もエラーも来ずに終わる。黙って消すと「押しても何も起きない」に見える */
+        if (mr) {
+          markDualBlocked();
+          say(el, 'ng', '<span class="verdict">認識が何も返しませんでした。</span>' +
+            '<span class="sub">この端末では録音と音声認識を同時に使えないようです。' +
+            '次からは録音をやめて認識だけを行います。<b>もう一度押してください。</b></span>');
+        } else {
+          say(el, 'ng', '<span class="verdict">認識が何も返しませんでした。</span>' + NO_RESULT_HINT);
+        }
+      }
+      release(btn);
+      if (mr && mr.state !== 'inactive') { try { mr.stop(); } catch (e) { closeStream(stream); } }
+      else closeStream(stream);
+    };
+
+    try {
+      rec.start();
+      current = { rec: rec, btn: btn };
+    } catch (e) {
+      release(btn);
+      say(el, 'ng', '<span class="verdict">続けて押しすぎです。</span>　少し待ってからもう一度どうぞ。');
+    }
+  }
+
+  /* ---------- 組み立て ---------- */
+
+  var CHIP = { ok: '○ 通じた', near: '△ 惜しい', ng: '× 未通過' };
+
+  function buildItem(item) {
+    var el = document.createElement('article');
+    el.className = 'item';
+    el.dataset.id = item.id;
+    el.dataset.ep = item.ep;
+
+    /* 読み上げに使う語の並び。表示と読み上げが違う項目（[代替]付き）だけは
+       語の対応が取れないので、語クリックを切る */
+    var words = item.say.split(/\s+/).filter(Boolean);
+    var dispWords = item.en.split(/\s+/).filter(Boolean);
+    var seekable = dispWords.length === words.length;
+    if (!seekable) el.classList.add('no-seek');
+
+    /* 語ごとの span を作る。伏字と英文で番号をそろえ、目印を両方に出す */
+    function wordSpans(parent, arr, transform) {
+      for (var i = 0; i < arr.length; i++) {
+        var w = document.createElement('span');
+        w.className = 'w';
+        w.dataset.i = i;
+        w.textContent = transform ? transform(arr[i]) : arr[i];
+        parent.appendChild(w);
+        if (i < arr.length - 1) {
+          var sp = document.createElement('span');
+          sp.textContent = ' ';
+          parent.appendChild(sp);
+        }
+      }
+    }
+
+    /* 隠しているあいだに出す伏字。語の数と長さは残す（書き取りの手がかり） */
+    var mk = document.createElement('p');
+    mk.className = 'mask';
+    wordSpans(mk, dispWords, maskOf);
+    el.appendChild(mk);
+
+    var p = document.createElement('p');
+    p.className = 'en';
+    wordSpans(p, dispWords);
+    el.appendChild(p);
+
+    if (item.ja) {
+      var jm = document.createElement('p');
+      jm.className = 'ja-mask';
+      jm.textContent = maskJa(item.ja);
+      el.appendChild(jm);
+
+      var jp = document.createElement('p');
+      jp.className = 'ja';
+      jp.textContent = item.ja;
+      el.appendChild(jp);
+    }
+
+    var hint = document.createElement('p');
+    hint.className = 'seek-hint';
+    hint.textContent = seekable
+      ? '語を押すと、そこから読み上げます。'
+      : 'この項目は語ごとの頭出しに対応していません。';
+    el.appendChild(hint);
+
+    if (item.ctx) {
+      var c = document.createElement('p');
+      c.className = 'ctx';
+      c.textContent = item.ctx;
+      el.appendChild(c);
+    }
+    if (item.note) {
+      var m = document.createElement('p');
+      m.className = 'memo';
+      m.textContent = '※ ' + item.note;
+      el.appendChild(m);
+    }
+    if (item.say !== item.en) {
+      var s = document.createElement('p');
+      s.className = 'sub-say';
+      s.textContent = '読み上げ・判定は「' + item.say + '」で行います';
+      el.appendChild(s);
+    }
+
+    var acts = document.createElement('div');
+    acts.className = 'acts';
+
+    /* ---- 読み上げの位置。途中から・少し戻して聞くための状態 ---- */
+    var pos = 0;
+
+    function clearNow() {
+      var ws = el.querySelectorAll('.w');
+      for (var i = 0; i < ws.length; i++) ws[i].classList.remove('now');
+    }
+    function showNow(i) {
+      clearNow();
+      var ws = el.querySelectorAll('.w');
+      for (var k = 0; k < ws.length; k++) {
+        if (String(ws[k].dataset.i) === String(i)) ws[k].classList.add('now');
+      }
+    }
+
+    function playFrom(i, btn) {
+      pos = Math.max(0, Math.min(i, words.length - 1));
+      TTS.play(words, pos, {
+        onWord: function (idx, accurate) {
+          pos = idx;
+          /* 見積もりのときは目印を出さない。ずれた場所を光らせるほうが害が大きい */
+          if (accurate) showNow(idx);
+        },
+        onEnd: function (idx) { pos = idx; clearNow(); },
+        onStop: clearNow
+      }, btn || sp);
+    }
+
+    var sp = document.createElement('button');
+    sp.type = 'button';
+    sp.className = 'speak';
+    sp.innerHTML = SPK + '<span>聞く</span>';
+    sp.addEventListener('click', function () {
+      if (TTS.speaking()) { TTS.stop(); return; }
+      playFrom(0, sp);
+    });
+    acts.appendChild(sp);
+
+    var bk = document.createElement('button');
+    bk.type = 'button';
+    bk.className = 'back';
+    bk.innerHTML = '<span>◀ 少し戻る</span>';
+    bk.title = '3語ぶん戻って読み直します';
+    bk.addEventListener('click', function () { playFrom(pos - 3, sp); });
+    acts.appendChild(bk);
+
+    if (seekable) {
+      /* 語をクリックしたらそこから。伏字のほうも同じ番号で効く */
+      var onWordClick = function (e) {
+        var t = e.target;
+        while (t && t !== el && !(t.dataset && t.dataset.i !== undefined)) t = t.parentNode;
+        if (!t || t === el || !t.dataset || t.dataset.i === undefined) return;
+        playFrom(parseInt(t.dataset.i, 10), sp);
+      };
+      p.addEventListener('click', onWordClick);
+      mk.addEventListener('click', onWordClick);
+    }
+
+    if (SR) {
+      var rc = document.createElement('button');
+      rc.type = 'button';
+      rc.className = 'rec';
+      rc.innerHTML = MIC + '<span>発音チェック</span>';
+      rc.setAttribute('aria-pressed', 'false');
+      rc.addEventListener('click', function () {
+        if (current && current.btn === rc) { try { current.rec.stop(); } catch (e) {} return; }
+        start(rc, el, item);
+      });
+      acts.appendChild(rc);
+    }
+
+    var rv = document.createElement('button');
+    rv.type = 'button';
+    rv.className = 'reveal';
+    rv.innerHTML = '<span class="lbl-show">英文を見る</span>' +
+                   '<span class="lbl-hide">英文を隠す</span>';
+    rv.addEventListener('click', function () {
+      if (el.classList.contains('revealed')) el.classList.remove('revealed');
+      else el.classList.add('revealed');
+    });
+    acts.appendChild(rv);
+
+    if (item.ja) {
+      var rj = document.createElement('button');
+      rj.type = 'button';
+      rj.className = 'reveal-ja';
+      rj.innerHTML = '<span class="lbl-show">訳を見る</span>' +
+                     '<span class="lbl-hide">訳を隠す</span>';
+      rj.addEventListener('click', function () {
+        if (el.classList.contains('ja-revealed')) el.classList.remove('ja-revealed');
+        else el.classList.add('ja-revealed');
+      });
+      acts.appendChild(rj);
+    }
+
+    var chip = document.createElement('span');
+    var saved = Store.get(item.id);
+    if (saved) {
+      chip.className = 'chip ' + saved.r;
+      chip.textContent = CHIP[saved.r];
+      el.classList.add('done-' + saved.r);
+    } else {
+      chip.className = 'chip';
+      chip.textContent = '未';
+    }
+    acts.appendChild(chip);
+
+    el.appendChild(acts);
+    return el;
+  }
+
+  /* データを回ごとにまとめる */
+  var groups = [];
+  var byEp = {};
+  for (var i = 0; i < DATA.length; i++) {
+    var d = DATA[i];
+    d.id = 'ep' + d.ep + '-' + i;
+    d.tok = tokens(d.say);
+    if (!byEp[d.ep]) { byEp[d.ep] = { ep: d.ep, theme: d.theme, items: [] }; groups.push(byEp[d.ep]); }
+    if (!byEp[d.ep].theme && d.theme) byEp[d.ep].theme = d.theme;
+    byEp[d.ep].items.push(d);
+  }
+  groups.sort(function (a, b) { return a.ep - b.ep; });
+
+  document.getElementById('totalN').textContent =
+    DATA.length + ' 文 / ' + groups.length + ' 回ぶん';
+
+  for (var g = 0; g < groups.length; g++) {
+    var grp = groups[g];
+    var sec = document.createElement('section');
+    sec.className = 'ep';
+    sec.id = 'ep' + grp.ep;
+    sec.dataset.ep = grp.ep;
+
+    var head = document.createElement('div');
+    head.className = 'ep-head';
+    var no = document.createElement('span');
+    no.className = 'ep-no';
+    no.textContent = 'Lesson ' + grp.ep;
+    head.appendChild(no);
+    if (grp.theme) {
+      var th = document.createElement('span');
+      th.className = 'ep-theme';
+      th.textContent = grp.theme;
+      head.appendChild(th);
+    }
+    var cnt = document.createElement('span');
+    cnt.className = 'ep-count';
+    cnt.textContent = grp.items.length + ' 文';
+    head.appendChild(cnt);
+    sec.appendChild(head);
+
+    for (var n = 0; n < grp.items.length; n++) sec.appendChild(buildItem(grp.items[n]));
+    listEl.appendChild(sec);
+
+    var op = document.createElement('option');
+    op.value = 'ep' + grp.ep;
+    op.textContent = 'Lesson ' + grp.ep + (grp.theme ? ' — ' + grp.theme : '');
+    jumpEl.appendChild(op);
+  }
+
+  var first = document.createElement('option');
+  first.value = '';
+  first.textContent = '回へ移動…';
+  jumpEl.insertBefore(first, jumpEl.firstChild);
+  jumpEl.value = '';
+  jumpEl.addEventListener('change', function () {
+    if (!jumpEl.value) return;
+    var t = document.getElementById(jumpEl.value);
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    jumpEl.value = '';
+  });
+
+  /* ---------- 表示の絞り込み ---------- */
+
+  function applyFilter(mode) {
+    var shown = 0;
+    var items = listEl.querySelectorAll('.item');
+    for (var i = 0; i < items.length; i++) {
+      var st = Store.get(items[i].dataset.id);
+      var vis = mode === 'all'
+        || (mode === 'todo' && (!st || st.r !== 'ok'))
+        || (mode === 'weak' && st && st.r === 'ng');
+      items[i].hidden = !vis;
+      if (vis) shown++;
+    }
+    var secs = listEl.querySelectorAll('.ep');
+    for (var s = 0; s < secs.length; s++) {
+      var any = secs[s].querySelector('.item:not([hidden])');
+      secs[s].hidden = !any;
+    }
+    emptyEl.hidden = shown > 0;
+  }
+
+  var fbtns = { all: document.getElementById('flt-a'),
+                todo: document.getElementById('flt-t'),
+                weak: document.getElementById('flt-x') };
+  Object.keys(fbtns).forEach(function (mode) {
+    fbtns[mode].addEventListener('click', function () {
+      Object.keys(fbtns).forEach(function (m) {
+        fbtns[m].setAttribute('aria-pressed', m === mode ? 'true' : 'false');
+      });
+      applyFilter(mode);
+    });
+  });
+
+  /* ---------- 英文を隠す ---------- */
+
+  var MASK_KEY = 'english-powerup-mask';
+  var mOn = document.getElementById('msk-on');
+  var mOff = document.getElementById('msk-off');
+
+  function setMask(on, remember) {
+    if (on) document.body.classList.add('mask-on');
+    else document.body.classList.remove('mask-on');
+    mOn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    mOff.setAttribute('aria-pressed', on ? 'false' : 'true');
+    /* 隠しに戻すときは、1件ずつ開いたぶんも閉じ直す */
+    if (on) {
+      var its = listEl.querySelectorAll('.item');
+      for (var i = 0; i < its.length; i++) its[i].classList.remove('revealed');
+    }
+    if (remember) { try { window.localStorage.setItem(MASK_KEY, on ? '1' : '0'); } catch (e) {} }
+  }
+
+  mOn.addEventListener('click', function () { setMask(true, true); });
+  mOff.addEventListener('click', function () { setMask(false, true); });
+
+  var savedMask = '0';
+  try { savedMask = window.localStorage.getItem(MASK_KEY) || '0'; } catch (e) {}
+  setMask(savedMask === '1', false);
+
+  /* ---------- 訳を隠す（英文とは別に切り替える） ---------- */
+
+  var JAMASK_KEY = 'english-powerup-jamask';
+  var jOn = document.getElementById('jam-on');
+  var jOff = document.getElementById('jam-off');
+
+  function setJaMask(on, remember) {
+    if (on) document.body.classList.add('jamask-on');
+    else document.body.classList.remove('jamask-on');
+    jOn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    jOff.setAttribute('aria-pressed', on ? 'false' : 'true');
+    if (on) {
+      var its = listEl.querySelectorAll('.item');
+      for (var i = 0; i < its.length; i++) its[i].classList.remove('ja-revealed');
+    }
+    if (remember) { try { window.localStorage.setItem(JAMASK_KEY, on ? '1' : '0'); } catch (e) {} }
+  }
+
+  jOn.addEventListener('click', function () { setJaMask(true, true); });
+  jOff.addEventListener('click', function () { setJaMask(false, true); });
+
+  var savedJa = '0';
+  try { savedJa = window.localStorage.getItem(JAMASK_KEY) || '0'; } catch (e) {}
+  setJaMask(savedJa === '1', false);
+
+  /* ---------- 速さ ---------- */
+
+  var sbtns = { slow: document.getElementById('spd-s'),
+                normal: document.getElementById('spd-n'),
+                fast: document.getElementById('spd-f') };
+  Object.keys(sbtns).forEach(function (sp) {
+    sbtns[sp].addEventListener('click', function () {
+      Object.keys(sbtns).forEach(function (m) {
+        sbtns[m].setAttribute('aria-pressed', m === sp ? 'true' : 'false');
+      });
+      TTS.setSpeed(sp);
+    });
+  });
+
+  renderTally();
+})();
+</script>
+
+<script>
+/* ============================================================
+   マイク確認
+
+   発音チェックが「聞き取れませんでした」を返すとき、原因が端末側
+   （既定のデバイスが違う・入力音量が低い）なのか認識側なのかを
+   切り分ける。音声認識を通さず入力レベルをそのまま見せる。
+   ============================================================ */
+(function () {
+  var btn = document.getElementById('micCheckBtn');
+  var panel = document.getElementById('micCheck');
+  if (!btn || !panel) return;
+
+  var md = navigator.mediaDevices;
+  if (!md || !md.getUserMedia || !(window.AudioContext || window.webkitAudioContext)) {
+    btn.disabled = true;
+    btn.title = 'このブラウザでは使えません';
+    return;
+  }
+
+  var devEl = panel.querySelector('.mc-dev');
+  var fillEl = panel.querySelector('.mc-fill');
+  var peakEl = panel.querySelector('.mc-peak');
+  var verdictEl = panel.querySelector('.mc-verdict');
+
+  var stream = null, ctx = null, raf = null;
+  var peak = 0, frames = 0;
+
+  function pct(v) { return Math.min(100, Math.round(v * 100)); }
+
+  function stop() {
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    if (stream) {
+      var t = stream.getTracks();
+      for (var i = 0; i < t.length; i++) t[i].stop();
+      stream = null;
+    }
+    if (ctx) { try { ctx.close(); } catch (e) {} ctx = null; }
+    btn.setAttribute('aria-pressed', 'false');
+    btn.textContent = 'マイク確認';
+  }
+
+  function fail(msg) {
+    stop();
+    panel.hidden = false;
+    devEl.textContent = '';
+    verdictEl.className = 'mc-verdict bad';
+    verdictEl.textContent = msg;
+  }
+
+  function start() {
+    peak = 0; frames = 0;
+    panel.hidden = false;
+    devEl.textContent = 'マイクを開いています…';
+    verdictEl.className = 'mc-verdict';
+    verdictEl.textContent = '';
+    fillEl.style.width = '0';
+    peakEl.style.left = '0';
+
+    md.getUserMedia({ audio: true }).then(function (s) {
+      stream = s;
+      var track = s.getAudioTracks()[0];
+      var label = (track && track.label) || '（名前を取得できません）';
+      var st = {};
+      try { st = track.getSettings ? track.getSettings() : {}; } catch (e) {}
+      devEl.innerHTML = 'いま使われているマイク：' + label.replace(/</g, '&lt;') +
+        (st.sampleRate ? ' <span>' + st.sampleRate + ' Hz</span>' : '');
+
+      var AC = window.AudioContext || window.webkitAudioContext;
+      ctx = new AC();
+      if (ctx.state === 'suspended') ctx.resume();
+      var src = ctx.createMediaStreamSource(s);
+      var an = ctx.createAnalyser();
+      an.fftSize = 2048;
+      src.connect(an);
+      var buf = new Uint8Array(an.fftSize);
+
+      btn.setAttribute('aria-pressed', 'true');
+      btn.textContent = '確認をやめる';
+
+      function tick() {
+        an.getByteTimeDomainData(buf);
+        var sum = 0;
+        for (var i = 0; i < buf.length; i++) {
+          var v = (buf[i] - 128) / 128;
+          sum += v * v;
+        }
+        var rms = Math.sqrt(sum / buf.length);
+        var level = Math.min(1, rms * 6);   /* 話し声がだいたい 0.3〜0.8 に来る倍率 */
+
+        frames++;
+        if (level > peak) { peak = level; peakEl.style.left = pct(peak) + '%'; }
+        fillEl.style.width = pct(level) + '%';
+        fillEl.className = 'mc-fill' + (level > 0.12 ? ' loud' : '');
+
+        if (frames > 60) {
+          if (peak < 0.03) {
+            verdictEl.className = 'mc-verdict bad';
+            verdictEl.textContent = '無音のままです。声を出しても棒が動かないなら、端末側で拾えていません。';
+          } else if (peak < 0.12) {
+            verdictEl.className = 'mc-verdict bad';
+            verdictEl.textContent = '音は届いていますが小さすぎます。入力音量を上げるか、マイクに近づいてください。';
+          } else {
+            verdictEl.className = 'mc-verdict good';
+            verdictEl.textContent = '拾えています。この状態なら音声認識も動くはずです。';
+          }
+        }
+        raf = requestAnimationFrame(tick);
+      }
+      tick();
+    }).catch(function (e) {
+      var n = e && e.name;
+      if (n === 'NotAllowedError' || n === 'SecurityError') {
+        fail('マイクの使用が許可されていません。アドレスバーの錠前アイコンから許可にしてください。');
+      } else if (n === 'NotFoundError' || n === 'OverconstrainedError') {
+        fail('マイクが見つかりません。サウンド設定で入力デバイスを確認してください。');
+      } else if (n === 'NotReadableError') {
+        fail('マイクを他のアプリが使っています。Teams・Zoom・録音アプリを閉じてから、もう一度どうぞ。');
+      } else {
+        fail('マイクを開けませんでした（' + (n || 'unknown') + '）。');
+      }
+    });
+  }
+
+  btn.addEventListener('click', function () {
+    if (stream) { stop(); return; }
+    start();
+  });
+
+  /* 発音チェック側から呼ぶ。棒を出したままだとマイクを握り続け、
+     音声認識に音が届かない端末がある。 */
+  window.__stopMicCheck = function () { if (stream) stop(); };
+
+  window.addEventListener('pagehide', stop);
+})();
+</script>
+
+</body>
+</html>
