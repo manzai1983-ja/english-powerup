@@ -1,0 +1,1608 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>聞き取れなかった英文 — 音読と発音チェック</title>
+<style>
+  :root {
+    --paper:   #F2F1EE;
+    --surface: #FFFFFF;
+    --ink:     #1B1D22;
+    --muted:   #5F6570;
+    --faint:   #8D939D;
+    --accent:  #2E4B7A;
+    --accent-tint: #E4EAF3;
+    --amber:   #9C5A15;
+    --amber-tint: #F7EADA;
+    --rule:    #D9D8D4;
+    --rule-soft: #E7E6E3;
+    --ok:      #1F6B4E;
+    --ok-tint: #E1EFE8;
+    --near:    #8A6410;
+    --near-tint: #F7EED8;
+    --ng:      #A3372F;
+    --ng-tint: #F7E2E0;
+    --on-accent: #FFFFFF;
+
+    --font-en: "Palatino Linotype", Palatino, "Iowan Old Style", Georgia, serif;
+    --font-jp: "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, system-ui, sans-serif;
+    --font-mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:   #12141A;
+      --surface: #1A1D25;
+      --ink:     #E8EAEE;
+      --muted:   #A0A6B0;
+      --faint:   #79808B;
+      --accent:  #7FA6DC;
+      --accent-tint: #1D2941;
+      --amber:   #E0A253;
+      --amber-tint: #332616;
+      --rule:    #2C313B;
+      --rule-soft: #232830;
+      --ok:      #63C79A;
+      --ok-tint: #16311F;
+      --near:    #DCB45C;
+      --near-tint: #322A15;
+      --ng:      #E58279;
+      --ng-tint: #35201E;
+      --on-accent: #12141A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:   #12141A;
+    --surface: #1A1D25;
+    --ink:     #E8EAEE;
+    --muted:   #A0A6B0;
+    --faint:   #79808B;
+    --accent:  #7FA6DC;
+    --accent-tint: #1D2941;
+    --amber:   #E0A253;
+    --amber-tint: #332616;
+    --rule:    #2C313B;
+    --rule-soft: #232830;
+    --ok:      #63C79A;
+    --ok-tint: #16311F;
+    --near:    #DCB45C;
+    --near-tint: #322A15;
+    --ng:      #E58279;
+    --ng-tint: #35201E;
+    --on-accent: #12141A;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-jp);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 18px 80px; }
+
+  header.top {
+    padding: 34px 0 18px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 18px;
+  }
+  header.top h1 { margin: 0 0 6px; font-size: 1.6rem; line-height: 1.35; letter-spacing: .01em; }
+  header.top p  { margin: 0; color: var(--muted); font-size: .9rem; }
+
+  /* ---------- 説明 ---------- */
+  details.howto {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 0 16px;
+    margin-bottom: 16px;
+  }
+  details.howto > summary {
+    cursor: pointer; padding: 12px 0; font-weight: 700; font-size: .95rem;
+    list-style: none;
+  }
+  details.howto > summary::-webkit-details-marker { display: none; }
+  details.howto > summary::before { content: "▸ "; color: var(--accent); }
+  details.howto[open] > summary::before { content: "▾ "; }
+  details.howto ol, details.howto ul { margin: 0 0 14px; padding-left: 1.3em; }
+  details.howto li { margin: 6px 0; font-size: .92rem; }
+  details.howto p { font-size: .92rem; color: var(--muted); }
+
+  /* ---------- ツールバー ---------- */
+  .toolbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    padding: 10px 0;
+    margin-bottom: 4px;
+  }
+  .bar-label { font-size: .74rem; color: var(--faint); letter-spacing: .08em; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    border: 0; background: var(--surface); color: var(--muted);
+    padding: 7px 12px; font-size: .85rem; cursor: pointer;
+  }
+  .seg button + button { border-left: 1px solid var(--rule); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+  select.jump {
+    font-family: inherit; font-size: .85rem; padding: 7px 10px;
+    border: 1px solid var(--rule); border-radius: 8px;
+    background: var(--surface); color: var(--ink); max-width: 190px;
+  }
+  .tbtn {
+    border: 1px solid var(--rule); background: var(--surface); color: var(--muted);
+    border-radius: 8px; padding: 7px 12px; font-size: .85rem; cursor: pointer;
+  }
+  .tbtn[aria-pressed="true"] { background: var(--amber); color: var(--on-accent); border-color: var(--amber); }
+  .tally { font-size: .82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .vstat { font-size: .78rem; color: var(--faint); }
+
+  .note-bar {
+    background: var(--amber-tint); border: 1px solid var(--rule);
+    border-radius: 8px; padding: 10px 14px; margin: 10px 0;
+    font-size: .87rem; line-height: 1.65;
+  }
+  .note-bar code { font-family: var(--font-mono); font-size: .85em; }
+
+  /* ---------- マイク確認 ---------- */
+  .miccheck {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 10px; padding: 14px 16px; margin: 10px 0;
+  }
+  .mc-dev { margin: 0 0 10px; font-size: .84rem; color: var(--muted); }
+  .mc-dev span { font-family: var(--font-mono); font-size: .82em; }
+  .mc-bar {
+    position: relative; height: 14px; border-radius: 7px;
+    background: var(--rule-soft); overflow: hidden;
+  }
+  .mc-fill { height: 100%; width: 0; background: var(--accent); transition: width .05s linear; }
+  .mc-fill.loud { background: var(--ok); }
+  .mc-peak { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--amber); left: 0; }
+  .mc-scale { display: flex; justify-content: space-between; font-size: .7rem; color: var(--faint); margin-top: 4px; }
+  .mc-verdict { margin: 8px 0 0; font-size: .85rem; font-weight: 700; }
+  .mc-verdict.good { color: var(--ok); }
+  .mc-verdict.bad  { color: var(--ng); }
+  .mc-note { margin: 8px 0 0; font-size: .8rem; color: var(--muted); line-height: 1.6; }
+
+  /* ---------- 回の見出し ---------- */
+  .ep {
+    margin: 26px 0 0;
+    scroll-margin-top: 64px;
+  }
+  .ep-head {
+    display: flex; align-items: baseline; gap: 10px;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 6px; margin-bottom: 10px;
+  }
+  .ep-no {
+    font-family: var(--font-mono); font-size: 1.15rem; font-weight: 700;
+    color: var(--accent); letter-spacing: .02em;
+  }
+  .ep-theme { font-size: .9rem; color: var(--muted); }
+  .ep-count { margin-left: auto; font-size: .76rem; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+  /* ---------- 1文のカード ---------- */
+  .item {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--rule);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .item.done-ok   { border-left-color: var(--ok); }
+  .item.done-near { border-left-color: var(--near); }
+  .item.done-ng   { border-left-color: var(--ng); }
+
+  .item .en {
+    font-family: var(--font-en);
+    font-size: 1.16rem;
+    line-height: 1.55;
+    margin: 0 0 8px;
+  }
+  .item .ctx {
+    margin: 0 0 8px; font-size: .82rem; color: var(--faint);
+    font-family: var(--font-en); line-height: 1.5;
+    padding-left: 10px; border-left: 2px solid var(--rule-soft);
+  }
+  .item .memo {
+    margin: 0 0 8px; font-size: .82rem; color: var(--amber);
+  }
+  .item .sub-say {
+    margin: 0 0 8px; font-size: .78rem; color: var(--faint);
+  }
+
+  /* ---------- 英文を隠す ---------- */
+  .item .mask { display: none; }
+  body.mask-on .item:not(.revealed) .en,
+  body.mask-on .item:not(.revealed) .ctx,
+  body.mask-on .item:not(.revealed) .memo,
+  body.mask-on .item:not(.revealed) .sub-say { display: none; }
+  body.mask-on .item:not(.revealed) .mask {
+    display: block;
+    font-family: var(--font-en);
+    font-size: 1.16rem;
+    line-height: 1.55;
+    letter-spacing: .06em;
+    color: var(--faint);
+    margin: 0 0 8px;
+    user-select: none;
+  }
+  /* 隠しているあいだは常に出す。開いたあとも押せば閉じられる。
+     ラベルの出し分けはCSSでやる。JS側で書き換えると、全体の切り替えや
+     判定による自動表示と食い違う。 */
+  .acts .reveal { display: none; }
+  body.mask-on .acts .reveal { display: inline-flex; }
+  .reveal .lbl-hide { display: none; }
+  .item.revealed .reveal .lbl-show { display: none; }
+  .item.revealed .reveal .lbl-hide { display: inline; }
+
+  /* ---------- 日本語訳 ---------- */
+  .item .ja {
+    margin: 0 0 8px; font-size: .92rem; color: var(--muted); line-height: 1.75;
+  }
+  .item .ja-mask {
+    display: none;
+    margin: 0 0 8px; font-size: .92rem; color: var(--faint);
+    line-height: 1.75; letter-spacing: .06em; user-select: none;
+  }
+  body.jamask-on .item:not(.ja-revealed) .ja { display: none; }
+  body.jamask-on .item:not(.ja-revealed) .ja-mask { display: block; }
+
+  .acts .reveal-ja { display: none; }
+  body.jamask-on .acts .reveal-ja { display: inline-flex; }
+  .reveal-ja .lbl-hide { display: none; }
+  .item.ja-revealed .reveal-ja .lbl-show { display: none; }
+  .item.ja-revealed .reveal-ja .lbl-hide { display: inline; }
+
+  /* ---------- 語をクリックしてそこから聞く ---------- */
+  .item .w {
+    border-radius: 3px;
+    padding: 0 1px;
+    cursor: pointer;
+  }
+  .item .w:hover { background: var(--accent-tint); }
+  .item .w.now  { background: var(--amber-tint); color: var(--amber); }
+  .item.no-seek .w { cursor: default; }
+  .item.no-seek .w:hover { background: none; }
+  .item .seek-hint {
+    margin: 0 0 8px; font-size: .74rem; color: var(--faint);
+  }
+
+  .acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .acts button {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--rule); background: var(--paper); color: var(--ink);
+    border-radius: 8px; padding: 8px 12px; font-size: .86rem; cursor: pointer;
+    font-family: inherit;
+  }
+  .acts button:hover { border-color: var(--accent); }
+  .acts .speak.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .acts .rec.on   { background: var(--ng); color: var(--on-accent); border-color: var(--ng); }
+  .acts svg { width: 17px; height: 17px; flex: none; }
+  .chip {
+    margin-left: auto; font-size: .76rem; padding: 3px 9px; border-radius: 999px;
+    background: var(--rule-soft); color: var(--faint);
+  }
+  .chip.ok   { background: var(--ok-tint);   color: var(--ok); }
+  .chip.near { background: var(--near-tint); color: var(--near); }
+  .chip.ng   { background: var(--ng-tint);   color: var(--ng); }
+
+  .rec-out { display: block; margin-top: 10px; font-size: .88rem; line-height: 1.7; }
+  .rec-out:empty { display: none; }
+  .rec-out.ok   { color: var(--ok); }
+  .rec-out.near { color: var(--near); }
+  .rec-out.ng   { color: var(--ng); }
+  .rec-out .verdict { font-weight: 700; }
+  .rec-out .heard { font-family: var(--font-en); }
+  .rec-out .miss { text-decoration: underline wavy; text-underline-offset: 3px; }
+  .rec-out .sub, .rec-out .fix {
+    display: block; color: var(--muted); font-size: .82rem; margin-top: 3px;
+  }
+  .rec-out .fix-head {
+    display: block; margin-top: 6px; font-size: .78rem; color: var(--faint);
+    letter-spacing: .06em;
+  }
+  .rec-out .interim { color: var(--faint); font-style: italic; }
+  .plays { display: flex; gap: 8px; margin-top: 8px; }
+  .plays button {
+    border: 1px solid var(--rule); background: var(--paper); color: var(--ink);
+    border-radius: 8px; padding: 6px 11px; font-size: .82rem; cursor: pointer;
+    font-family: inherit;
+  }
+  .plays button.mine { border-color: var(--amber); color: var(--amber); }
+
+  .empty { padding: 40px 0; text-align: center; color: var(--faint); font-size: .9rem; }
+
+  footer.bot {
+    margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--rule);
+    font-size: .8rem; color: var(--faint); line-height: 1.7;
+  }
+
+  @media (pointer: coarse) {
+    .acts button { padding: 11px 15px; font-size: .95rem; }
+    .acts svg { width: 20px; height: 20px; }
+    .seg button, .tbtn, select.jump { padding: 10px 14px; font-size: .9rem; }
+    .plays button { padding: 9px 14px; font-size: .88rem; }
+    .item .en { font-size: 1.22rem; }
+  }
+  @media print {
+    .toolbar, .acts, .rec-out, .miccheck, .note-bar, details.howto { display: none; }
+    body { background: #fff; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>聞き取れなかった英文</h1>
+  <p>ラジオ英会話2026 のスタディファイルで「全然聞こえない」と印を付けた文だけを集めたページ。<strong id="totalN"></strong></p>
+</header>
+
+<details class="howto">
+  <summary>使い方と、できること・できないこと</summary>
+  <ol>
+    <li><strong>スピーカーの印で聞く。</strong>端末の読み上げ音声です。<strong>ゆっくり</strong>は口の形をなぞる用、<strong>ふつう</strong>は覚える用、<strong>はやい</strong>は本来の速さに近く聞き取りの練習用。聞き取れなかった文なので、まず「はやい」で聞いて、分からなければ「ゆっくり」に落として音を確かめるのが順序です。</li>
+    <li><strong>途中から・少し戻して聞けます。</strong>文中の<strong>語を押すとそこから</strong>読み直します（伏字のあいだも、伏字の塊を押せば同じように効きます）。<strong>「◀ 少し戻る」</strong>は3語ぶん戻ります。聞き終わったあとに押せば、最後のところだけ繰り返せます。読み上げ中にもう一度「聞く」を押すと止まります。</li>
+    <li><strong>マイクの印で自分の発音を判定する。</strong>押してから声に出すと、端末の音声認識が<strong>何と聞き取ったか</strong>を返し、通らなかった語を指摘します。判定の下に<strong>「▶ 自分の声」「▶ お手本」</strong>が出るので、交互に押して聞き比べてください。文字の説明より耳のほうが速いです。</li>
+    <li><strong>英文を「隠す」にすると、伏字になります。</strong>文字を見てしまうと聞き取れた気になるので、聞き取りの練習はこちらで。語の数と長さ、句読点だけ残してあるので、何語の文かは分かります。答え合わせはカードの<strong>「英文を見る」</strong>、または発音チェックを実行すると自動で開きます。開いたあとに<strong>「英文を隠す」</strong>で1件ずつ閉じ直せるので、同じ文をもう一度音だけで確かめられます。設定は次に開いたときも残ります。</li>
+    <li><strong>日本語訳も同じように隠せます。</strong>ツールバーの<strong>訳</strong>で全体を切り替え、カードの<strong>「訳を見る／訳を隠す」</strong>で1件ずつ。英文とは<strong>別々に</strong>効くので、「英文は隠す・訳は見せる」（意味を知ったうえで英語を作る）や、両方隠して純粋な聞き取りに、といった使い分けができます。</li>
+    <li><strong>結果は端末に残ります。</strong>○△× の印がカードの左端と右上に付き、次に開いたときも残っています。ツールバーの<strong>表示</strong>で「まだ通っていないもの」だけに絞れます。</li>
+  </ol>
+  <p><strong>判定できるのは「通じたかどうか」まで</strong>です。発音の良し悪しは採点できません。音のお手本はスピーカーの印のほうを信じてください。音声認識には<strong>通信が必要</strong>で、オフラインでは動きません。</p>
+  <p>スマホでは<strong>録音と音声認識を同時に使えない</strong>ため、マイクを認識に譲ります。自分の声は判定が出たあとの「録って聞き比べる」で録れます。</p>
+</details>
+
+<div class="toolbar" id="toolbar">
+  <span class="bar-label">速さ</span>
+  <span class="seg" role="group" aria-label="読み上げ速度">
+    <button type="button" id="spd-s" aria-pressed="false">ゆっくり</button>
+    <button type="button" id="spd-n" aria-pressed="true">ふつう</button>
+    <button type="button" id="spd-f" aria-pressed="false">はやい</button>
+  </span>
+  <span class="bar-label">英文</span>
+  <span class="seg" role="group" aria-label="英文の表示">
+    <button type="button" id="msk-off" aria-pressed="true">見せる</button>
+    <button type="button" id="msk-on" aria-pressed="false">隠す</button>
+  </span>
+  <span class="bar-label">訳</span>
+  <span class="seg" role="group" aria-label="日本語訳の表示">
+    <button type="button" id="jam-off" aria-pressed="true">見せる</button>
+    <button type="button" id="jam-on" aria-pressed="false">隠す</button>
+  </span>
+  <span class="bar-label">表示</span>
+  <span class="seg" role="group" aria-label="表示する項目">
+    <button type="button" id="flt-a" aria-pressed="true">すべて</button>
+    <button type="button" id="flt-t" aria-pressed="false">未クリア</button>
+    <button type="button" id="flt-x" aria-pressed="false">要練習</button>
+  </span>
+  <select class="jump" id="jump" aria-label="回へ移動"></select>
+  <button type="button" class="tbtn" id="micCheckBtn" aria-pressed="false" aria-controls="micCheck">マイク確認</button>
+  <span class="tally" id="tally"></span>
+  <span class="vstat" id="vstat">音声を確認しています…</span>
+</div>
+
+<p class="note-bar" id="vhelp" hidden></p>
+<p class="note-bar" id="rhelp" hidden></p>
+
+<div class="miccheck" id="micCheck" hidden>
+  <p class="mc-dev"></p>
+  <div class="mc-bar"><div class="mc-fill"></div><div class="mc-peak"></div></div>
+  <div class="mc-scale"><span>無音</span><span>話し声の目安</span><span>大</span></div>
+  <p class="mc-verdict"></p>
+  <p class="mc-note">声を出して棒が動くかを見てください。動かないなら音声認識も拾えません。パソコンなら 設定 → システム → サウンド で、<b>入力デバイス</b>と<b>入力音量</b>を確認してください。マイクの形式が 16000 Hz（テープレコーダーの音質）だと英語はまず通りません。<b>48000 Hz（DVDの音質）</b>に上げてください。</p>
+</div>
+
+<main id="list"></main>
+
+<p class="empty" id="empty" hidden>この条件に当てはまる文はありません。</p>
+
+<footer class="bot">
+  出典: <code>ラジオ英会話_2026.xlsx</code> の 2026年度_main-part シートで「（全然聞こえない）」と印を付けた箇所。
+  Main part（教科書の正しい英文）と各回のキーフレーズ行から抽出しています。
+  聞き取りメモ（Main part without repeat）は誤字を含む書き取りのため、練習対象から外しています。
+  <br><strong>日本語訳は教科書の訳例ではなく、英文から起こした参考訳です。</strong>意味をつかむ目的で付けています。正式な訳はテキストを参照してください。
+  <br>記録はこの端末のブラウザだけに保存されます。パソコンとスマホでは別々になります。
+</footer>
+
+</div>
+
+<script>
+/* ============================================================
+   データ。Excel から抽出したもの。
+   ep=回, theme=主テーマ, en=表示する英文, say=読み上げ・判定に使う形,
+   ctx=元の行全体（対象が行の一部のときだけ）, note=補足メモ
+   ============================================================ */
+var DATA = [{"ep":1,"theme":"あいさつ①","en":"Yeah, I submitted it late last night. It took me forever to cite all the sources.","say":"Yeah, I submitted it late last night. It took me forever to cite all the sources.","ctx":"","note":"","ja":"うん、昨日の夜遅くに提出したよ。出典を全部書くのにものすごく時間がかかった。"},{"ep":1,"theme":"あいさつ①","en":"Luckey you. I'm still halfway through. I didn't realizaed how long the case study would take.","say":"Luckey you. I'm still halfway through. I didn't realizaed how long the case study would take.","ctx":"","note":"","ja":"いいなあ。私はまだ半分。ケーススタディにこんなに時間がかかるとは思わなかった。"},{"ep":1,"theme":"あいさつ①","en":"I know. Guess I'll be living in the library until then.","say":"I know. Guess I'll be living in the library until then.","ctx":"","note":"","ja":"わかる。それまで図書館に住むことになりそう。"},{"ep":3,"theme":"あいさつ③","en":"Yeah. I was stationed at Singapole office for six months. Just got back last week.","say":"Yeah. I was stationed at Singapole office for six months. Just got back last week.","ctx":"","note":"","ja":"うん。シンガポール支社に半年赴任してたんだ。先週戻ってきたばかり。"},{"ep":3,"theme":"あいさつ③","en":"Thanks. It's nice to be back. Let's catch up properly...over lunch sometime?","say":"Thanks. It's nice to be back. Let's catch up properly...over lunch sometime?","ctx":"","note":"","ja":"ありがとう。戻れてうれしいよ。今度ゆっくり話そう……いつかランチでもどう？"},{"ep":3,"theme":"あいさつ③","en":"Look who it is!","say":"Look who it is!","ctx":"Look who it is! / If it isn't David! / Well I'll be!","note":"","ja":"誰かと思えば！"},{"ep":3,"theme":"あいさつ③","en":"If it isn't David!","say":"If it isn't David!","ctx":"Look who it is! / If it isn't David! / Well I'll be!","note":"","ja":"デイビッドじゃないか！"},{"ep":3,"theme":"あいさつ③","en":"Well I'll be!","say":"Well I'll be!","ctx":"Look who it is! / If it isn't David! / Well I'll be!","note":"I'm supprised を補う感じオギナカン","ja":"これは驚いた！"},{"ep":3,"theme":"あいさつ③","en":"Long time no see. [ What have you been up to? / Been keeping busy? ]","say":"Long time no see.","ctx":"","note":"","ja":"久しぶり。［最近どうしてた？ ／ 忙しくしてる？］"},{"ep":4,"theme":"お悔やみを述べるクノ","en":"Oh, I'm really sorry about your loss. My condolences.","say":"Oh, I'm really sorry about your loss. My condolences.","ctx":"","note":"","ja":"ああ、このたびはご愁傷さまです。お悔やみ申し上げます。"},{"ep":4,"theme":"お悔やみを述べるクノ","en":"Thanks. I didn’t expect it to hit me this hard.","say":"Thanks. I didn’t expect it to hit me this hard.","ctx":"","note":"","ja":"ありがとう。こんなにこたえるとは思わなかった。"},{"ep":4,"theme":"お悔やみを述べるクノ","en":"I get it. You took such good care of it. It wasn't just a fish. It meant something to you.","say":"I get it. You took such good care of it. It wasn't just a fish. It meant something to you.","ctx":"","note":"","ja":"わかるよ。本当に大事に世話してたもんね。ただの魚じゃなかった。君にとって意味があったんだ。"},{"ep":4,"theme":"お悔やみを述べるクノ","en":"Yeah. I raise it from when it was tiny.","say":"Yeah. I raise it from when it was tiny.","ctx":"","note":"","ja":"うん。小さいときから育てたんだ。"},{"ep":4,"theme":"お悔やみを述べるクノ","en":"That means a lot. Thanks for saying that.","say":"That means a lot. Thanks for saying that.","ctx":"","note":"","ja":"その言葉、うれしいよ。そう言ってくれてありがとう。"},{"ep":4,"theme":"お悔やみを述べるクノ","en":"Anytine I know what it's like to lose a pet.","say":"Anytine I know what it's like to lose a pet.","ctx":"","note":"","ja":"いつでも。ペットを亡くす気持ちはわかるから。"},{"ep":4,"theme":"お悔やみを述べるクノ","en":"Please accept my deepest condolences.","say":"Please accept my deepest condolences.","ctx":"","note":"","ja":"心よりお悔やみ申し上げます。"},{"ep":4,"theme":"お悔やみを述べるクノ","en":"My condolences. I can't imagine how hard this must be for you.","say":"My condolences. I can't imagine how hard this must be for you.","ctx":"","note":"","ja":"お悔やみ申し上げます。どれほどおつらいか、想像もつきません。"},{"ep":6,"theme":"祝福するシュクフク","en":"Thanks dad. My hands were shaking when I clicked the result.","say":"Thanks dad. My hands were shaking when I clicked the result.","ctx":"","note":"","ja":"ありがとう、お父さん。結果をクリックするとき手が震えたよ。"},{"ep":6,"theme":"祝福するシュクフク","en":"All your hard work paid off. We should celebrate.","say":"All your hard work paid off. We should celebrate.","ctx":"","note":"","ja":"努力が実ったな。お祝いしよう。"},{"ep":6,"theme":"祝福するシュクフク","en":"That'd be great. Can we go out for dinner?","say":"That'd be great. Can we go out for dinner?","ctx":"","note":"","ja":"それはいいね。外に食べに行ってもいい？"},{"ep":7,"theme":"あいさつからの流れ① ー相手の様子へのコメントナガアイテヨウス","en":"Morning. I've just gotten some great news. My wife and I are expecting our first baby.","say":"Morning. I've just gotten some great news. My wife and I are expecting our first baby.","ctx":"","note":"","ja":"おはよう。ちょうどうれしい知らせがあってね。妻と私に第一子が生まれるんだ。"},{"ep":8,"theme":"あいさつからの流れ② ー天候へのコメントナガテンコウ","en":"Oh I so. Your front yard looks lovely.","say":"Oh I so. Your front yard looks lovely.","ctx":"","note":"","ja":"へえ、そうなんだ。お宅の前庭、すてきですね。"},{"ep":8,"theme":"あいさつからの流れ② ー天候へのコメントナガテンコウ","en":"Blooming beautiful this year. You should stop by and see them.","say":"Blooming beautiful this year. You should stop by and see them.","ctx":"","note":"","ja":"今年はきれいに咲いてね。寄って見ていってくださいよ。"},{"ep":9,"theme":"あいさつからの流れ③ ー気になる話題ナガキワダイ","en":"Yes I finished preparing that last night. I'll print everything out and bring copies to the room.","say":"Yes I finished preparing that last night. I'll print everything out and bring copies to the room.","ctx":"","note":"","ja":"はい、昨夜のうちに準備を終えました。全部印刷して、部屋にコピーを持っていきます。"},{"ep":11,"theme":"初対面① ー気軽な初対面ショタイメンキガルショタイメン","en":"Exactly. Looks like there're room for collaboration.","say":"Exactly. Looks like there're room for collaboration.","ctx":"","note":"","ja":"そのとおりです。協業の余地がありそうですね。"},{"ep":11,"theme":"初対面① ー気軽な初対面ショタイメンキガルショタイメン","en":"Hi, I don't beleive we've met. I'm David. Great party, isn't it?","say":"Hi, I don't beleive we've met. I'm David. Great party, isn't it?","ctx":"","note":"","ja":"こんにちは、初めましてですよね。デイビッドです。いいパーティーですね。"},{"ep":11,"theme":"初対面① ー気軽な初対面ショタイメンキガルショタイメン","en":"We haven't met before, have we? My name's Alex. I'm a friend of Tom's.","say":"We haven't met before, have we? My name's Alex. I'm a friend of Tom's.","ctx":"","note":"","ja":"お会いしたことはありませんよね？ アレックスといいます。トムの友人です。"},{"ep":12,"theme":"初対面② ーフォーマルな初対面ショタイメンショタイメン","en":"All good things I hope.","say":"All good things I hope.","ctx":"","note":"","ja":"いい話だといいのですが。"},{"ep":12,"theme":"初対面② ーフォーマルな初対面ショタイメンショタイメン","en":"Absolutelly. He speaks very highly of your work with the Tokyo branch.","say":"Absolutelly. He speaks very highly of your work with the Tokyo branch.","ctx":"","note":"","ja":"もちろんです。東京支社でのお仕事を、彼はとても高く評価していますよ。"},{"ep":12,"theme":"初対面② ーフォーマルな初対面ショタイメンショタイメン","en":"That's kind of him. I'm looking forward to hearing your thoughts on the new proposal.","say":"That's kind of him. I'm looking forward to hearing your thoughts on the new proposal.","ctx":"","note":"","ja":"ありがたいお言葉です。新しい提案について、ご意見をうかがえるのを楽しみにしています。"},{"ep":12,"theme":"初対面② ーフォーマルな初対面ショタイメンショタイメン","en":"Likewise. I've prepared a few ideas. I hope you'll find help.","say":"Likewise. I've prepared a few ideas. I hope you'll find help.","ctx":"","note":"","ja":"こちらこそ。いくつか案を用意してきました。お役に立てばよいのですが。"},{"ep":13,"theme":"話し合いを求める①ハナアモト","en":"I'm a bit confused about what Professor Davis said today.","say":"I'm a bit confused about what Professor Davis said today.","ctx":"","note":"","ja":"今日のデイビス教授の話が、ちょっとよくわからなくて。"},{"ep":13,"theme":"話し合いを求める①ハナアモト","en":"The explanation about the supply and demand curves.","say":"The explanation about the supply and demand curves.","ctx":"The explanation about the supply and demand curves. It didn't quite make sense to me","note":"","ja":"需要曲線と供給曲線の説明のところ。"},{"ep":13,"theme":"話し合いを求める①ハナアモト","en":"Yeah, that part was tricky. Want me to go over it with you?","say":"Yeah, that part was tricky. Want me to go over it with you?","ctx":"","note":"","ja":"うん、あそこは難しかったね。一緒に見直そうか？"},{"ep":14,"theme":"話し合いを求める② ー内容予告ハナアモトナイヨウヨコク","en":"I'm really sorry. There's been some trouble with my commute lately.","say":"I'm really sorry. There's been some trouble with my commute lately.","ctx":"","note":"","ja":"本当にすみません。最近、通勤でトラブルが続いていて。"},{"ep":14,"theme":"話し合いを求める② ー内容予告ハナアモトナイヨウヨコク","en":"I understand things happen.","say":"I understand things happen.","ctx":"I understand things happen. But it's becoming a pattern. Please find a way to fix it.","note":"","ja":"事情があるのはわかります。"},{"ep":14,"theme":"話し合いを求める② ー内容予告ハナアモトナイヨウヨコク","en":"Good! We all reay on each other to be professional.","say":"Good! We all reay on each other to be professional.","ctx":"","note":"","ja":"よかった。私たちは互いにプロであることを頼りにしていますから。"},{"ep":14,"theme":"話し合いを求める② ー内容予告ハナアモトナイヨウヨコク","en":"Got a minute? I need help with homework.","say":"Got a minute? I need help with homework.","ctx":"","note":"","ja":"ちょっといい？ 宿題を手伝ってほしいんだ。"},{"ep":16,"theme":"話し合いを求める③ ー深刻な内容を示唆ハナアモトシンコクナイヨウシサ","en":"Our latest custermer satisfaction report shows a noticeable drop. That's a red flag.","say":"Our latest custermer satisfaction report shows a noticeable drop. That's a red flag.","ctx":"","note":"","ja":"最新の顧客満足度レポートで、はっきりとした低下が出ています。これは危険信号です。"},{"ep":16,"theme":"話し合いを求める③ ー深刻な内容を示唆ハナアモトシンコクナイヨウシサ","en":"I see. Do we know what's causing it?","say":"I see. Do we know what's causing it?","ctx":"","note":"","ja":"なるほど。原因はわかっているのですか？"},{"ep":16,"theme":"話し合いを求める③ ー深刻な内容を示唆ハナアモトシンコクナイヨウシサ","en":"Understood. I'll review our current process and propose some viable improvement.","say":"Understood. I'll review our current process and propose some viable improvement.","ctx":"","note":"","ja":"承知しました。現行のプロセスを見直して、実行可能な改善案を提案します。"},{"ep":17,"theme":"話し合いを求める④ ー秘密であることを伝えるハナアモトヒミツツタ","en":"I'm all right. But, could you keep this to yourself?","say":"I'm all right. But, could you keep this to yourself?","ctx":"","note":"","ja":"私は大丈夫。でも、このことは内緒にしてもらえる？"},{"ep":17,"theme":"話し合いを求める④ ー秘密であることを伝えるハナアモトヒミツツタ","en":"My husband might be transferred to Boston. And if that happen, we'll have to move.","say":"My husband might be transferred to Boston. And if that happen, we'll have to move.","ctx":"","note":"","ja":"夫がボストンに転勤になるかもしれなくて。そうなったら引っ越さないといけないの。"},{"ep":17,"theme":"話し合いを求める④ ー秘密であることを伝えるハナアモトヒミツツタ","en":"Yeah. But nothing's conformed yet. I don't want the whole neighborhood talking.","say":"Yeah. But nothing's conformed yet. I don't want the whole neighborhood talking.","ctx":"","note":"","ja":"ええ。でもまだ何も確定していないの。近所中の噂になってほしくなくて。"},{"ep":18,"theme":"話し合いを求める⑤ ーさまざまな会話のきっかけハナアモトカイワ","en":"Did you hear that Takumi and Kate are seeing each other?","say":"Did you hear that Takumi and Kate are seeing each other?","ctx":"","note":"","ja":"タクミとケイトが付き合ってるって聞いた？"},{"ep":18,"theme":"話し合いを求める⑤ ーさまざまな会話のきっかけハナアモトカイワ","en":"Totally! They've liked each other for a while, haven't they.","say":"Totally! They've liked each other for a while, haven't they.","ctx":"","note":"","ja":"まったくね！ 前からお互い好きだったでしょ。"},{"ep":18,"theme":"話し合いを求める⑤ ーさまざまな会話のきっかけハナアモトカイワ","en":"Yeah, it was kind of obvious. I'm glad they finally got together.","say":"Yeah, it was kind of obvious. I'm glad they finally got together.","ctx":"","note":"","ja":"うん、けっこう見え見えだった。やっと一緒になれてよかったよ。"},{"ep":18,"theme":"話し合いを求める⑤ ーさまざまな会話のきっかけハナアモトカイワ","en":"Me too. They're both kind and thoughtful.","say":"Me too. They're both kind and thoughtful.","ctx":"Me too. They're both kind and thoughtful. It'll work out.","note":"","ja":"私も。二人とも優しくて思いやりがあるもの。"},{"ep":18,"theme":"話し合いを求める⑤ ーさまざまな会話のきっかけハナアモトカイワ","en":"For sure. I'm actually kind of jealous.","say":"For sure. I'm actually kind of jealous.","ctx":"","note":"","ja":"ほんとね。正直ちょっとうらやましい。"},{"ep":18,"theme":"話し合いを求める⑤ ーさまざまな会話のきっかけハナアモトカイワ","en":"Maybe it's our turn next?","say":"Maybe it's our turn next?","ctx":"","note":"","ja":"次は私たちの番かもね？"},{"ep":19,"theme":"話し合いを求める② ーニュースを伝えるハナアモトツタ","en":"Guess what? I finally bought a car with the money I saved from part-time job.","say":"Guess what? I finally bought a car with the money I saved from part-time job.","ctx":"","note":"","ja":"ねえ聞いて。バイトで貯めたお金で、ついに車を買ったんだ。"},{"ep":21,"theme":"会話原則 協調 - 興味を示せ①カイワゲンソクキョウチョウキョウミシメ","en":"Mr. Clark dropped his notes, and they scattered everywhere.","say":"Mr. Clark dropped his notes, and they scattered everywhere.","ctx":"","note":"","ja":"クラーク先生がノートを落として、そこら中に散らばったんだ。"},{"ep":21,"theme":"会話原則 協調 - 興味を示せ①カイワゲンソクキョウチョウキョウミシメ","en":"Really that must have be embarracing. And then what happened?","say":"Really that must have be embarracing. And then what happened?","ctx":"","note":"","ja":"本当に？ それは気まずかったでしょうね。それでどうなったの？"},{"ep":21,"theme":"会話原則 協調 - 興味を示せ①カイワゲンソクキョウチョウキョウミシメ","en":"I helped him pick them up, and he smiled and thanked me .","say":"I helped him pick them up, and he smiled and thanked me .","ctx":"","note":"","ja":"拾うのを手伝ったら、笑って礼を言ってくれたよ。"},{"ep":21,"theme":"会話原則 協調 - 興味を示せ①カイワゲンソクキョウチョウキョウミシメ","en":"Ha, Not really, But it felt good.","say":"Ha, Not really, But it felt good.","ctx":"","note":"","ja":"はは、そんなことないよ。でも気分はよかった。"},{"ep":21,"theme":"会話原則 協調 - 興味を示せ①カイワゲンソクキョウチョウキョウミシメ","en":"You’re sweet, Ethan.","say":"You’re sweet, Ethan.","ctx":"","note":"","ja":"優しいのね、イーサン。"},{"ep":22,"theme":"会話原則 協調 - 興味を示せ②カイワゲンソクキョウチョウキョウミシメ","en":"The tulips seem to be blooming nicely. Are they new this season?","say":"The tulips seem to be blooming nicely. Are they new this season?","ctx":"","note":"","ja":"チューリップがきれいに咲いてきましたね。今年から新しく植えたんですか？"},{"ep":22,"theme":"会話原則 協調 - 興味を示せ②カイワゲンソクキョウチョウキョウミシメ","en":"They brighten the whole street. Your yard always inspires me to try harder with mine.","say":"They brighten the whole street. Your yard always inspires me to try harder with mine.","ctx":"","note":"","ja":"通り全体が明るくなりますね。お宅の庭を見ると、うちももっと頑張ろうと思わされます。"},{"ep":22,"theme":"会話原則 協調 - 興味を示せ②カイワゲンソクキョウチョウキョウミシメ","en":"I can give you a ride to the station if you want. - Oh, can you? That helps a lot.","say":"I can give you a ride to the station if you want. - Oh, can you? That helps a lot.","ctx":"","note":"","ja":"よかったら駅まで送りますよ。 — え、いいんですか？ 助かります。"},{"ep":23,"theme":"会話原則 流れ - 依頼の流れカイワゲンソクナガイライナガ","en":"Hey, could you return this book to library for me? I totally forgot it's due today.","say":"Hey, could you return this book to library for me? I totally forgot it's due today.","ctx":"","note":"","ja":"ねえ、この本を図書館に返しておいてくれない？ 今日が返却日なのをすっかり忘れてて。"},{"ep":23,"theme":"会話原則 流れ - 依頼の流れカイワゲンソクナガイライナガ","en":"You're a lifesaver. I've got back-to-back lectures all afternoon.","say":"You're a lifesaver. I've got back-to-back lectures all afternoon.","ctx":"","note":"","ja":"本当に助かるよ。午後はずっと講義が詰まってるんだ。"},{"ep":23,"theme":"会話原則 流れ - 依頼の流れカイワゲンソクナガイライナガ","en":"No worries. Which drop box should I use?","say":"No worries. Which drop box should I use?","ctx":"","note":"","ja":"いいよ。どの返却ボックスを使えばいい？"},{"ep":23,"theme":"会話原則 流れ - 依頼の流れカイワゲンソクナガイライナガ","en":"I don't think it's the matter, but the one by the main entrance is fine.","say":"I don't think it's the matter, but the one by the main entrance is fine.","ctx":"","note":"","ja":"どこでもいいと思うけど、正面玄関のところが確実かな。"},{"ep":23,"theme":"会話原則 流れ - 依頼の流れカイワゲンソクナガイライナガ","en":"Nope. that’s it, Thanks again, Sara.","say":"Nope. that’s it, Thanks again, Sara.","ctx":"","note":"","ja":"ううん、それだけ。改めてありがとう、サラ。"},{"ep":23,"theme":"会話原則 流れ - 依頼の流れカイワゲンソクナガイライナガ","en":"Anytime, Jake. You owe me coffee though.","say":"Anytime, Jake. You owe me coffee though.","ctx":"","note":"","ja":"いつでもどうぞ、ジェイク。コーヒーはおごりね。"},{"ep":23,"theme":"会話原則 流れ - 依頼の流れカイワゲンソクナガイライナガ","en":"Hi, could you take the picture of us?","say":"Hi, could you take the picture of us?","ctx":"","note":"","ja":"すみません、私たちの写真を撮ってもらえますか？"},{"ep":23,"theme":"会話原則 流れ - 依頼の流れカイワゲンソクナガイライナガ","en":"Hey, just wondering if you could join our meeting later?","say":"Hey, just wondering if you could join our meeting later?","ctx":"","note":"","ja":"ねえ、あとでミーティングに入ってもらえないかな？"},{"ep":23,"theme":"会話原則 流れ - 依頼の流れカイワゲンソクナガイライナガ","en":"Excuse me. Can you move your bag a little?","say":"Excuse me. Can you move your bag a little?","ctx":"","note":"","ja":"すみません。カバンを少しずらしてもらえますか？"},{"ep":23,"theme":"会話原則 流れ - 依頼の流れカイワゲンソクナガイライナガ","en":"Sorry to bother you, but could you check this email draft?","say":"Sorry to bother you, but could you check this email draft?","ctx":"","note":"","ja":"お忙しいところすみません、このメールの下書きを確認してもらえますか？"},{"ep":24,"theme":"会話原則 流れ - 疑問文への流れカイワゲンソクナガギモンブンナガ","en":"That explain the sudden fashion upgrade. Even Jason is in the blazer.","say":"That explain the sudden fashion upgrade. Even Jason is in the blazer.","ctx":"","note":"","ja":"それで急に服装がよくなったのか。ジェイソンまでブレザーを着てる。"},{"ep":24,"theme":"会話原則 流れ - 疑問文への流れカイワゲンソクナガギモンブンナガ","en":"Yeah, I barely recognized him. Want me to brief you before the 2 p.m. meeting?","say":"Yeah, I barely recognized him. Want me to brief you before the 2 p.m. meeting?","ctx":"","note":"","ja":"ええ、ほとんど誰だかわかりませんでした。午後2時の会議の前に、要点をお伝えしましょうか？"},{"ep":24,"theme":"会話原則 流れ - 疑問文への流れカイワゲンソクナガギモンブンナガ","en":"Please I don't want to get caugh off guard.","say":"Please I don't want to get caugh off guard.","ctx":"","note":"","ja":"頼むよ。不意を突かれたくないからね。"},{"ep":24,"theme":"会話原則 流れ - 疑問文への流れカイワゲンソクナガギモンブンナガ","en":"Got it. I'll bring the updated ajender to your office in 10.","say":"Got it. I'll bring the updated ajender to your office in 10.","ctx":"","note":"","ja":"承知しました。10分後に更新した議題をお持ちします。"},{"ep":26,"theme":"会話原則 流れ - 「引いて・押せ」の基本","en":"Yeah, but I already promised my friends I'd joined their study group.","say":"Yeah, but I already promised my friends I'd joined their study group.","ctx":"","note":"","ja":"うん、でも友達の勉強会に参加するって、もう約束しちゃったんだ。"},{"ep":26,"theme":"会話原則 流れ - 「引いて・押せ」の基本","en":"That works. Let me talk to Mom and we'll plan something nice.","say":"That works. Let me talk to Mom and we'll plan something nice.","ctx":"","note":"","ja":"それならいいわ。お母さんに話して、何かいい計画を立てましょう。"},{"ep":27,"theme":"会話原則 流れ - 議論で使える「引いて・押せ」ギロンツカ","en":"You know I read somewhere that EV might outsell gas-power car in the near future.","say":"You know I read somewhere that EV might outsell gas-power car in the near future.","ctx":"","note":"","ja":"そういえば、近い将来EVがガソリン車より売れるようになるかもしれない、ってどこかで読んだよ。"},{"ep":27,"theme":"会話原則 流れ - 議論で使える「引いて・押せ」ギロンツカ","en":"I get where you're coming from, but I need some time to think.","say":"I get where you're coming from, but I need some time to think.","ctx":"","note":"","ja":"言いたいことはわかります。ただ、少し考える時間をください。"},{"ep":28,"theme":"会話原則 流れ - 会話はキャッチボールカイワ","en":"Ethan I've been thinking you should spend less time on video game and focus more on prepairing college.","say":"Ethan I've been thinking you should spend less time on video game and focus more on prepairing college.","ctx":"","note":"","ja":"イーサン、ずっと思っていたんだけど、テレビゲームの時間を減らして、大学の準備にもっと集中したほうがいいわ。"},{"ep":28,"theme":"会話原則 流れ - 会話はキャッチボールカイワ","en":"Well, I get your point, mam. But playing games also help me relaxing and connecting with my friends.","say":"Well, I get your point, mam. But playing games also help me relaxing and connecting with my friends.","ctx":"","note":"","ja":"言いたいことはわかるよ、母さん。でもゲームは息抜きになるし、友達とのつながりにもなってるんだ。"},{"ep":28,"theme":"会話原則 流れ - 会話はキャッチボールカイワ","en":"I understand that, but the right balance is key. Too much gaming might hurt your grades.","say":"I understand that, but the right balance is key. Too much gaming might hurt your grades.","ctx":"","note":"","ja":"それはわかる。でもバランスが大事なの。ゲームのしすぎは成績に響くかもしれない。"},{"ep":28,"theme":"会話原則 流れ - 会話はキャッチボールカイワ","en":"That sounds reasonable. I'm glad we talk about it.","say":"That sounds reasonable. I'm glad we talk about it.","ctx":"","note":"","ja":"それは筋が通ってるね。話し合えてよかった。"},{"ep":29,"theme":"会話原則 流れ - 話題変更ワダイヘンコウ","en":"Today felt endless with all those repair request, I'm beat.","say":"Today felt endless with all those repair request, I'm beat.","ctx":"","note":"","ja":"今日は修理の依頼が次から次で、終わりが見えなかったよ。もうくたくただ。"},{"ep":29,"theme":"会話原則 流れ - 話題変更ワダイヘンコウ","en":"Speaking of food, how about grabbing a bite before heading home?","say":"Speaking of food, how about grabbing a bite before heading home?","ctx":"","note":"","ja":"食べ物といえば、帰る前に何か軽く食べていかない？"},{"ep":29,"theme":"会話原則 流れ - 話題変更ワダイヘンコウ","en":"Maybe the ramen place, Nikkoan. Bit of walk, but totally worth it.","say":"Maybe the ramen place, Nikkoan. Bit of walk, but totally worth it.","ctx":"","note":"","ja":"ラーメン屋の日光庵かな。少し歩くけど、その価値は十分ある。"},{"ep":29,"theme":"会話原則 流れ - 話題変更ワダイヘンコウ","en":"That reminds me, I need to call Mom.","say":"That reminds me, I need to call Mom.","ctx":"","note":"","ja":"それで思い出した、母さんに電話しなきゃ。"},{"ep":31,"theme":"会話原則 遮らない - 会話文は不完全サエギカイワブンフカンゼン","en":"Oh good. I was worried we might have to get out and push the car.","say":"Oh good. I was worried we might have to get out and push the car.","ctx":"","note":"","ja":"ああよかった。車を降りて押すことになるかと思ったよ。"},{"ep":32,"theme":"会話原則 理解 - 発言を聞き返すリカイハツゲンキカエ","en":"Great. I'm starving. This place always smells so good.","say":"Great. I'm starving. This place always smells so good.","ctx":"","note":"","ja":"いいね。おなかぺこぺこだよ。この店はいつもいい匂いがする。"},{"ep":32,"theme":"会話原則 理解 - 発言を聞き返すリカイハツゲンキカエ","en":"Would you mind repeating what you said?","say":"Would you mind repeating what you said?","ctx":"","note":"","ja":"もう一度言っていただけますか？"},{"ep":33,"theme":"会話原則 理解 - 謝罪は明瞭にリカイシャザイメイリョウ","en":"I was starting to wonder if you're forggoten my birthday.","say":"I was starting to wonder if you're forggoten my birthday.","ctx":"","note":"","ja":"私の誕生日を忘れたんじゃないかと思い始めてたところよ。"},{"ep":33,"theme":"会話原則 理解 - 謝罪は明瞭にリカイシャザイメイリョウ","en":"Never. I've been looking foward to this evening all week.","say":"Never. I've been looking foward to this evening all week.","ctx":"","note":"","ja":"まさか。今週はずっと今夜を楽しみにしてたよ。"},{"ep":33,"theme":"会話原則 理解 - 謝罪は明瞭にリカイシャザイメイリョウ","en":"I sure did","say":"I sure did","ctx":"I sure did . Now tonight is about you. So let's fogot about the kids and just relax.","note":"","ja":"もちろんしたよ。"},{"ep":33,"theme":"会話原則 理解 - 謝罪は明瞭にリカイシャザイメイリョウ","en":"That's sweet. Thank you Justin.","say":"That's sweet. Thank you Justin.","ctx":"","note":"","ja":"うれしい。ありがとう、ジャスティン。"},{"ep":33,"theme":"会話原則 理解 - 謝罪は明瞭にリカイシャザイメイリョウ","en":"Perfect. I'm happy already just been here with you.","say":"Perfect. I'm happy already just been here with you.","ctx":"","note":"","ja":"完璧。こうして一緒にいられるだけで、もう幸せよ。"},{"ep":34,"theme":"会話原則 理解 - 感謝は明瞭にリカイカンシャメイリョウ","en":"Thank you for having me today, Ms Sato. I really enjoyed meeting your team and seeing the project in action.","say":"Thank you for having me today, Ms Sato. I really enjoyed meeting your team and seeing the project in action.","ctx":"","note":"","ja":"本日はお招きいただきありがとうございました、佐藤さん。チームの皆さんにお会いでき、プロジェクトが動いているところを見られて、本当に楽しかったです。"},{"ep":34,"theme":"会話原則 理解 - 感謝は明瞭にリカイカンシャメイリョウ","en":"We're honered you came, Mr. Cale. Your feedback means a lot, especially to the younger engineers.","say":"We're honered you came, Mr. Cale. Your feedback means a lot, especially to the younger engineers.","ctx":"","note":"","ja":"お越しいただき光栄です、コールさん。いただいたご意見は、特に若い技術者たちにとって大きな意味があります。"},{"ep":34,"theme":"会話原則 理解 - 感謝は明瞭にリカイカンシャメイリョウ","en":"They're talented. Cuddly Code values partnerships, and I see strong potential here.","say":"They're talented. Cuddly Code values partnerships, and I see strong potential here.","ctx":"","note":"","ja":"皆さん優秀ですね。カドリー・コードはパートナーシップを大切にしています。ここには大きな可能性を感じます。"},{"ep":34,"theme":"会話原則 理解 - 感謝は明瞭にリカイカンシャメイリョウ","en":"Excellent. I'll look foward to that. Have a great evening, Ms. Sato.","say":"Excellent. I'll look foward to that. Have a great evening, Ms. Sato.","ctx":"","note":"","ja":"すばらしい。楽しみにしています。よい夜をお過ごしください、佐藤さん。"},{"ep":36,"theme":"会話原則 配慮－相手の状況に配慮するカイワゲンソクハイリョアイテジョウキョウハイリョ","en":"Sorry to interrupt, but a Mr. Cole just called. He asked if we could design a mascot plush toy for his company.","say":"Sorry to interrupt, but a Mr. Cole just called. He asked if we could design a mascot plush toy for his company.","ctx":"","note":"","ja":"お話し中すみません、たった今コールさんという方からお電話がありました。自社のマスコットのぬいぐるみをデザインできないか、とのことです。"},{"ep":36,"theme":"会話原則 配慮－相手の状況に配慮するカイワゲンソクハイリョアイテジョウキョウハイリョ","en":"Cuddly Code. A startup based in San Fransisco.","say":"Cuddly Code. A startup based in San Fransisco.","ctx":"","note":"","ja":"カドリー・コード。サンフランシスコを拠点とするスタートアップです。"},{"ep":36,"theme":"会話原則 配慮－相手の状況に配慮するカイワゲンソクハイリョアイテジョウキョウハイリョ","en":"Ah...right. I've heard the name. Interesting. Let's arrange a meeting and see what he has in mind.","say":"Ah...right. I've heard the name. Interesting. Let's arrange a meeting and see what he has in mind.","ctx":"","note":"","ja":"ああ……そうか。名前は聞いたことがある。面白いね。打ち合わせを設定して、何を考えているのか聞いてみよう。"},{"ep":36,"theme":"会話原則 配慮－相手の状況に配慮するカイワゲンソクハイリョアイテジョウキョウハイリョ","en":"Got it. I'll schedule a call and prepare note.","say":"Got it. I'll schedule a call and prepare note.","ctx":"","note":"","ja":"承知しました。通話を設定して、資料を用意します。"},{"ep":36,"theme":"会話原則 配慮－相手の状況に配慮するカイワゲンソクハイリョアイテジョウキョウハイリョ","en":"I know you're busy, but there's something I should tell you.","say":"I know you're busy, but there's something I should tell you.","ctx":"","note":"","ja":"お忙しいのは承知していますが、お伝えしておきたいことがあります。"},{"ep":36,"theme":"会話原則 配慮－相手の状況に配慮するカイワゲンソクハイリョアイテジョウキョウハイリョ","en":"I hope I'm not catching you at bad time, but I wanted to follow up on my last email.","say":"I hope I'm not catching you at bad time, but I wanted to follow up on my last email.","ctx":"","note":"","ja":"お手すきでないところ恐縮ですが、先日のメールの件で確認させてください。"},{"ep":37,"theme":"会話原則 配慮－ショックへのクッションカイワゲンソクハイリョ","en":"Hey, just finished the car outside?","say":"Hey, just finished the car outside?","ctx":"","note":"","ja":"やあ、外の車は終わったのか？"},{"ep":37,"theme":"会話原則 配慮－ショックへのクッションカイワゲンソクハイリョ","en":"Nice. By the way, some woman called while you were out there. She sounded... a little too friendly.","say":"Nice. By the way, some woman called while you were out there. She sounded... a little too friendly.","ctx":"","note":"","ja":"いいね。ところで、君が外にいる間に女の人から電話があったよ。なんだか……やけに親しげだったな。"},{"ep":37,"theme":"会話原則 配慮－ショックへのクッションカイワゲンソクハイリョ","en":"Yeah well. Next time you answer.","say":"Yeah well. Next time you answer.","ctx":"","note":"","ja":"ああ、そう。じゃあ次は君が出てくれ。"},{"ep":37,"theme":"会話原則 配慮－ショックへのクッションカイワゲンソクハイリョ","en":"I hate to say this, but the results weren't as good as we'd hope.","say":"I hate to say this, but the results weren't as good as we'd hope.","ctx":"","note":"","ja":"こんなことを申し上げるのは心苦しいのですが、結果は期待したほどではありませんでした。"},{"ep":37,"theme":"会話原則 配慮－ショックへのクッションカイワゲンソクハイリョ","en":"Unfortunately, we won't be able ot meet the deadline this time.","say":"Unfortunately, we won't be able ot meet the deadline this time.","ctx":"","note":"","ja":"残念ながら、今回は納期に間に合わせることができません。"},{"ep":38,"theme":"会話原則 配慮－やわらかく表現をするカイワゲンソクハイリョヒョウゲン","en":"Kyoko, can you taste this soup? I'm not sure if it's right yet.","say":"Kyoko, can you taste this soup? I'm not sure if it's right yet.","ctx":"","note":"","ja":"キョウコ、このスープを味見してくれない？ これでいいのか自信がなくて。"},{"ep":38,"theme":"会話原則 配慮－やわらかく表現をするカイワゲンソクハイリョヒョウゲン","en":"Not at all. It's tasty. But I think you should add just a little more solt.","say":"Not at all. It's tasty. But I think you should add just a little more solt.","ctx":"","note":"","ja":"とんでもない。おいしいわよ。ただ、もう少しだけ塩を足したほうがいいと思う。"},{"ep":39,"theme":"会話原則 配慮－相手の心境に配慮するカイワゲンソクハイリョアイテシンキョウハイリョ","en":"Dad, I don't mean to be rude, but you always check your phone at dinner.","say":"Dad, I don't mean to be rude, but you always check your phone at dinner.","ctx":"","note":"","ja":"お父さん、失礼なことを言うつもりはないんだけど、夕食のときいつもスマホを見てるよね。"},{"ep":39,"theme":"会話原則 配慮－相手の心境に配慮するカイワゲンソクハイリョアイテシンキョウハイリョ","en":"Thanks Dad. I just want us to eat together without distruction.","say":"Thanks Dad. I just want us to eat together without distruction.","ctx":"","note":"","ja":"ありがとう、お父さん。ただ、何にも邪魔されずに一緒に食べたいだけなんだ。"},{"ep":39,"theme":"会話原則 配慮－相手の心境に配慮するカイワゲンソクハイリョアイテシンキョウハイリョ","en":"No offends, but I think this plan needs a bit more work.","say":"No offends, but I think this plan needs a bit more work.","ctx":"","note":"","ja":"気を悪くしないでほしいのですが、この計画はもう少し詰める必要があると思います。"},{"ep":39,"theme":"会話原則 配慮－相手の心境に配慮するカイワゲンソクハイリョアイテシンキョウハイリョ","en":"With all due respect, I think we need to reconcider this decision.","say":"With all due respect, I think we need to reconcider this decision.","ctx":"","note":"","ja":"失礼を承知で申し上げますが、この決定は考え直す必要があると思います。"},{"ep":39,"theme":"会話原則 配慮－相手の心境に配慮するカイワゲンソクハイリョアイテシンキョウハイリョ","en":"I hope you don't mind (me saying), but I'd like to offer different perspective.","say":"I hope you don't mind (me saying), but I'd like to offer different perspective.","ctx":"","note":"","ja":"お気を悪くしないでいただきたいのですが、別の見方を示させてください。"},{"ep":41,"theme":"発言パターン アドバイスー強いアドバイス①ハツゲンツヨ","en":"Yes, I'm really sorry. Traffic was worse than I expected.","say":"Yes, I'm really sorry. Traffic was worse than I expected.","ctx":"","note":"","ja":"はい、本当に申し訳ありません。渋滞が思っていたよりひどくて。"},{"ep":41,"theme":"発言パターン アドバイスー強いアドバイス①ハツゲンツヨ","en":"That's exactly the problem. You must expect delays. This isn't first warning.","say":"That's exactly the problem. You must expect delays. This isn't first warning.","ctx":"","note":"","ja":"まさにそこが問題なんだ。遅れは見込んでおかなければいけない。注意するのはこれが初めてじゃないよ。"},{"ep":41,"theme":"発言パターン アドバイスー強いアドバイス①ハツゲンツヨ","en":"I know. I really thought I could make it.","say":"I know. I really thought I could make it.","ctx":"","note":"","ja":"わかっています。本当に間に合うと思ったんです。"},{"ep":42,"theme":"発言パターン アドバイスー強いアドバイス②ハツゲンツヨ","en":"I had an argumnet with a friend today. We both said things we shouldn't have.","say":"I had an argumnet with a friend today. We both said things we shouldn't have.","ctx":"","note":"","ja":"今日、友達と口論になったんだ。お互い言うべきでないことを言ってしまって。"},{"ep":42,"theme":"発言パターン アドバイスー強いアドバイス②ハツゲンツヨ","en":"Even when you feel you're right?","say":"Even when you feel you're right?","ctx":"","note":"","ja":"自分が正しいと感じているときでも？"},{"ep":42,"theme":"発言パターン アドバイスー強いアドバイス②ハツゲンツヨ","en":"Yes, it's crucial to slow down and think before reacting. Anger never fixes anything.","say":"Yes, it's crucial to slow down and think before reacting. Anger never fixes anything.","ctx":"","note":"","ja":"ええ、いったん落ち着いて、反応する前に考えることが肝心よ。怒りは何も解決しないの。"},{"ep":42,"theme":"発言パターン アドバイスー強いアドバイス②ハツゲンツヨ","en":"I know, but it's important to look for solutions, not winners. That's how problems actually to get resolve.","say":"I know, but it's important to look for solutions, not winners. That's how problems actually to get resolve.","ctx":"","note":"","ja":"わかってる。でも大事なのは勝ち負けじゃなく、解決策を探すことだ。そうやって初めて問題は片づくんだ。"},{"ep":42,"theme":"発言パターン アドバイスー強いアドバイス②ハツゲンツヨ","en":"If I were you, I'd absolutelly double-check the numbers before sending the email.","say":"If I were you, I'd absolutelly double-check the numbers before sending the email.","ctx":"","note":"","ja":"私が君なら、メールを送る前に数字を絶対に二重チェックするね。"},{"ep":44,"theme":"発言パターン アドバイスー穏やかなアドバイス①ハツゲンオダ","en":"Laytory, I've been getting tired so easily. Even small things wear me out.","say":"Laytory, I've been getting tired so easily. Even small things wear me out.","ctx":"","note":"","ja":"最近、すぐ疲れてしまうんです。ちょっとしたことでもぐったりして。"},{"ep":44,"theme":"発言パターン アドバイスー穏やかなアドバイス①ハツゲンオダ","en":"Un, it might be a good idea to go to gym or do some light exercise.","say":"Un, it might be a good idea to go to gym or do some light exercise.","ctx":"","note":"","ja":"うーん、ジムに行くか、軽い運動をしてみるのもいいかもしれないね。"},{"ep":44,"theme":"発言パターン アドバイスー穏やかなアドバイス①ハツゲンオダ","en":"It might be worth meeting her in person.","say":"It might be worth meeting her in person.","ctx":"","note":"","ja":"直接会って話してみる価値はあるかもしれないね。"},{"ep":46,"theme":"発言パターン アドバイスー穏やかなアドバイス②ハツゲンオダ","en":"Do you feel that? The car's been rattling a bit since we left campus.","say":"Do you feel that? The car's been rattling a bit since we left campus.","ctx":"","note":"","ja":"感じる？ キャンパスを出てから、車が少しガタガタいってるんだ。"},{"ep":46,"theme":"発言パターン アドバイスー穏やかなアドバイス②ハツゲンオダ","en":"I just bought it. So I'm hoping it's nothing serious.","say":"I just bought it. So I'm hoping it's nothing serious.","ctx":"","note":"","ja":"買ったばかりなんだ。だから大したことないといいんだけど。"},{"ep":46,"theme":"発言パターン アドバイスー穏やかなアドバイス②ハツゲンオダ","en":"It's totaly up to you, but maybe you should take it back to Garage Hiroto and have them check it over.","say":"It's totaly up to you, but maybe you should take it back to Garage Hiroto and have them check it over.","ctx":"","note":"","ja":"決めるのは君だけど、ガレージ・ヒロトに戻して見てもらったほうがいいかもしれないよ。"},{"ep":46,"theme":"発言パターン アドバイスー穏やかなアドバイス②ハツゲンオダ","en":"You think so?","say":"You think so?","ctx":"","note":"","ja":"そう思う？"},{"ep":46,"theme":"発言パターン アドバイスー穏やかなアドバイス②ハツゲンオダ","en":"Yeah. Better safe than sorry. It'll help you relax and enjoy driving more.","say":"Yeah. Better safe than sorry. It'll help you relax and enjoy driving more.","ctx":"","note":"","ja":"うん。念のためだよ。そのほうが安心して運転を楽しめる。"},{"ep":46,"theme":"発言パターン アドバイスー穏やかなアドバイス②ハツゲンオダ","en":"Just a thought, but you might want to meet her in person.","say":"Just a thought, but you might want to meet her in person.","ctx":"","note":"","ja":"ひとつの考えだけど、直接会ってみるといいかもしれないよ。"},{"ep":46,"theme":"発言パターン アドバイスー穏やかなアドバイス②ハツゲンオダ","en":"One option is to give her some space and wait a little.","say":"One option is to give her some space and wait a little.","ctx":"","note":"","ja":"ひとつの手としては、少し距離を置いて待ってみることかな。"},{"ep":46,"theme":"発言パターン アドバイスー穏やかなアドバイス②ハツゲンオダ","en":"Have you thought about asking your manager for advice?","say":"Have you thought about asking your manager for advice?","ctx":"","note":"","ja":"上司に相談してみることは考えた？"},{"ep":47,"theme":"発言パターン アドバイス - 心理負担の軽減ハツゲンシンリフタンケイゲン","en":"Mr. Yamamoto, your garden looks amaging lately. How do you get your flowers to bloom so well?","say":"Mr. Yamamoto, your garden looks amaging lately. How do you get your flowers to bloom so well?","ctx":"","note":"","ja":"山本さん、最近お庭がすばらしいですね。どうすればあんなに花がよく咲くんですか？"},{"ep":47,"theme":"発言パターン アドバイス - 心理負担の軽減ハツゲンシンリフタンケイゲン","en":"That's it? No special fertilizer or tricks?","say":"That's it? No special fertilizer or tricks?","ctx":"","note":"","ja":"それだけですか？ 特別な肥料やコツはなし？"},{"ep":47,"theme":"発言パターン アドバイス - 心理負担の軽減ハツゲンシンリフタンケイゲン","en":"Not really. I water them, watch how they grow and notice small changes.","say":"Not really. I water them, watch how they grow and notice small changes.","ctx":"","note":"","ja":"特にないよ。水をやって、育ち方を見て、小さな変化に気づく。それだけだ。"},{"ep":48,"theme":"発言パターン 助力を申し出る 丁寧・フォーマル","en":"I can take notes and handle technical question if needed.","say":"I can take notes and handle technical question if needed.","ctx":"","note":"","ja":"必要でしたら、記録を取ったり技術的な質問に対応したりできます。"},{"ep":48,"theme":"発言パターン 助力を申し出る 丁寧・フォーマル","en":"That would let me focus on discution.","say":"That would let me focus on discution.","ctx":"","note":"","ja":"そうしていただけると、私は議論に集中できます。"},{"ep":48,"theme":"発言パターン 助力を申し出る 丁寧・フォーマル","en":"Exactly. I think it might make things easier for you.","say":"Exactly. I think it might make things easier for you.","ctx":"","note":"","ja":"そのとおりです。そのほうがやりやすくなると思います。"},{"ep":48,"theme":"発言パターン 助力を申し出る 丁寧・フォーマル","en":"All right. Let's do that, then.","say":"All right. Let's do that, then.","ctx":"","note":"","ja":"わかりました。では、そうしましょう。"},{"ep":49,"theme":"発言パターン 助力を申し出る — やや丁寧","en":"I sure do. It's a popukar item. I'd be happy to guide you there.","say":"I sure do. It's a popukar item. I'd be happy to guide you there.","ctx":"","note":"","ja":"ええ、ございます。人気の商品でして。ご案内しましょうか。"},{"ep":49,"theme":"発言パターン 助力を申し出る — やや丁寧","en":"No worries. It's nearly deli counter, past the salada.","say":"No worries. It's nearly deli counter, past the salada.","ctx":"","note":"","ja":"とんでもありません。総菜コーナーのすぐ手前、サラダを過ぎたあたりです。"},{"ep":49,"theme":"発言パターン 助力を申し出る — やや丁寧","en":"Hopefully there's one left.","say":"Hopefully there's one left.","ctx":"","note":"","ja":"ひとつ残っているといいのですが。"},{"ep":51,"theme":"発言パターン 助力を申し出る — 万能表現","en":"Garden supplies. I may have gone a bit overboard.","say":"Garden supplies. I may have gone a bit overboard.","ctx":"","note":"","ja":"園芸用品だよ。ちょっと買いすぎたかもしれない。"},{"ep":51,"theme":"発言パターン 助力を申し出る — 万能表現","en":"Happens to the best of us.","say":"Happens to the best of us.","ctx":"","note":"","ja":"誰にでもあることですよ。"},{"ep":52,"theme":"発言パターン 助力を申し出る — カジュアルな表現","en":"It's OK. I'll get it. I've fixed these before.","say":"It's OK. I'll get it. I've fixed these before.","ctx":"","note":"","ja":"大丈夫です。私がやります。これは前にも直したことがあるので。"},{"ep":52,"theme":"発言パターン 助力を申し出る — カジュアルな表現","en":"Lemme fix it.","say":"Lemme fix it.","ctx":"","note":"","ja":"直させて。"},{"ep":53,"theme":"発言パターン 助力を申し出る — 準備がある","en":"I'm glad to hear that. We focus on keeping the design simple and friendly.","say":"I'm glad to hear that. We focus on keeping the design simple and friendly.","ctx":"","note":"","ja":"そう言っていただけてうれしいです。デザインはシンプルで親しみやすいものを心がけています。"},{"ep":53,"theme":"発言パターン 助力を申し出る — 準備がある","en":"Thank you. We're open to any other suggestions you might have.","say":"Thank you. We're open to any other suggestions you might have.","ctx":"","note":"","ja":"ありがとうございます。ほかにご提案があれば、どんなことでもうかがいます。"},{"ep":53,"theme":"発言パターン 助力を申し出る — 準備がある","en":"That's helpful feedback. We'll look into that and share an upgrade.","say":"That's helpful feedback. We'll look into that and share an upgrade.","ctx":"","note":"","ja":"参考になるご意見です。検討して、改良版をお見せします。"},{"ep":53,"theme":"発言パターン 助力を申し出る — 準備がある","en":"We're willing to make small adjustments if needed.","say":"We're willing to make small adjustments if needed.","ctx":"","note":"","ja":"必要でしたら、細かい調整はいたします。"},{"ep":54,"theme":"発言パターン 食べ物をすすめる①","en":"Want to spread out here and tackle math first?","say":"Want to spread out here and tackle math first?","ctx":"","note":"","ja":"ここに広げて、まず数学から片づけない？"},{"ep":54,"theme":"発言パターン 食べ物をすすめる①","en":"Same. Do you want a drink?","say":"Same. Do you want a drink?","ctx":"","note":"","ja":"私も。何か飲む？"},{"ep":54,"theme":"発言パターン 食べ物をすすめる①","en":"Good idea. I'll go grab my worksheet.","say":"Good idea. I'll go grab my worksheet.","ctx":"","note":"","ja":"いい考えだね。プリントを取ってくるよ。"},{"ep":54,"theme":"発言パターン 食べ物をすすめる①","en":"Would you care for dessert?","say":"Would you care for dessert?","ctx":"","note":"","ja":"デザートはいかがですか。"},{"ep":54,"theme":"発言パターン 食べ物をすすめる①","en":"Can I offer you some wine?","say":"Can I offer you some wine?","ctx":"","note":"","ja":"ワインはいかがですか。"},{"ep":56,"theme":"発言パターン 食べ物をすすめる②","en":"Honestly? I got bored with the car I bought here last time. I want something that feels new again.","say":"Honestly? I got bored with the car I bought here last time. I want something that feels new again.","ctx":"","note":"","ja":"正直に言うと？ 前にここで買った車に飽きてしまってね。また新鮮に感じられる何かがほしいんだ。"},{"ep":56,"theme":"発言パターン 食べ物をすすめる②","en":"Happens more often than you think. Take your time and check out the new lineup outside.","say":"Happens more often than you think. Take your time and check out the new lineup outside.","ctx":"","note":"","ja":"思っていらっしゃるよりよくあることです。ごゆっくり、外の新しいラインナップをご覧ください。"},{"ep":56,"theme":"発言パターン 食べ物をすすめる②","en":"No pressure, of course. Help yourself to some coffee in the office while you look around.","say":"No pressure, of course. Help yourself to some coffee in the office while you look around.","ctx":"","note":"","ja":"もちろん急かすつもりはありません。ご覧になっている間、事務所のコーヒーをご自由にどうぞ。"},{"ep":57,"theme":"発言パターン 食べ物のすすめを断る","en":"How is everything so far? Would you like to order anything else tonight?","say":"How is everything so far? Would you like to order anything else tonight?","ctx":"","note":"","ja":"ここまでのところ、いかがですか。今夜はほかに何かご注文なさいますか。"},{"ep":58,"theme":"シナリオ ホテルへのチェックイン","en":"Hi, I have a reservation. I booked it online. My name is David Evans.","say":"Hi, I have a reservation. I booked it online. My name is David Evans.","ctx":"","note":"","ja":"こんにちは、予約している者です。オンラインで予約しました。デイビッド・エバンスといいます。"},{"ep":58,"theme":"シナリオ ホテルへのチェックイン","en":"Great, Mr. Evans. Your reservation is for one night, and breakfast is included. You're in Room 512 on the fifth floor. Check-out is by 11 a.m. tomorrow.","say":"Great, Mr. Evans. Your reservation is for one night, and breakfast is included. You're in Room 512 on the fifth floor. Check-out is by 11 a.m. tomorrow.","ctx":"Great, Mr. Evans. Your reservation is for one night, and breakfast is included. You're in Room 512 on the fifth floor. Check-out is by 11 a.m. tomorrow. The Wi-Fi network is \"Sunset Guest,\" and the password is written on your key card holder. Would you like a wake-up call tomorrow?","note":"","ja":"かしこまりました、エバンス様。ご予約は1泊、朝食付きでございます。お部屋は5階の512号室です。チェックアウトは明日の午前11時までとなります。"},{"ep":58,"theme":"シナリオ ホテルへのチェックイン","en":"The Wi-Fi network is \"Sunset Guest,\" and the password is written on your key card holder. Would you like a wake-up call tomorrow?","say":"The Wi-Fi network is \"Sunset Guest,\" and the password is written on your key card holder. Would you like a wake-up call tomorrow?","ctx":"Great, Mr. Evans. Your reservation is for one night, and breakfast is included. You're in Room 512 on the fifth floor. Check-out is by 11 a.m. tomorrow. The Wi-Fi network is \"Sunset Guest,\" and the password is written on your key card holder. Would you like a wake-up call tomorrow?","note":"","ja":"Wi-Fiのネットワークは「Sunset Guest」で、パスワードはキーカードのホルダーに記載しております。明日モーニングコールはご入用ですか。"},{"ep":58,"theme":"シナリオ ホテルへのチェックイン","en":"I'll be arriving late tonight. Will that be OK?","say":"I'll be arriving late tonight. Will that be OK?","ctx":"","note":"","ja":"今夜は到着が遅くなります。それでも大丈夫でしょうか。"},{"ep":59,"theme":"シナリオ ホテルからのチェックアウト","en":"It's 1208. I really loved this hotel—the staff were so kind. The room was clean, and the view was amazing.","say":"It's 1208. I really loved this hotel—the staff were so kind. The room was clean, and the view was amazing.","ctx":"","note":"","ja":"1208号室です。このホテル、本当に気に入りました。スタッフの方が親切で。部屋も清潔で、眺めも最高でした。"},{"ep":59,"theme":"シナリオ ホテルからのチェックアウト","en":"Thank you! That means a lot to us. Did you use the minibar or order room service?","say":"Thank you! That means a lot to us. Did you use the minibar or order room service?","ctx":"","note":"","ja":"ありがとうございます。そう言っていただけると励みになります。ミニバーのご利用やルームサービスのご注文はございましたか。"},{"ep":59,"theme":"シナリオ ホテルからのチェックアウト","en":"Could I get an itemized receipt, please?","say":"Could I get an itemized receipt, please?","ctx":"","note":"","ja":"明細付きの領収書をいただけますか。"},{"ep":59,"theme":"シナリオ ホテルからのチェックアウト","en":"Can I leave my bags here after checkout?","say":"Can I leave my bags here after checkout?","ctx":"","note":"","ja":"チェックアウトの後、荷物をここに預けてもいいですか。"},{"ep":61,"theme":"発言パターン 参加をうながす①ーカジュアルに","en":"Now you're talking. I've been craving their double cheeseburger all morning.","say":"Now you're talking. I've been craving their double cheeseburger all morning.","ctx":"","note":"","ja":"そう来なくちゃ。朝からずっとあそこのダブルチーズバーガーが食べたかったんだ。"},{"ep":61,"theme":"発言パターン 参加をうながす①ーカジュアルに","en":"Same. Plus, it's only a ten-minute walk from campus.","say":"Same. Plus, it's only a ten-minute walk from campus.","ctx":"","note":"","ja":"私も。しかもキャンパスから歩いて10分だし。"},{"ep":61,"theme":"発言パターン 参加をうながす①ーカジュアルに","en":"Not until two. We've got time. I swear I think clearer after fries.","say":"Not until two. We've got time. I swear I think clearer after fries.","ctx":"","note":"","ja":"2時までないよ。時間はある。フライドポテトを食べたほうが頭がさえる気がするんだ。"},{"ep":61,"theme":"発言パターン 参加をうながす①ーカジュアルに","en":"That's a bold academic strategy.","say":"That's a bold academic strategy.","ctx":"","note":"","ja":"ずいぶん大胆な学習戦略だね。"},{"ep":61,"theme":"発言パターン 参加をうながす①ーカジュアルに","en":"Yeah, I'm coming. But if you're late, don't tell your team it was my fault.","say":"Yeah, I'm coming. But if you're late, don't tell your team it was my fault.","ctx":"","note":"","ja":"うん、行くよ。でも君が遅れても、僕のせいだってチームに言うなよ。"},{"ep":61,"theme":"発言パターン 参加をうながす①ーカジュアルに","en":"Come along. [Come with us. / Join us.]","say":"Come along.","ctx":"","note":"","ja":"おいでよ。［一緒に来て。／ 加わってよ。］"},{"ep":62,"theme":"発言パターン 参加をうながす②ー丁寧に・しっかりと","en":"We'd like to celebrate our recent expansion and thank our key partners properly.","say":"We'd like to celebrate our recent expansion and thank our key partners properly.","ctx":"We'd like to celebrate our recent expansion and thank our key partners properly. It's going to be a formal evening at Trattoria di Melrose.","note":"","ja":"このたびの事業拡大を祝うとともに、主要なパートナーの皆さまにきちんとお礼を申し上げたいと考えております。"},{"ep":62,"theme":"発言パターン 参加をうながす②ー丁寧に・しっかりと","en":"I'd be honored. It's always a pleasure working with your team.","say":"I'd be honored. It's always a pleasure working with your team.","ctx":"","note":"","ja":"光栄です。御社のチームとお仕事をするのはいつも楽しいですから。"},{"ep":62,"theme":"発言パターン 参加をうながす②ー丁寧に・しっかりと","en":"We'd be delighted if you could join us.","say":"We'd be delighted if you could join us.","ctx":"","note":"","ja":"ご参加いただけましたら幸いです。"},{"ep":63,"theme":"発言パターン 食事制限を尋ねる","en":"Justin, before we place our orders, may I ask if you have any food allergies or dietary restrictions?","say":"Justin, before we place our orders, may I ask if you have any food allergies or dietary restrictions?","ctx":"Justin, before we place our orders, may I ask if you have any food allergies or dietary restrictions? I want to make sure everything is comfortable for you this evening.","note":"","ja":"ジャスティン、注文する前におうかがいしますが、食物アレルギーや食事制限はございますか。"},{"ep":63,"theme":"発言パターン 食事制限を尋ねる","en":"I want to make sure everything is comfortable for you this evening.","say":"I want to make sure everything is comfortable for you this evening.","ctx":"Justin, before we place our orders, may I ask if you have any food allergies or dietary restrictions? I want to make sure everything is comfortable for you this evening.","note":"","ja":"今夜、何もご不便がないようにしておきたいので。"},{"ep":63,"theme":"発言パターン 食事制限を尋ねる","en":"None at all, thank you. That's very thoughtful of you.","say":"None at all, thank you. That's very thoughtful of you.","ctx":"","note":"","ja":"まったくありません、ありがとうございます。お心遣い痛み入ります。"},{"ep":63,"theme":"発言パターン 食事制限を尋ねる","en":"Excellent. We've arranged a special menu, but substitutions are always possible.","say":"Excellent. We've arranged a special menu, but substitutions are always possible.","ctx":"","note":"","ja":"承知しました。特別なメニューをご用意していますが、差し替えはいつでも可能です。"},{"ep":63,"theme":"発言パターン 食事制限を尋ねる","en":"That sounds wonderful. You've planned everything beautifully.","say":"That sounds wonderful. You've planned everything beautifully.","ctx":"","note":"","ja":"すばらしいですね。すべて見事に手配してくださって。"},{"ep":64,"theme":"発言パターン 同行を申し出る","en":"Daichi, I'm dying to see the Hollywood Walk of Fame this weekend! I heard you can just walk around there and find different movie stars' names.","say":"Daichi, I'm dying to see the Hollywood Walk of Fame this weekend! I heard you can just walk around there and find different movie stars' names.","ctx":"","note":"","ja":"ダイチ、今週末ハリウッドの「ウォーク・オブ・フェーム」がどうしても見たいの！ そのへんを歩くだけで、いろんな映画スターの名前が見つかるんだってね。"},{"ep":66,"theme":"発言パターン 選択①ー選択権を与える(カジュアル)","en":"The Hollywood Walk of Fame is really crowded, isn't it? Are you getting tired at all?","say":"The Hollywood Walk of Fame is really crowded, isn't it? Are you getting tired at all?","ctx":"","note":"","ja":"ハリウッドのウォーク・オブ・フェーム、すごい人だね。少し疲れてない？"},{"ep":66,"theme":"発言パターン 選択①ー選択権を与える(カジュアル)","en":"No, I'm fine. I've had such a great time.","say":"No, I'm fine. I've had such a great time.","ctx":"","note":"","ja":"ううん、平気。すごく楽しんでる。"},{"ep":66,"theme":"発言パターン 選択①ー選択権を与える(カジュアル)","en":"So, what would you prefer for lunch—pizza or a burger? Both places are close by.","say":"So, what would you prefer for lunch—pizza or a burger? Both places are close by.","ctx":"","note":"","ja":"それで、お昼はどっちがいい？ ピザかバーガーか。どっちも近くだよ。"},{"ep":66,"theme":"発言パターン 選択①ー選択権を与える(カジュアル)","en":"Sounds good. It's just down this street.","say":"Sounds good. It's just down this street.","ctx":"","note":"","ja":"いいね。この道をまっすぐ行ったところだよ。"},{"ep":67,"theme":"発言パターン 選択②ー選択権を与える(丁寧)","en":"Of course, Mr. Cole. What's on your mind?","say":"Of course, Mr. Cole. What's on your mind?","ctx":"","note":"","ja":"もちろんです、コールさん。どのようなご用件でしょうか。"},{"ep":67,"theme":"発言パターン 選択②ー選択権を与える(丁寧)","en":"I was wondering if we might add a speaking function to the plush. Maybe it could say a few simple phrases. What do you think?","say":"I was wondering if we might add a speaking function to the plush. Maybe it could say a few simple phrases. What do you think?","ctx":"","note":"","ja":"ぬいぐるみに話す機能を足せないかと思いましてね。簡単なフレーズをいくつか言えるくらいで。どう思われますか。"},{"ep":67,"theme":"発言パターン 選択②ー選択権を与える(丁寧)","en":"That's certainly possible. We can accommodate that request. However, adding a voice feature would increase the production cost.","say":"That's certainly possible. We can accommodate that request. However, adding a voice feature would increase the production cost.","ctx":"","note":"","ja":"それは十分に可能です。ご要望にお応えできます。ただ、音声機能を加えると製造コストが上がります。"},{"ep":67,"theme":"発言パターン 選択②ー選択権を与える(丁寧)","en":"We're prepared to move forward either way. Whether it's worth the cost, that's for you to decide.","say":"We're prepared to move forward either way. Whether it's worth the cost, that's for you to decide.","ctx":"","note":"","ja":"どちらでも進められるよう準備しております。費用に見合うかどうかは、御社でご判断ください。"},{"ep":67,"theme":"発言パターン 選択②ー選択権を与える(丁寧)","en":"Please decide what works best for you.","say":"Please decide what works best for you.","ctx":"","note":"","ja":"いちばんよいと思われる形をお選びください。"},{"ep":68,"theme":"発言パターン 選択③ーよりよい選択肢を示す","en":"Good afternoon, Mr. Yamamoto. Still driving that Hiroto 2000GT?","say":"Good afternoon, Mr. Yamamoto. Still driving that Hiroto 2000GT?","ctx":"","note":"","ja":"こんにちは、山本さん。まだあのヒロト2000GTに乗っていらっしゃるんですか。"},{"ep":68,"theme":"発言パターン 選択③ーよりよい選択肢を示す","en":"Hi. Yes, but it's starting to feel a bit too loud for everyday errands. It draws attention, and parking it for grocery runs is a hassle.","say":"Hi. Yes, but it's starting to feel a bit too loud for everyday errands. It draws attention, and parking it for grocery runs is a hassle.","ctx":"","note":"","ja":"やあ。ええ、でも普段の用事にはちょっと音が大きすぎてね。目立つし、買い物のたびに駐車するのもひと苦労だよ。"},{"ep":68,"theme":"発言パターン 選択③ーよりよい選択肢を示す","en":"That makes sense. Are you looking for something compact and easy to handle?","say":"That makes sense. Are you looking for something compact and easy to handle?","ctx":"","note":"","ja":"なるほど。小回りが利いて扱いやすいものをお探しですか。"},{"ep":68,"theme":"発言パターン 選択③ーよりよい選択肢を示す","en":"It's up to you, though I'd lean toward a fuel-efficient compact. It'll be quieter, easier to park, and much more practical for shopping trips.","say":"It's up to you, though I'd lean toward a fuel-efficient compact. It'll be quieter, easier to park, and much more practical for shopping trips.","ctx":"","note":"","ja":"お決めになるのは山本さんですが、私なら燃費のいいコンパクトを選びます。静かですし、駐車も楽で、買い物にはずっと実用的です。"},{"ep":68,"theme":"発言パターン 選択③ーよりよい選択肢を示す","en":"It's totally your call, but I'd probably go with the smaller one.","say":"It's totally your call, but I'd probably go with the smaller one.","ctx":"","note":"","ja":"決めるのは完全にあなた次第ですが、私ならたぶん小さいほうにしますね。"},{"ep":68,"theme":"発言パターン 選択③ーよりよい選択肢を示す","en":"It might be better to keep it simple for now.","say":"It might be better to keep it simple for now.","ctx":"","note":"","ja":"今のところは、簡単にしておくほうがいいかもしれません。"},{"ep":69,"theme":"発言パターン 心配する","en":"Hey, Sarah. You doing all right? You look kind of worn out today.","say":"Hey, Sarah. You doing all right? You look kind of worn out today.","ctx":"","note":"","ja":"やあ、サラ。大丈夫？ 今日はなんだか疲れて見えるけど。"},{"ep":69,"theme":"発言パターン 心配する","en":"A little? You can barely keep your eyes open. What's going on?","say":"A little? You can barely keep your eyes open. What's going on?","ctx":"","note":"","ja":"ちょっとどころ？ 目を開けているのもやっとじゃないか。何かあったの？"},{"ep":69,"theme":"発言パターン 心配する","en":"I've been juggling my part-time job and classes. Midterms are coming up, and I've been cutting back on sleep to finish everything.","say":"I've been juggling my part-time job and classes. Midterms are coming up, and I've been cutting back on sleep to finish everything.","ctx":"","note":"","ja":"バイトと授業をかけ持ちしていて。中間試験も近いし、全部終わらせるために睡眠時間を削っているの。"},{"ep":69,"theme":"発言パターン 心配する","en":"I know... I just don't want to fall behind at work or school.","say":"I know... I just don't want to fall behind at work or school.","ctx":"","note":"","ja":"わかってる……。ただ、仕事でも学校でも遅れを取りたくなくて。"},{"ep":71,"theme":"発言パターン 相手を支えるひと言","en":"Don't push yourself too hard, OK? I know you want to do well, but your health comes first.","say":"Don't push yourself too hard, OK? I know you want to do well, but your health comes first.","ctx":"","note":"","ja":"無理はしすぎないで、いい？ ちゃんとやりたいのはわかるけど、体が第一だよ。"},{"ep":71,"theme":"発言パターン 相手を支えるひと言","en":"I just feel like I'm barely keeping up. What if I mess up my midterms?","say":"I just feel like I'm barely keeping up. What if I mess up my midterms?","ctx":"","note":"","ja":"ついていくのがやっと、という感じなの。中間試験で失敗したらどうしよう。"},{"ep":71,"theme":"発言パターン 相手を支えるひと言","en":"Hey, you're one of the smartest people in our class. You explain things even the professor makes seem complicated.","say":"Hey, you're one of the smartest people in our class. You explain things even the professor makes seem complicated.","ctx":"Hey, you're one of the smartest people in our class. You explain things even the professor makes seem complicated. You've already done the work. Trust yourself.","note":"","ja":"ねえ、君はクラスでいちばん頭のいい部類だよ。教授が難しく見せることまで、君は説明できるんだから。"},{"ep":71,"theme":"発言パターン 相手を支えるひと言","en":"Absolutely. You don't need to worry about those exams. Just get some sleep. Your brain works best when you're rested.","say":"Absolutely. You don't need to worry about those exams. Just get some sleep. Your brain works best when you're rested.","ctx":"","note":"","ja":"もちろん。あの試験の心配はいらないよ。とにかく寝て。休んでいるときがいちばん頭は働くんだから。"},{"ep":72,"theme":"発言パターン 提案①ーカジュアルな提案","en":"Yeah... Japanese Culture Club got canceled, so now I have nothing to do. I was really looking forward to it.","say":"Yeah... Japanese Culture Club got canceled, so now I have nothing to do. I was really looking forward to it.","ctx":"","note":"","ja":"うん……日本文化クラブが中止になって、やることがなくなっちゃった。すごく楽しみにしてたのに。"},{"ep":72,"theme":"発言パターン 提案①ーカジュアルな提案","en":"Well, since you're suddenly free, how about grabbing a burger at Sunset Shack?","say":"Well, since you're suddenly free, how about grabbing a burger at Sunset Shack?","ctx":"","note":"","ja":"じゃあ、急に空いたことだし、サンセット・シャックでバーガーでも食べない？"},{"ep":73,"theme":"発言パターン 提案②ーsuggest, shouldによる提案","en":"Claire, you've barely had a break all day. Are you sure you're OK?","say":"Claire, you've barely had a break all day. Are you sure you're OK?","ctx":"","note":"","ja":"クレア、今日は一日ほとんど休んでないじゃないか。本当に大丈夫？"},{"ep":73,"theme":"発言パターン 提案②ーsuggest, shouldによる提案","en":"I'm just tired. The baby needs me constantly, and I'm trying to keep everything organized before we go back to work.","say":"I'm just tired. The baby needs me constantly, and I'm trying to keep everything organized before we go back to work.","ctx":"","note":"","ja":"ただ疲れてるだけよ。赤ちゃんがずっと私を必要としているし、仕事に戻る前に何もかも整えておこうとしていて。"},{"ep":73,"theme":"発言パターン 提案②ーsuggest, shouldによる提案","en":"That's exactly why I'm worried. We start work again soon. I suggest hiring a housekeeper, at least temporarily.","say":"That's exactly why I'm worried. We start work again soon. I suggest hiring a housekeeper, at least temporarily.","ctx":"","note":"","ja":"まさにそこが心配なんだ。もうすぐ二人とも仕事に戻る。せめて一時的にでも、家政婦さんを雇うことを提案するよ。"},{"ep":73,"theme":"発言パターン 提案②ーsuggest, shouldによる提案","en":"I don't know... It feels like admitting I can't handle it.","say":"I don't know... It feels like admitting I can't handle it.","ctx":"","note":"","ja":"どうかしら……。自分では手に負えないと認めるみたいで。"},{"ep":74,"theme":"発言パターン 提案③ーフォーマルな提案・強い提案","en":"Yes. I would like to propose a support program for employees who return to work after having a baby.","say":"Yes. I would like to propose a support program for employees who return to work after having a baby.","ctx":"","note":"","ja":"はい。出産後に職場復帰する社員向けの支援プログラムを提案したいと考えています。"},{"ep":74,"theme":"発言パターン 提案③ーフォーマルな提案・強い提案","en":"Flexible hours, temporary remote work, and help finding childcare. Going back to work can be very stressful.","say":"Flexible hours, temporary remote work, and help finding childcare. Going back to work can be very stressful.","ctx":"","note":"","ja":"柔軟な勤務時間、一時的な在宅勤務、そして保育先を見つける手助けです。職場復帰は非常に大きな負担になり得ます。"},{"ep":74,"theme":"発言パターン 提案③ーフォーマルな提案・強い提案","en":"If we support our employees, they will feel more secure and stay with the company longer.","say":"If we support our employees, they will feel more secure and stay with the company longer.","ctx":"","note":"","ja":"社員を支えれば、安心感が生まれ、より長く会社に残ってくれるはずです。"},{"ep":74,"theme":"発言パターン 提案③ーフォーマルな提案・強い提案","en":"Thank you, Yukiko. We will review your proposal.","say":"Thank you, Yukiko. We will review your proposal.","ctx":"","note":"","ja":"ありがとう、ユキコ。提案を検討します。"},{"ep":76,"theme":"発言パターン 提案④ー控えめな提案","en":"True... but what if we baked him a cake ourselves?","say":"True... but what if we baked him a cake ourselves?","ctx":"","note":"","ja":"確かに……でも、自分たちでケーキを焼いてあげるのはどう？"},{"ep":76,"theme":"発言パターン 提案④ー控えめな提案","en":"That's actually sweet. OK. But if it comes out burnt, you're explaining it.","say":"That's actually sweet. OK. But if it comes out burnt, you're explaining it.","ctx":"","note":"","ja":"それ、実はいい考えだね。よし。ただ、焦げたら説明するのは君だよ。"},{"ep":77,"theme":"発言パターン 推薦する","en":"Reiko's flying back to Japan next week. I want to take her somewhere special for her last dinner here.","say":"Reiko's flying back to Japan next week. I want to take her somewhere special for her last dinner here.","ctx":"","note":"","ja":"レイコが来週日本に帰るんだ。こっちでの最後の晩ごはんに、どこか特別なところへ連れて行きたくて。"},{"ep":77,"theme":"発言パターン 推薦する","en":"Oh... I didn't know it was that soon. If it's her last meal, I recommend Sushi Yamaga. It's authentic and memorable.","say":"Oh... I didn't know it was that soon. If it's her last meal, I recommend Sushi Yamaga. It's authentic and memorable.","ctx":"","note":"","ja":"え……そんなにすぐだとは知らなかった。最後の食事なら、寿司ヤマガをすすめるよ。本格的で、記憶に残る店だ。"},{"ep":77,"theme":"発言パターン 推薦する","en":"She'll love it. It'll feel like home.","say":"She'll love it. It'll feel like home.","ctx":"","note":"","ja":"彼女、気に入るよ。故郷にいるような気持ちになるはずだ。"},{"ep":77,"theme":"発言パターン 推薦する","en":"You have to [must] try the sushi there. It's amazing.","say":"You have to try the sushi there. It's amazing.","ctx":"","note":"","ja":"あそこの寿司は［絶対に］食べたほうがいい。すごくおいしいから。"},{"ep":77,"theme":"発言パターン 推薦する","en":"You might want to try the chef's special today.","say":"You might want to try the chef's special today.","ctx":"","note":"","ja":"今日はシェフのおすすめを試してみるといいかもしれません。"},{"ep":78,"theme":"シナリオ 衣類の購入","en":"Hi there! Let me know if you need any help.","say":"Hi there! Let me know if you need any help.","ctx":"","note":"","ja":"こんにちは。何かあればお声がけください。"},{"ep":78,"theme":"シナリオ 衣類の購入","en":"Thanks. I'm looking at this jacket. Do you have this in a small?","say":"Thanks. I'm looking at this jacket. Do you have this in a small?","ctx":"","note":"","ja":"ありがとう。このジャケットを見ているんですが、Sサイズはありますか。"},{"ep":78,"theme":"シナリオ 衣類の購入","en":"It fits well, but do you have it in another color?","say":"It fits well, but do you have it in another color?","ctx":"","note":"","ja":"サイズは合っているんですが、別の色はありますか。"},{"ep":78,"theme":"シナリオ 衣類の購入","en":"We have it in navy and in beige.","say":"We have it in navy and in beige.","ctx":"","note":"","ja":"ネイビーとベージュがございます。"},{"ep":79,"theme":"シナリオ 返品","en":"Sure. Was there an issue with it?","say":"Sure. Was there an issue with it?","ctx":"","note":"","ja":"かしこまりました。何か不具合がございましたか。"},{"ep":82,"theme":"便利フレーズ 待ちきれない","en":"Hello, Mr. Cole. I'm pleased to let you know that the latest version of Codey the Bear is now ready. The plush turned out great, and we've added the voice feature as discussed.","say":"Hello, Mr. Cole. I'm pleased to let you know that the latest version of Codey the Bear is now ready. The plush turned out great, and we've added the voice feature as discussed.","ctx":"","note":"","ja":"コールさん、こんにちは。コーディ・ザ・ベアの最新版が完成しましたのでお知らせします。ぬいぐるみの仕上がりはとてもよく、お話ししていた音声機能も追加しました。"},{"ep":82,"theme":"便利フレーズ 待ちきれない","en":"I'd prefer to see it in person. I can't wait to check it out myself.","say":"I'd prefer to see it in person. I can't wait to check it out myself.","ctx":"","note":"","ja":"できれば直接見たいですね。自分の目で確かめるのが待ちきれません。"},{"ep":82,"theme":"便利フレーズ 待ちきれない","en":"Perfect. We'll have everything ready for your visit.","say":"Perfect. We'll have everything ready for your visit.","ctx":"","note":"","ja":"承知しました。ご来訪に合わせてすべて用意しておきます。"},{"ep":83,"theme":"便利フレーズ 信じられない","en":"That sounds impressive. Do you have a photo?","say":"That sounds impressive. Do you have a photo?","ctx":"","note":"","ja":"それはすごいですね。写真はありますか。"},{"ep":83,"theme":"便利フレーズ 信じられない","en":"I can't believe how bad it was.","say":"I can't believe how bad it was.","ctx":"","note":"","ja":"あんなにひどかったなんて信じられない。"},{"ep":83,"theme":"便利フレーズ 信じられない","en":"(It's) so good it's unreal.","say":"(It's) so good it's unreal.","ctx":"","note":"","ja":"うそみたいにおいしい。"},{"ep":84,"theme":"便利フレーズ まさか","en":"I know. But sometimes things don't go as planned. What matters is how you bounce back.","say":"I know. But sometimes things don't go as planned. What matters is how you bounce back.","ctx":"","note":"","ja":"わかるよ。でも、計画どおりにいかないこともある。大事なのは、そこからどう立て直すかだ。"},{"ep":84,"theme":"便利フレーズ まさか","en":"Yeah... I guess. Still, that really sucks.","say":"Yeah... I guess. Still, that really sucks.","ctx":"","note":"","ja":"うん……そうだね。それでも、やっぱりつらいよ。"},{"ep":84,"theme":"便利フレーズ まさか","en":"Hey, one delay won't change who you are as a player. You'll be ready next week.","say":"Hey, one delay won't change who you are as a player. You'll be ready next week.","ctx":"","note":"","ja":"なあ、一度の出遅れで選手としての君が変わるわけじゃない。来週には準備が整っているさ。"},{"ep":84,"theme":"便利フレーズ まさか","en":"They canceled the meeting? You've got to be kidding me.","say":"They canceled the meeting? You've got to be kidding me.","ctx":"","note":"","ja":"会議が中止になった？ 冗談だろう。"},{"ep":86,"theme":"便利フレーズ 気にしない","en":"Mr. Anderson, I just met with Mr. Cole. He loved the latest Codey the Bear prototype.","say":"Mr. Anderson, I just met with Mr. Cole. He loved the latest Codey the Bear prototype.","ctx":"","note":"","ja":"アンダーソンさん、たった今コールさんとお会いしました。コーディ・ザ・ベアの最新の試作品を大変気に入ってくださいました。"},{"ep":86,"theme":"便利フレーズ 気にしない","en":"Yes, he said it adds real value, and he wants to move forward soon.","say":"Yes, he said it adds real value, and he wants to move forward soon.","ctx":"","note":"","ja":"はい、実際に価値が加わっていると言っていました。早く進めたいそうです。"},{"ep":86,"theme":"便利フレーズ 気にしない","en":"You've been at this since yesterday. Maybe call it a day? I can take it from here.","say":"You've been at this since yesterday. Maybe call it a day? I can take it from here.","ctx":"","note":"","ja":"昨日からずっとこれをやってるじゃないですか。今日はもう切り上げたらどうです？ ここからは私が引き受けます。"},{"ep":86,"theme":"便利フレーズ 気にしない","en":"I appreciate that, but I don't care about the hours. I don't stop halfway. What must be done is what must be done.","say":"I appreciate that, but I don't care about the hours. I don't stop halfway. What must be done is what must be done.","ctx":"","note":"","ja":"ありがたいが、時間のことは気にしていないんだ。途中でやめるのは性に合わない。やるべきことは、やるべきことだからね。"},{"ep":87,"theme":"便利フレーズ これで決まりだ","en":"Daichi, I passed by your shop the other day and saw a stunning red vintage sports car out front.","say":"Daichi, I passed by your shop the other day and saw a stunning red vintage sports car out front.","ctx":"","note":"","ja":"ダイチ、この前お店の前を通ったら、目を奪われるような赤いビンテージのスポーツカーがあったよ。"},{"ep":87,"theme":"便利フレーズ これで決まりだ","en":"Oh, you mean the Hiroto 2000GT? It definitely turns heads.","say":"Oh, you mean the Hiroto 2000GT? It definitely turns heads.","ctx":"","note":"","ja":"ああ、ヒロト2000GTのことだね。あれは確かに人目を引く。"},{"ep":87,"theme":"便利フレーズ これで決まりだ","en":"I get the appeal, but it actually belongs to one of our clients. He just stopped by.","say":"I get the appeal, but it actually belongs to one of our clients. He just stopped by.","ctx":"","note":"","ja":"魅力はわかるよ。でも実はお客さんのものなんだ。ちょっと立ち寄られただけでね。"},{"ep":87,"theme":"便利フレーズ これで決まりだ","en":"That settles it. We're going with the steakhouse.","say":"That settles it. We're going with the steakhouse.","ctx":"","note":"","ja":"それで決まりだ。ステーキハウスにしよう。"},{"ep":87,"theme":"便利フレーズ これで決まりだ","en":"How about the 8:15 flight? — That works.","say":"How about the 8:15 flight? — That works.","ctx":"","note":"","ja":"8時15分の便はどうですか。 — それでいきましょう。"},{"ep":87,"theme":"便利フレーズ これで決まりだ","en":"It's decided. We're going to Mt. Fuji.","say":"It's decided. We're going to Mt. Fuji.","ctx":"","note":"","ja":"決まりだ。富士山に行こう。"},{"ep":88,"theme":"便利フレーズ 疲れた","en":"Yeah, it's been nonstop. I wish something interesting would come up for once.","say":"Yeah, it's been nonstop. I wish something interesting would come up for once.","ctx":"","note":"","ja":"ああ、ずっと休みなしだよ。たまには何か面白いことでも起きてほしいね。"},{"ep":88,"theme":"便利フレーズ 疲れた","en":"Speaking of interesting, that woman came by again. What did she want?","say":"Speaking of interesting, that woman came by again. What did she want?","ctx":"","note":"","ja":"面白いといえば、あの女性がまた来たよ。何の用だったんだい？"},{"ep":88,"theme":"便利フレーズ 疲れた","en":"Mmm...he did say he might want to get another car. I don't know if he's serious, though.","say":"Mmm...he did say he might want to get another car. I don't know if he's serious, though.","ctx":"Mmm...he did say he might want to get another car. I don't know if he's serious, though. Anyway, let's grab dinner. Ramen Nikko-an?","note":"","ja":"うーん……もう一台買いたいかもしれない、とは言っていたな。本気かどうかはわからないけど。"},{"ep":88,"theme":"便利フレーズ 疲れた","en":"Anyway, let's grab dinner. Ramen Nikko-an?","say":"Anyway, let's grab dinner. Ramen Nikko-an?","ctx":"Mmm...he did say he might want to get another car. I don't know if he's serious, though. Anyway, let's grab dinner. Ramen Nikko-an?","note":"","ja":"とにかく、夕飯を食べに行こう。ラーメン日光庵はどう？"},{"ep":89,"theme":"便利フレーズ うんざり","en":"Ugh... I'm so fed up with this math homework. None of it makes sense anymore.","say":"Ugh... I'm so fed up with this math homework. None of it makes sense anymore.","ctx":"","note":"","ja":"ああもう……この数学の宿題にはうんざりだ。もう何ひとつ意味がわからない。"},{"ep":89,"theme":"便利フレーズ うんざり","en":"Hey, take it easy. You've been working on it for a while. Maybe you just need a short break.","say":"Hey, take it easy. You've been working on it for a while. Maybe you just need a short break.","ctx":"","note":"","ja":"まあ落ち着いて。ずいぶん長いことやってるじゃない。少し休憩したほうがいいんじゃない。"},{"ep":89,"theme":"便利フレーズ うんざり","en":"Still, you did it. Let's go over this one together. We'll get through it.","say":"Still, you did it. Let's go over this one together. We'll get through it.","ctx":"","note":"","ja":"それでも、やり遂げたじゃない。この一問を一緒に見てみよう。きっと乗り越えられる。"},{"ep":91,"theme":"便利フレーズ 何言ってるの","en":"That sounds rough. You've been pushing yourself a lot lately.","say":"That sounds rough. You've been pushing yourself a lot lately.","ctx":"","note":"","ja":"それはきついね。最近ずっと無理をしているじゃないか。"},{"ep":91,"theme":"便利フレーズ 何言ってるの","en":"I know, but I feel like I'm falling behind.","say":"I know, but I feel like I'm falling behind.","ctx":"","note":"","ja":"わかってる。でも、どんどん遅れをとっている気がするの。"},{"ep":92,"theme":"便利フレーズ お気の毒に","en":"Don't remind me. His short game is unbelievably sharp.","say":"Don't remind me. His short game is unbelievably sharp.","ctx":"","note":"","ja":"言わないでくれよ。彼のショートゲームは信じられないくらいキレがあるんだ。"},{"ep":92,"theme":"便利フレーズ お気の毒に","en":"Well, at least you're getting good practice.","say":"Well, at least you're getting good practice.","ctx":"","note":"","ja":"でも、少なくともいい練習にはなっているじゃない。"},{"ep":92,"theme":"便利フレーズ お気の毒に","en":"I suppose. Oh, by the way, he has a friend visiting from Tokyo—Mr. Emori. He's into haiku.","say":"I suppose. Oh, by the way, he has a friend visiting from Tokyo—Mr. Emori. He's into haiku.","ctx":"","note":"","ja":"まあね。ああ、そういえば、東京から来ている友人がいるんだ——エモリさん。俳句が好きらしい。"},{"ep":93,"theme":"便利フレーズ 頑張って","en":"Thank you, Jennifer. It's a pleasure to be here. Haiku is a short form of poetry that captures a moment, often in nature.","say":"Thank you, Jennifer. It's a pleasure to be here. Haiku is a short form of poetry that captures a moment, often in nature.","ctx":"","note":"","ja":"ありがとうございます、ジェニファーさん。ここに来られてうれしいです。俳句は、多くは自然の中の一瞬を切り取る、短い詩の形式です。"},{"ep":94,"theme":"便利フレーズ よくやりました","en":"Thank you for joining, Justin. We've analyzed your website, and there are some issues with usability.","say":"Thank you for joining, Justin. We've analyzed your website, and there are some issues with usability.","ctx":"","note":"","ja":"ご参加ありがとうございます、ジャスティンさん。御社のウェブサイトを分析したところ、使いやすさにいくつか問題がありました。"},{"ep":94,"theme":"便利フレーズ よくやりました","en":"Customers are having trouble finding products quickly. The navigation and search could be more intuitive.","say":"Customers are having trouble finding products quickly. The navigation and search could be more intuitive.","ctx":"","note":"","ja":"お客様が商品をすぐに見つけられていません。ナビゲーションと検索を、もっと直感的にできる余地があります。"},{"ep":94,"theme":"便利フレーズ よくやりました","en":"That explains the drop in conversions.","say":"That explains the drop in conversions.","ctx":"","note":"","ja":"それでコンバージョンが下がっているわけですね。"},{"ep":96,"theme":"","en":"Good. I'd like you to review the current flow, and identify where users might get confused or drop off.","say":"Good. I'd like you to review the current flow, and identify where users might get confused or drop off.","ctx":"","note":"","ja":"よろしい。現在の導線を見直して、ユーザーがどこで迷ったり離脱したりしているかを特定してほしい。"},{"ep":96,"theme":"","en":"Got it. Should I also look into improving the search accuracy?","say":"Got it. Should I also look into improving the search accuracy?","ctx":"","note":"","ja":"承知しました。検索の精度を上げることについても調べましょうか。"},{"ep":96,"theme":"","en":"Yes please. Let's aim for a smoother more user-friendly experience overall.","say":"Yes please. Let's aim for a smoother more user-friendly experience overall.","ctx":"","note":"","ja":"ぜひ頼む。全体として、より滑らかで使いやすい体験を目指そう。"},{"ep":96,"theme":"","en":"Understood. I'll get right on it.","say":"Understood. I'll get right on it.","ctx":"","note":"","ja":"了解です。すぐに取りかかります。"},{"ep":97,"theme":"","en":"Hey, Theo. Mom is asking us to mow the lawn this afternoon.","say":"Hey, Theo. Mom is asking us to mow the lawn this afternoon.","ctx":"","note":"","ja":"ねえ、テオ。母さんが今日の午後、芝刈りをしてほしいって。"},{"ep":97,"theme":"","en":"Seriously? I'm kind of busy today. I've got a lot on my plate and I'm knee-deep in homework.","say":"Seriously? I'm kind of busy today. I've got a lot on my plate and I'm knee-deep in homework.","ctx":"","note":"","ja":"本気で言ってる？ 今日はちょっと忙しいんだ。やることが山積みで、宿題にどっぷり浸かってる。"},{"ep":97,"theme":"","en":"Oh really? Well, she said she might give us some allowance.","say":"Oh really? Well, she said she might give us some allowance.","ctx":"Oh really? Well, she said she might give us some allowance. You could finally get that samurai figure from Little Ken's workshop.","note":"","ja":"へえ、そう？ でも、おこづかいをくれるかもしれないって言ってたよ。"},{"ep":97,"theme":"","en":"You could finally get that samurai figure from Little Ken's workshop.","say":"You could finally get that samurai figure from Little Ken's workshop.","ctx":"Oh really? Well, she said she might give us some allowance. You could finally get that samurai figure from Little Ken's workshop.","note":"","ja":"リトル・ケンの工房の、あのサムライのフィギュアがついに買えるかもね。"},{"ep":97,"theme":"","en":"Wait, seriously? How much are we talking about?","say":"Wait, seriously? How much are we talking about?","ctx":"","note":"","ja":"待って、本当に？ いくらくらいの話？"},{"ep":97,"theme":"","en":"In that case...yeah I'm in. Let's do it together.","say":"In that case...yeah I'm in. Let's do it together.","ctx":"","note":"","ja":"それなら……うん、やるよ。一緒にやろう。"},{"ep":99,"theme":"","en":"I'm really sorry, but something came up, and I won't be able to make it.","say":"I'm really sorry, but something came up, and I won't be able to make it.","ctx":"","note":"","ja":"本当に申し訳ないのですが、急用ができてしまい、うかがえなくなりました。"},{"ep":99,"theme":"","en":"No problem. Just give us a call when you're ready.","say":"No problem. Just give us a call when you're ready.","ctx":"","note":"","ja":"問題ございません。ご都合がつきましたら、お電話ください。"}];
+</script>
+
+<script>
+/* ============================================================
+   読み上げ
+   ============================================================ */
+var TTS = (function () {
+  var synth = window.speechSynthesis;
+  var vstat = document.getElementById('vstat');
+  var vhelp = document.getElementById('vhelp');
+
+  if (!synth) {
+    vstat.textContent = 'このブラウザは読み上げに対応していません。';
+    return { speak: function () {}, stop: function () {}, setSpeed: function () {}, ok: false };
+  }
+
+  var RATES = { slow: 0.6, normal: 0.92, fast: 1.15 };
+  var speed = 'normal';
+  var voice = null, active = null;
+
+  function pick() {
+    var vs = synth.getVoices();
+    if (!vs.length) return;
+    var en = vs.filter(function (v) { return /^en(-|_)/i.test(v.lang); });
+    if (!en.length) {
+      vstat.textContent = '英語の音声が見つかりません。';
+      vhelp.innerHTML = '<strong>この端末に英語の読み上げ音声が入っていません。</strong> ' +
+        'Windows なら 設定 → 時刻と言語 → 音声認識 で英語の音声を追加できます。判定のほうは音声が無くても動きます。';
+      vhelp.hidden = false;
+      return;
+    }
+    /* 自然な声を優先。名前で選べない端末もあるので最後は先頭を使う */
+    var pref = ['Google US English', 'Microsoft Aria', 'Microsoft Jenny', 'Samantha', 'Microsoft Zira'];
+    for (var i = 0; i < pref.length && !voice; i++) {
+      for (var j = 0; j < en.length; j++) {
+        if (en[j].name.indexOf(pref[i]) >= 0) { voice = en[j]; break; }
+      }
+    }
+    if (!voice) {
+      for (var k = 0; k < en.length; k++) { if (/^en-US/i.test(en[k].lang)) { voice = en[k]; break; } }
+    }
+    if (!voice) voice = en[0];
+    vstat.textContent = '読み上げ: ' + voice.name;
+  }
+
+  pick();
+  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = pick;
+
+  /* 読み上げは途中から鳴らせない。シークの代わりに、語の途中から
+     読み直すことで「少し戻す」「ここから聞く」を実現する。 */
+
+  var cur = null;
+
+  function stop() {
+    var st = cur;
+    cur = null;
+    if (st) {
+      if (st.timer) clearInterval(st.timer);
+      if (st.btn) st.btn.classList.remove('on');
+      if (st.hooks.onStop) st.hooks.onStop();
+    }
+    if (active) { active.classList.remove('on'); active = null; }
+    synth.cancel();
+  }
+
+  /**
+   * words を from 番目から読む。
+   * hooks.onWord(index, accurate) — accurate=false は時間からの見積もり
+   */
+  function play(words, from, hooks, btn) {
+    stop();
+    if (!words.length) return;
+    from = Math.max(0, Math.min(from | 0, words.length - 1));
+    var chunk = words.slice(from);
+    var text = chunk.join(' ');
+
+    /* 読み上げ中の位置(charIndex)を語の番号に戻すための表 */
+    var offs = [], p = 0;
+    for (var i = 0; i < chunk.length; i++) { offs.push(p); p += chunk[i].length + 1; }
+
+    var u = new SpeechSynthesisUtterance(text);
+    if (voice) { u.voice = voice; u.lang = voice.lang; } else { u.lang = 'en-US'; }
+    u.rate = RATES[speed];
+
+    var st = { hooks: hooks || {}, btn: btn || null, idx: from, boundary: false, timer: null };
+    cur = st;
+
+    u.onboundary = function (e) {
+      if (cur !== st || typeof e.charIndex !== 'number') return;
+      st.boundary = true;
+      var k = 0;
+      for (var j = 0; j < offs.length; j++) {
+        if (offs[j] <= e.charIndex) k = j; else break;
+      }
+      st.idx = from + k;
+      if (st.hooks.onWord) st.hooks.onWord(st.idx, true);
+    };
+
+    u.onend = function () {
+      if (cur !== st) return;
+      cur = null;
+      if (st.timer) clearInterval(st.timer);
+      st.idx = words.length - 1;
+      if (st.btn) st.btn.classList.remove('on');
+      if (st.hooks.onEnd) st.hooks.onEnd(st.idx);
+    };
+    u.onerror = u.onend;
+
+    if (st.btn) st.btn.classList.add('on');
+
+    /* boundary を出さない音声がある（Chromeのネットワーク音声など）。
+       その場合は経過時間から位置を見積もる。目印は出さず、
+       「少し戻る」の起点にだけ使う。外れた目印を出すほうが害が大きい。 */
+    var t0 = Date.now();
+    st.timer = setInterval(function () {
+      if (cur !== st || st.boundary) return;
+      var wps = 2.6 * RATES[speed];
+      var k = Math.floor((Date.now() - t0) / 1000 * wps);
+      st.idx = Math.min(words.length - 1, from + k);
+      if (st.hooks.onWord) st.hooks.onWord(st.idx, false);
+    }, 120);
+
+    synth.speak(u);
+  }
+
+  /* 文字列をそのまま読む（お手本ボタン用） */
+  function speak(text, btn) { play(String(text).split(/\s+/), 0, {}, btn); }
+
+  return {
+    ok: true,
+    play: play,
+    speak: speak,
+    stop: stop,
+    speaking: function () { return !!cur; },
+    setSpeed: function (s) { speed = s; }
+  };
+})();
+
+/* ============================================================
+   記録（この端末のブラウザに保存）
+   ============================================================ */
+var Store = (function () {
+  var KEY = 'english-powerup-v1';
+  var data = {};
+  try {
+    var raw = window.localStorage.getItem(KEY);
+    if (raw) data = JSON.parse(raw) || {};
+  } catch (e) { data = {}; }
+
+  function save() {
+    try { window.localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+  }
+  return {
+    get: function (id) { return data[id] || null; },
+    set: function (id, result) { data[id] = { r: result, t: Date.now() }; save(); },
+    all: function () { return data; }
+  };
+})();
+</script>
+
+<script>
+/* ============================================================
+   発音チェック（英語）
+
+   端末の音声認識に自分の発音を聞かせ、何と聞き取られたかを返す。
+   長い文は途中で切れないよう continuous で拾い、確定ぶんを足していく。
+
+   スマホでは、マイクは最初に掴んだひとつが握ったままになる。
+   getUserMedia で録音していると認識側には無音しか届かないため、
+   指で押す端末では録音を諦めて認識を通す。聞き比べは判定のあとに録る。
+   ============================================================ */
+(function () {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var help = document.getElementById('rhelp');
+  var tallyEl = document.getElementById('tally');
+  var listEl = document.getElementById('list');
+  var emptyEl = document.getElementById('empty');
+  var jumpEl = document.getElementById('jump');
+
+  function note(html) { help.innerHTML = html; help.hidden = false; }
+
+  var SERVE_HINT =
+    'このフォルダで <code>npx serve -l 8000</code> を実行し、' +
+    '<code>http://localhost:8000/</code> から開いてください。読み上げのほうは今のままでも使えます。';
+
+  if (location.protocol === 'file:') {
+    note('<strong>ファイルを直接開いているあいだは、発音チェックのマイクが使えません。</strong> ' +
+         'ブラウザは <code>file://</code> のページにマイクの許可を出せない決まりになっています。' + SERVE_HINT);
+  }
+  if (!SR) {
+    note('<strong>このブラウザでは発音チェックが使えません。</strong> ' +
+         'Chrome、Edge、iPhone の Safari で開くと使えます。読み上げはこのままでも動きます。');
+  }
+
+  var MIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<rect x="9" y="2.5" width="6" height="11" rx="3"/>' +
+    '<path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3.5"/></svg>';
+  var SPK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/>' +
+    '<path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
+
+  /* ---------- 語に割る。数字は語に開いてそろえる ---------- */
+
+  var ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+              'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
+              'seventeen', 'eighteen', 'nineteen'];
+  var TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+
+  function numWords(n) {
+    var out = [];
+    if (n >= 1000) { out = out.concat(numWords(Math.floor(n / 1000)), ['thousand']); n = n % 1000; }
+    if (n >= 100)  { out = out.concat(numWords(Math.floor(n / 100)),  ['hundred']);  n = n % 100; }
+    if (n >= 20) {
+      out.push(TENS[Math.floor(n / 10)]);
+      n = n % 10;
+      if (n) out.push(ONES[n]);
+      return out;
+    }
+    if (n > 0 || !out.length) out.push(ONES[n]);
+    return out;
+  }
+
+  function tokens(s) {
+    var raw = String(s).toLowerCase().replace(/[^a-z0-9']+/g, ' ').replace(/\s+/g, ' ').trim();
+    var disp = [], key = [];
+    if (!raw) return { disp: disp, key: key };
+    var parts = raw.split(' ');
+    for (var i = 0; i < parts.length; i++) {
+      var w = parts[i].replace(/^'+|'+$/g, '');
+      if (!w) continue;
+      if (/^[0-9]{1,4}$/.test(w)) {
+        var words = numWords(parseInt(w, 10));
+        for (var k = 0; k < words.length; k++) { disp.push(words[k]); key.push(words[k]); }
+      } else {
+        disp.push(w); key.push(w);
+      }
+    }
+    return { disp: disp, key: key };
+  }
+
+  /** 編集距離をたどり直して、どこが置き換わり・余分・不足かを返す */
+  function align(a, b) {
+    var m = a.length, n = b.length, i, j;
+    var d = [], from = [];
+    for (i = 0; i <= m; i++) { d[i] = [i]; from[i] = ['u']; }
+    for (j = 0; j <= n; j++) { d[0][j] = j; from[0][j] = 'l'; }
+    from[0][0] = null;
+    for (i = 1; i <= m; i++) {
+      for (j = 1; j <= n; j++) {
+        var same = a[i - 1] === b[j - 1];
+        var sub = d[i - 1][j - 1] + (same ? 0 : 1);
+        var del = d[i - 1][j] + 1;
+        var ins = d[i][j - 1] + 1;
+        var best = Math.min(sub, del, ins);
+        d[i][j] = best;
+        from[i][j] = (best === sub) ? (same ? 'e' : 's') : (best === del ? 'u' : 'l');
+      }
+    }
+    var ops = [];
+    i = m; j = n;
+    while (i > 0 || j > 0) {
+      var dir = (i > 0 && j > 0) ? from[i][j] : (i > 0 ? 'u' : 'l');
+      if (dir === 'e' || dir === 's') {
+        ops.push({ op: dir === 'e' ? 'eq' : 'sub', ai: i - 1, bi: j - 1 });
+        i--; j--;
+      } else if (dir === 'u') {
+        ops.push({ op: 'del', ai: i - 1, bi: -1 }); i--;
+      } else {
+        ops.push({ op: 'ins', ai: -1, bi: j - 1 }); j--;
+      }
+    }
+    ops.reverse();
+    var max = Math.max(m, n);
+    return { ops: ops, score: max ? 1 - d[m][n] / max : 0 };
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  /* 英文を隠すときの伏字。文字だけ潰し、語の区切りと句読点は残す。
+     長さが見えないと、何語の文なのかも分からず聞き取りの手がかりが無くなる。 */
+  function maskOf(s) {
+    return String(s).replace(/[A-Za-z0-9']/g, '•');
+  }
+
+  /* 訳のほうも同じ考え方。句読点だけ残す */
+  function maskJa(s) {
+    return String(s).replace(/[^\s、。，．！？!?「」『』（）()［］…・—\-]/g, '•');
+  }
+
+  function paint(ops, heard) {
+    var out = [];
+    for (var i = 0; i < ops.length; i++) {
+      var o = ops[i];
+      if (o.bi < 0) continue;
+      var w = esc(heard.disp[o.bi]);
+      out.push(o.op === 'eq' ? w : '<span class="miss">' + w + '</span>');
+    }
+    return out.join(' ');
+  }
+
+  /* ---------- 表示 ---------- */
+
+  var tally = { ok: 0, near: 0, ng: 0 };
+
+  function renderTally() {
+    var st = Store.all(), done = 0;
+    for (var k in st) if (st.hasOwnProperty(k)) done++;
+    tallyEl.textContent = '今回 ○' + tally.ok + ' △' + tally.near + ' ×' + tally.ng +
+      '　／　通過 ' + countOk() + ' / ' + DATA.length;
+  }
+
+  function countOk() {
+    var st = Store.all(), n = 0;
+    for (var k in st) if (st.hasOwnProperty(k) && st[k].r === 'ok') n++;
+    return n;
+  }
+
+  function outFor(el) {
+    var o = el.querySelector('.rec-out');
+    if (o) return o;
+    o = document.createElement('span');
+    o.className = 'rec-out';
+    el.appendChild(o);
+    return o;
+  }
+
+  function say(el, cls, html) {
+    var out = outFor(el);
+    out.className = 'rec-out' + (cls ? ' ' + cls : '');
+    out.innerHTML = html;
+  }
+
+  function mark(el, item, result) {
+    Store.set(item.id, result);
+    /* 判定を出した時点でお手本も表示するので、隠していても開く */
+    el.classList.add('revealed');
+    el.classList.remove('done-ok', 'done-near', 'done-ng');
+    el.classList.add('done-' + result);
+    var chip = el.querySelector('.chip');
+    chip.className = 'chip ' + result;
+    chip.textContent = result === 'ok' ? '○ 通じた' : (result === 'near' ? '△ 惜しい' : '× 未通過');
+    tally[result]++;
+    renderTally();
+  }
+
+  /* ---------- 判定 ---------- */
+
+  function acceptable(item, text) {
+    if (!item.tok.key.length) return false;
+    var h = tokens(text);
+    var a = align(item.tok.key, h.key);
+    for (var i = 0; i < a.ops.length; i++) {
+      if (a.ops[i].op === 'sub' || a.ops[i].op === 'del') {
+        return align(item.tok.key.join('').split(''), h.key.join('').split('')).score >= 0.9;
+      }
+    }
+    return true;
+  }
+
+  function verdict(el, item, heardText) {
+    var heard = tokens(heardText);
+    var a = align(item.tok.key, heard.key);
+    var shown = paint(a.ops, heard) || '（無音）';
+
+    /* 語の単位だけで見ると厳しすぎる。認識は EasyCard を easy card に割るし、
+       one を wan と書くこともある。語の切れ目を無視した文字単位でも見る。 */
+    var flat = align(item.tok.key.join('').split(''), heard.key.join('').split('')).score;
+
+    var hard = 0, dels = 0, adds = 0;
+    for (var i = 0; i < a.ops.length; i++) {
+      var o = a.ops[i];
+      if (o.op === 'sub') hard++;
+      else if (o.op === 'del') dels++;
+      else if (o.op === 'ins') adds++;
+    }
+
+    /* 狙った語がすべて順番どおり出ていれば合格。認識は前後に語を足して返す */
+    if (hard === 0 && dels === 0 && item.tok.key.length) {
+      say(el, 'ok', '<span class="verdict">○ 通じました</span>　聞こえた：<span class="heard">' +
+        shown + '</span>' +
+        (adds ? '<span class="sub">余計な語も拾っていますが、狙った語はすべて出ています。</span>' : ''));
+      mark(el, item, 'ok');
+      return true;
+    }
+
+    if (flat >= 0.9) {
+      say(el, 'ok', '<span class="verdict">○ 通じました</span>　聞こえた：<span class="heard">' +
+        shown + '</span><span class="sub">語の切れ目や細かい綴りは違いますが、通じる範囲です。</span>');
+      mark(el, item, 'ok');
+      return true;
+    }
+
+    /* 語のどれが通らなかったかを直接見る。切れ目がずれると対応付けは当てにならない */
+    var heardFlat = heard.key.join('');
+    var missed = [];
+    for (var w = 0; w < item.tok.key.length; w++) {
+      if (heardFlat.indexOf(item.tok.key[w]) < 0) missed.push(item.tok.disp[w]);
+    }
+    var cls = flat >= 0.6 ? 'near' : 'ng';
+    var head = cls === 'near' ? '△ 惜しい' : '× 別の文に聞こえています';
+
+    say(el, cls, '<span class="verdict">' + head + '</span>　聞こえた：<span class="heard">' +
+      shown + '</span><span class="sub">お手本：' + esc(item.say) + '</span>' +
+      (missed.length
+        ? '<span class="fix-head">直すところ</span><span class="fix">通らなかった語：' +
+          esc(missed.slice(0, 8).join(' ')) + '</span><span class="fix">' +
+          'まずこの語だけを繰り返して、通るようになってから文に戻してください。</span>'
+        : '<span class="fix-head">直すところ</span><span class="fix">' +
+          '語は合っていますが、並びか区切りがずれています。文を通しで言い直してください。</span>'));
+    mark(el, item, cls);
+    return false;
+  }
+
+  /* ---------- 録音と聞き比べ ---------- */
+
+  function canRecord() {
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+  }
+  function closeStream(stream) {
+    if (!stream) return;
+    var t = stream.getTracks();
+    for (var i = 0; i < t.length; i++) t[i].stop();
+  }
+
+  var DUAL_KEY = 'english-powerup-dual';
+  var COARSE = false;
+  try { COARSE = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); } catch (e) {}
+
+  function dualBlocked() {
+    try {
+      var v = window.localStorage.getItem(DUAL_KEY);
+      if (v === 'no') return true;
+      if (v === 'ok') return false;
+    } catch (e) {}
+    return COARSE;
+  }
+  function markDualBlocked() {
+    try { window.localStorage.setItem(DUAL_KEY, 'no'); } catch (e) {}
+  }
+
+  function attachClip(el, item, chunks) {
+    if (!chunks.length) return;
+    var out = outFor(el);
+    if (out.clipUrl) { try { URL.revokeObjectURL(out.clipUrl); } catch (e) {} }
+    var url = URL.createObjectURL(new Blob(chunks, { type: chunks[0].type || 'audio/webm' }));
+    out.clipUrl = url;
+    var audio = new Audio(url);
+
+    var wrap = document.createElement('span');
+    wrap.className = 'plays';
+
+    var mine = document.createElement('button');
+    mine.type = 'button';
+    mine.className = 'mine';
+    mine.textContent = '▶ 自分の声';
+    mine.addEventListener('click', function (e) {
+      e.stopPropagation();
+      TTS.stop();
+      try { audio.currentTime = 0; } catch (err) {}
+      audio.play();
+    });
+
+    var model = document.createElement('button');
+    model.type = 'button';
+    model.textContent = '▶ お手本';
+    model.addEventListener('click', function (e) {
+      e.stopPropagation();
+      try { audio.pause(); } catch (err) {}
+      TTS.speak(item.say, null);
+    });
+
+    wrap.appendChild(mine);
+    wrap.appendChild(model);
+    out.appendChild(wrap);
+  }
+
+  /* 録音と認識を同時に使えない端末むけ。判定のあとに、もう一度言って録るだけのボタン */
+  function attachRetake(el, item) {
+    if (!canRecord()) return;
+    var wrap = document.createElement('span');
+    wrap.className = 'plays';
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = '🎤 録って聞き比べる';
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (b.dataset.on === '1') { if (b._stop) b._stop(); return; }
+      TTS.stop();
+      b.textContent = 'マイクを準備しています…';
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+        var chunks = [], mr2;
+        try { mr2 = new MediaRecorder(stream); } catch (err) {
+          closeStream(stream); b.textContent = '録音できませんでした'; return;
+        }
+        var done = false, timer = null;
+        mr2.ondataavailable = function (ev) { if (ev.data && ev.data.size) chunks.push(ev.data); };
+        mr2.onstop = function () {
+          closeStream(stream);
+          if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+          attachClip(el, item, chunks);
+        };
+        b._stop = function () {
+          if (done) return;
+          done = true;
+          if (timer) clearTimeout(timer);
+          if (mr2.state !== 'inactive') { try { mr2.stop(); } catch (err) { closeStream(stream); } }
+        };
+        mr2.start();
+        b.dataset.on = '1';
+        b.textContent = '■ 録音を止める（自動で止まります）';
+        timer = setTimeout(b._stop, Math.min(20000, 5000 + item.tok.key.length * 500));
+      }).catch(function () {
+        b.textContent = 'マイクが使えませんでした';
+      });
+    });
+    wrap.appendChild(b);
+    outFor(el).appendChild(wrap);
+  }
+
+  /* ---------- 認識の実行 ---------- */
+
+  var current = null;
+
+  function release(btn) {
+    btn.classList.remove('on');
+    btn.setAttribute('aria-pressed', 'false');
+    btn.innerHTML = MIC + '<span>発音チェック</span>';
+    current = null;
+  }
+
+  function start(btn, el, item) {
+    if (current) {
+      try { current.rec.abort(); } catch (e) {}
+      release(current.btn);
+    }
+    TTS.stop();
+    /* マイク確認の棒が出たままだとマイクを握っていて認識に音が届かない */
+    if (window.__stopMicCheck) { try { window.__stopMicCheck(); } catch (e) {} }
+
+    if (!canRecord() || dualBlocked()) { begin(btn, el, item, null); return; }
+
+    btn.classList.add('on');
+    say(el, '', '<span class="verdict">マイクを準備しています…</span>');
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      begin(btn, el, item, stream);
+    }).catch(function () {
+      begin(btn, el, item, null);   /* 録音が取れなくても判定だけは進める */
+    });
+  }
+
+  var NO_RESULT_HINT =
+    '<span class="sub">通信が切れているか、端末の音声認識が使えない状態です。' +
+    'iPhone は 設定 → 一般 → キーボード → <b>音声入力</b> をオンに。' +
+    'Android は Chrome のマイク権限と、Google アプリが有効かを確認してください。</span>';
+
+  function begin(btn, el, item, stream) {
+    var rec;
+    try { rec = new SR(); } catch (e) {
+      closeStream(stream); release(btn);
+      say(el, 'ng', '<span class="verdict">音声認識を開始できませんでした。</span>');
+      return;
+    }
+
+    var chunks = [], mr = null;
+    if (stream) {
+      try {
+        mr = new MediaRecorder(stream);
+        mr.ondataavailable = function (ev) { if (ev.data && ev.data.size) chunks.push(ev.data); };
+        mr.onstop = function () { attachClip(el, item, chunks); closeStream(stream); };
+        mr.start();
+      } catch (e) { mr = null; closeStream(stream); }
+    }
+
+    rec.lang = 'en-US';
+    rec.interimResults = true;
+    /* 長い文は途中の間で切れてしまうので、確定ぶんを足していく */
+    rec.continuous = true;
+    rec.maxAlternatives = 5;
+
+    var finals = [], alts = [], settled = false;
+    /* 語数に応じて待つ。短い文で長く待っても意味がない */
+    var limit = Math.min(25000, 7000 + item.tok.key.length * 600);
+    var guard = setTimeout(function () { try { rec.stop(); } catch (e) {} }, limit);
+
+    btn.classList.add('on');
+    btn.setAttribute('aria-pressed', 'true');
+    btn.innerHTML = MIC + '<span>■ 終わったら押す</span>';
+    say(el, '', '<span class="verdict">聞いています…</span>　英語で声に出してください' +
+      '<span class="sub">言い終わったらボタンをもう一度押すか、そのまま待つと判定します。</span>');
+
+    rec.onresult = function (e) {
+      var interim = '';
+      for (var i = e.resultIndex; i < e.results.length; i++) {
+        var r = e.results[i];
+        if (r.isFinal) {
+          finals.push(r[0].transcript);
+          for (var k = 0; k < r.length; k++) alts.push(r[k].transcript);
+        } else {
+          interim += r[0].transcript;
+        }
+      }
+      if (interim) {
+        say(el, '', '<span class="verdict">聞いています…</span>　<span class="interim">' +
+          esc((finals.join(' ') + ' ' + interim).trim()) + '</span>');
+      }
+    };
+
+    rec.onerror = function (e) {
+      var code = e.error || '';
+      if (code === 'aborted') { settled = true; say(el, '', ''); return; }
+      if (code === 'no-speech') {
+        if (finals.length) return;   /* 何か拾えているなら onend の判定に任せる */
+        settled = true;
+        if (mr) {
+          markDualBlocked();
+          say(el, 'ng', '<span class="verdict">聞き取れませんでした。</span>' +
+            '<span class="sub">この端末では録音と音声認識を同時に使えないようです。' +
+            '次からは録音をやめて認識だけを行います。<b>もう一度押してください。</b></span>');
+        } else {
+          say(el, 'ng', '<span class="verdict">聞き取れませんでした。</span>　マイクに近づいてもう一度どうぞ。');
+          attachRetake(el, item);
+        }
+        return;
+      }
+      settled = true;
+      if (code === 'not-allowed' || code === 'service-not-allowed') {
+        say(el, 'ng', '<span class="verdict">マイクが使えません。</span>　下の案内を見てください。');
+        note('<strong>マイクが使えません。</strong> ' +
+          (location.protocol === 'file:'
+            ? 'ファイルを直接開いているためです。' + SERVE_HINT
+            : 'アドレスバーの錠前アイコンから、このページのマイクを「許可」にしてください。'));
+        return;
+      }
+      if (code === 'network') {
+        say(el, 'ng', '<span class="verdict">認識サーバーに届きませんでした。</span>　音声認識はネット接続が要ります。');
+        return;
+      }
+      say(el, 'ng', '<span class="verdict">認識できませんでした（' + esc(code) + '）。</span>');
+    };
+
+    rec.onend = function () {
+      clearTimeout(guard);
+      var text = finals.join(' ').trim();
+      if (text) {
+        /* 第1候補が外れていても、候補の中に狙った音があるならそれで判定する。
+           ここで落とすと、正しく言えているのに何度やっても通らない。 */
+        var use = text;
+        if (!acceptable(item, text)) {
+          for (var k = 0; k < alts.length; k++) {
+            if (acceptable(item, alts[k])) { use = alts[k]; break; }
+          }
+        }
+        verdict(el, item, use);
+        if (use !== text) {
+          outFor(el).innerHTML += '<span class="sub">第1候補は「' + esc(text) +
+            '」でしたが、候補の中に狙った音があったので合格にしています。</span>';
+        }
+        if (!mr) attachRetake(el, item);
+      } else if (!settled) {
+        /* 結果もエラーも来ずに終わる。黙って消すと「押しても何も起きない」に見える */
+        if (mr) {
+          markDualBlocked();
+          say(el, 'ng', '<span class="verdict">認識が何も返しませんでした。</span>' +
+            '<span class="sub">この端末では録音と音声認識を同時に使えないようです。' +
+            '次からは録音をやめて認識だけを行います。<b>もう一度押してください。</b></span>');
+        } else {
+          say(el, 'ng', '<span class="verdict">認識が何も返しませんでした。</span>' + NO_RESULT_HINT);
+        }
+      }
+      release(btn);
+      if (mr && mr.state !== 'inactive') { try { mr.stop(); } catch (e) { closeStream(stream); } }
+      else closeStream(stream);
+    };
+
+    try {
+      rec.start();
+      current = { rec: rec, btn: btn };
+    } catch (e) {
+      release(btn);
+      say(el, 'ng', '<span class="verdict">続けて押しすぎです。</span>　少し待ってからもう一度どうぞ。');
+    }
+  }
+
+  /* ---------- 組み立て ---------- */
+
+  var CHIP = { ok: '○ 通じた', near: '△ 惜しい', ng: '× 未通過' };
+
+  function buildItem(item) {
+    var el = document.createElement('article');
+    el.className = 'item';
+    el.dataset.id = item.id;
+    el.dataset.ep = item.ep;
+
+    /* 読み上げに使う語の並び。表示と読み上げが違う項目（[代替]付き）だけは
+       語の対応が取れないので、語クリックを切る */
+    var words = item.say.split(/\s+/).filter(Boolean);
+    var dispWords = item.en.split(/\s+/).filter(Boolean);
+    var seekable = dispWords.length === words.length;
+    if (!seekable) el.classList.add('no-seek');
+
+    /* 語ごとの span を作る。伏字と英文で番号をそろえ、目印を両方に出す */
+    function wordSpans(parent, arr, transform) {
+      for (var i = 0; i < arr.length; i++) {
+        var w = document.createElement('span');
+        w.className = 'w';
+        w.dataset.i = i;
+        w.textContent = transform ? transform(arr[i]) : arr[i];
+        parent.appendChild(w);
+        if (i < arr.length - 1) {
+          var sp = document.createElement('span');
+          sp.textContent = ' ';
+          parent.appendChild(sp);
+        }
+      }
+    }
+
+    /* 隠しているあいだに出す伏字。語の数と長さは残す（書き取りの手がかり） */
+    var mk = document.createElement('p');
+    mk.className = 'mask';
+    wordSpans(mk, dispWords, maskOf);
+    el.appendChild(mk);
+
+    var p = document.createElement('p');
+    p.className = 'en';
+    wordSpans(p, dispWords);
+    el.appendChild(p);
+
+    if (item.ja) {
+      var jm = document.createElement('p');
+      jm.className = 'ja-mask';
+      jm.textContent = maskJa(item.ja);
+      el.appendChild(jm);
+
+      var jp = document.createElement('p');
+      jp.className = 'ja';
+      jp.textContent = item.ja;
+      el.appendChild(jp);
+    }
+
+    var hint = document.createElement('p');
+    hint.className = 'seek-hint';
+    hint.textContent = seekable
+      ? '語を押すと、そこから読み上げます。'
+      : 'この項目は語ごとの頭出しに対応していません。';
+    el.appendChild(hint);
+
+    if (item.ctx) {
+      var c = document.createElement('p');
+      c.className = 'ctx';
+      c.textContent = item.ctx;
+      el.appendChild(c);
+    }
+    if (item.note) {
+      var m = document.createElement('p');
+      m.className = 'memo';
+      m.textContent = '※ ' + item.note;
+      el.appendChild(m);
+    }
+    if (item.say !== item.en) {
+      var s = document.createElement('p');
+      s.className = 'sub-say';
+      s.textContent = '読み上げ・判定は「' + item.say + '」で行います';
+      el.appendChild(s);
+    }
+
+    var acts = document.createElement('div');
+    acts.className = 'acts';
+
+    /* ---- 読み上げの位置。途中から・少し戻して聞くための状態 ---- */
+    var pos = 0;
+
+    function clearNow() {
+      var ws = el.querySelectorAll('.w');
+      for (var i = 0; i < ws.length; i++) ws[i].classList.remove('now');
+    }
+    function showNow(i) {
+      clearNow();
+      var ws = el.querySelectorAll('.w');
+      for (var k = 0; k < ws.length; k++) {
+        if (String(ws[k].dataset.i) === String(i)) ws[k].classList.add('now');
+      }
+    }
+
+    function playFrom(i, btn) {
+      pos = Math.max(0, Math.min(i, words.length - 1));
+      TTS.play(words, pos, {
+        onWord: function (idx, accurate) {
+          pos = idx;
+          /* 見積もりのときは目印を出さない。ずれた場所を光らせるほうが害が大きい */
+          if (accurate) showNow(idx);
+        },
+        onEnd: function (idx) { pos = idx; clearNow(); },
+        onStop: clearNow
+      }, btn || sp);
+    }
+
+    var sp = document.createElement('button');
+    sp.type = 'button';
+    sp.className = 'speak';
+    sp.innerHTML = SPK + '<span>聞く</span>';
+    sp.addEventListener('click', function () {
+      if (TTS.speaking()) { TTS.stop(); return; }
+      playFrom(0, sp);
+    });
+    acts.appendChild(sp);
+
+    var bk = document.createElement('button');
+    bk.type = 'button';
+    bk.className = 'back';
+    bk.innerHTML = '<span>◀ 少し戻る</span>';
+    bk.title = '3語ぶん戻って読み直します';
+    bk.addEventListener('click', function () { playFrom(pos - 3, sp); });
+    acts.appendChild(bk);
+
+    if (seekable) {
+      /* 語をクリックしたらそこから。伏字のほうも同じ番号で効く */
+      var onWordClick = function (e) {
+        var t = e.target;
+        while (t && t !== el && !(t.dataset && t.dataset.i !== undefined)) t = t.parentNode;
+        if (!t || t === el || !t.dataset || t.dataset.i === undefined) return;
+        playFrom(parseInt(t.dataset.i, 10), sp);
+      };
+      p.addEventListener('click', onWordClick);
+      mk.addEventListener('click', onWordClick);
+    }
+
+    if (SR) {
+      var rc = document.createElement('button');
+      rc.type = 'button';
+      rc.className = 'rec';
+      rc.innerHTML = MIC + '<span>発音チェック</span>';
+      rc.setAttribute('aria-pressed', 'false');
+      rc.addEventListener('click', function () {
+        if (current && current.btn === rc) { try { current.rec.stop(); } catch (e) {} return; }
+        start(rc, el, item);
+      });
+      acts.appendChild(rc);
+    }
+
+    var rv = document.createElement('button');
+    rv.type = 'button';
+    rv.className = 'reveal';
+    rv.innerHTML = '<span class="lbl-show">英文を見る</span>' +
+                   '<span class="lbl-hide">英文を隠す</span>';
+    rv.addEventListener('click', function () {
+      if (el.classList.contains('revealed')) el.classList.remove('revealed');
+      else el.classList.add('revealed');
+    });
+    acts.appendChild(rv);
+
+    if (item.ja) {
+      var rj = document.createElement('button');
+      rj.type = 'button';
+      rj.className = 'reveal-ja';
+      rj.innerHTML = '<span class="lbl-show">訳を見る</span>' +
+                     '<span class="lbl-hide">訳を隠す</span>';
+      rj.addEventListener('click', function () {
+        if (el.classList.contains('ja-revealed')) el.classList.remove('ja-revealed');
+        else el.classList.add('ja-revealed');
+      });
+      acts.appendChild(rj);
+    }
+
+    var chip = document.createElement('span');
+    var saved = Store.get(item.id);
+    if (saved) {
+      chip.className = 'chip ' + saved.r;
+      chip.textContent = CHIP[saved.r];
+      el.classList.add('done-' + saved.r);
+    } else {
+      chip.className = 'chip';
+      chip.textContent = '未';
+    }
+    acts.appendChild(chip);
+
+    el.appendChild(acts);
+    return el;
+  }
+
+  /* データを回ごとにまとめる */
+  var groups = [];
+  var byEp = {};
+  for (var i = 0; i < DATA.length; i++) {
+    var d = DATA[i];
+    d.id = 'ep' + d.ep + '-' + i;
+    d.tok = tokens(d.say);
+    if (!byEp[d.ep]) { byEp[d.ep] = { ep: d.ep, theme: d.theme, items: [] }; groups.push(byEp[d.ep]); }
+    if (!byEp[d.ep].theme && d.theme) byEp[d.ep].theme = d.theme;
+    byEp[d.ep].items.push(d);
+  }
+  groups.sort(function (a, b) { return a.ep - b.ep; });
+
+  document.getElementById('totalN').textContent =
+    DATA.length + ' 文 / ' + groups.length + ' 回ぶん';
+
+  for (var g = 0; g < groups.length; g++) {
+    var grp = groups[g];
+    var sec = document.createElement('section');
+    sec.className = 'ep';
+    sec.id = 'ep' + grp.ep;
+    sec.dataset.ep = grp.ep;
+
+    var head = document.createElement('div');
+    head.className = 'ep-head';
+    var no = document.createElement('span');
+    no.className = 'ep-no';
+    no.textContent = 'Lesson ' + grp.ep;
+    head.appendChild(no);
+    if (grp.theme) {
+      var th = document.createElement('span');
+      th.className = 'ep-theme';
+      th.textContent = grp.theme;
+      head.appendChild(th);
+    }
+    var cnt = document.createElement('span');
+    cnt.className = 'ep-count';
+    cnt.textContent = grp.items.length + ' 文';
+    head.appendChild(cnt);
+    sec.appendChild(head);
+
+    for (var n = 0; n < grp.items.length; n++) sec.appendChild(buildItem(grp.items[n]));
+    listEl.appendChild(sec);
+
+    var op = document.createElement('option');
+    op.value = 'ep' + grp.ep;
+    op.textContent = 'Lesson ' + grp.ep + (grp.theme ? ' — ' + grp.theme : '');
+    jumpEl.appendChild(op);
+  }
+
+  var first = document.createElement('option');
+  first.value = '';
+  first.textContent = '回へ移動…';
+  jumpEl.insertBefore(first, jumpEl.firstChild);
+  jumpEl.value = '';
+  jumpEl.addEventListener('change', function () {
+    if (!jumpEl.value) return;
+    var t = document.getElementById(jumpEl.value);
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    jumpEl.value = '';
+  });
+
+  /* ---------- 表示の絞り込み ---------- */
+
+  function applyFilter(mode) {
+    var shown = 0;
+    var items = listEl.querySelectorAll('.item');
+    for (var i = 0; i < items.length; i++) {
+      var st = Store.get(items[i].dataset.id);
+      var vis = mode === 'all'
+        || (mode === 'todo' && (!st || st.r !== 'ok'))
+        || (mode === 'weak' && st && st.r === 'ng');
+      items[i].hidden = !vis;
+      if (vis) shown++;
+    }
+    var secs = listEl.querySelectorAll('.ep');
+    for (var s = 0; s < secs.length; s++) {
+      var any = secs[s].querySelector('.item:not([hidden])');
+      secs[s].hidden = !any;
+    }
+    emptyEl.hidden = shown > 0;
+  }
+
+  var fbtns = { all: document.getElementById('flt-a'),
+                todo: document.getElementById('flt-t'),
+                weak: document.getElementById('flt-x') };
+  Object.keys(fbtns).forEach(function (mode) {
+    fbtns[mode].addEventListener('click', function () {
+      Object.keys(fbtns).forEach(function (m) {
+        fbtns[m].setAttribute('aria-pressed', m === mode ? 'true' : 'false');
+      });
+      applyFilter(mode);
+    });
+  });
+
+  /* ---------- 英文を隠す ---------- */
+
+  var MASK_KEY = 'english-powerup-mask';
+  var mOn = document.getElementById('msk-on');
+  var mOff = document.getElementById('msk-off');
+
+  function setMask(on, remember) {
+    if (on) document.body.classList.add('mask-on');
+    else document.body.classList.remove('mask-on');
+    mOn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    mOff.setAttribute('aria-pressed', on ? 'false' : 'true');
+    /* 隠しに戻すときは、1件ずつ開いたぶんも閉じ直す */
+    if (on) {
+      var its = listEl.querySelectorAll('.item');
+      for (var i = 0; i < its.length; i++) its[i].classList.remove('revealed');
+    }
+    if (remember) { try { window.localStorage.setItem(MASK_KEY, on ? '1' : '0'); } catch (e) {} }
+  }
+
+  mOn.addEventListener('click', function () { setMask(true, true); });
+  mOff.addEventListener('click', function () { setMask(false, true); });
+
+  var savedMask = '0';
+  try { savedMask = window.localStorage.getItem(MASK_KEY) || '0'; } catch (e) {}
+  setMask(savedMask === '1', false);
+
+  /* ---------- 訳を隠す（英文とは別に切り替える） ---------- */
+
+  var JAMASK_KEY = 'english-powerup-jamask';
+  var jOn = document.getElementById('jam-on');
+  var jOff = document.getElementById('jam-off');
+
+  function setJaMask(on, remember) {
+    if (on) document.body.classList.add('jamask-on');
+    else document.body.classList.remove('jamask-on');
+    jOn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    jOff.setAttribute('aria-pressed', on ? 'false' : 'true');
+    if (on) {
+      var its = listEl.querySelectorAll('.item');
+      for (var i = 0; i < its.length; i++) its[i].classList.remove('ja-revealed');
+    }
+    if (remember) { try { window.localStorage.setItem(JAMASK_KEY, on ? '1' : '0'); } catch (e) {} }
+  }
+
+  jOn.addEventListener('click', function () { setJaMask(true, true); });
+  jOff.addEventListener('click', function () { setJaMask(false, true); });
+
+  var savedJa = '0';
+  try { savedJa = window.localStorage.getItem(JAMASK_KEY) || '0'; } catch (e) {}
+  setJaMask(savedJa === '1', false);
+
+  /* ---------- 速さ ---------- */
+
+  var sbtns = { slow: document.getElementById('spd-s'),
+                normal: document.getElementById('spd-n'),
+                fast: document.getElementById('spd-f') };
+  Object.keys(sbtns).forEach(function (sp) {
+    sbtns[sp].addEventListener('click', function () {
+      Object.keys(sbtns).forEach(function (m) {
+        sbtns[m].setAttribute('aria-pressed', m === sp ? 'true' : 'false');
+      });
+      TTS.setSpeed(sp);
+    });
+  });
+
+  renderTally();
+})();
+</script>
+
+<script>
+/* ============================================================
+   マイク確認
+
+   発音チェックが「聞き取れませんでした」を返すとき、原因が端末側
+   （既定のデバイスが違う・入力音量が低い）なのか認識側なのかを
+   切り分ける。音声認識を通さず入力レベルをそのまま見せる。
+   ============================================================ */
+(function () {
+  var btn = document.getElementById('micCheckBtn');
+  var panel = document.getElementById('micCheck');
+  if (!btn || !panel) return;
+
+  var md = navigator.mediaDevices;
+  if (!md || !md.getUserMedia || !(window.AudioContext || window.webkitAudioContext)) {
+    btn.disabled = true;
+    btn.title = 'このブラウザでは使えません';
+    return;
+  }
+
+  var devEl = panel.querySelector('.mc-dev');
+  var fillEl = panel.querySelector('.mc-fill');
+  var peakEl = panel.querySelector('.mc-peak');
+  var verdictEl = panel.querySelector('.mc-verdict');
+
+  var stream = null, ctx = null, raf = null;
+  var peak = 0, frames = 0;
+
+  function pct(v) { return Math.min(100, Math.round(v * 100)); }
+
+  function stop() {
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    if (stream) {
+      var t = stream.getTracks();
+      for (var i = 0; i < t.length; i++) t[i].stop();
+      stream = null;
+    }
+    if (ctx) { try { ctx.close(); } catch (e) {} ctx = null; }
+    btn.setAttribute('aria-pressed', 'false');
+    btn.textContent = 'マイク確認';
+  }
+
+  function fail(msg) {
+    stop();
+    panel.hidden = false;
+    devEl.textContent = '';
+    verdictEl.className = 'mc-verdict bad';
+    verdictEl.textContent = msg;
+  }
+
+  function start() {
+    peak = 0; frames = 0;
+    panel.hidden = false;
+    devEl.textContent = 'マイクを開いています…';
+    verdictEl.className = 'mc-verdict';
+    verdictEl.textContent = '';
+    fillEl.style.width = '0';
+    peakEl.style.left = '0';
+
+    md.getUserMedia({ audio: true }).then(function (s) {
+      stream = s;
+      var track = s.getAudioTracks()[0];
+      var label = (track && track.label) || '（名前を取得できません）';
+      var st = {};
+      try { st = track.getSettings ? track.getSettings() : {}; } catch (e) {}
+      devEl.innerHTML = 'いま使われているマイク：' + label.replace(/</g, '&lt;') +
+        (st.sampleRate ? ' <span>' + st.sampleRate + ' Hz</span>' : '');
+
+      var AC = window.AudioContext || window.webkitAudioContext;
+      ctx = new AC();
+      if (ctx.state === 'suspended') ctx.resume();
+      var src = ctx.createMediaStreamSource(s);
+      var an = ctx.createAnalyser();
+      an.fftSize = 2048;
+      src.connect(an);
+      var buf = new Uint8Array(an.fftSize);
+
+      btn.setAttribute('aria-pressed', 'true');
+      btn.textContent = '確認をやめる';
+
+      function tick() {
+        an.getByteTimeDomainData(buf);
+        var sum = 0;
+        for (var i = 0; i < buf.length; i++) {
+          var v = (buf[i] - 128) / 128;
+          sum += v * v;
+        }
+        var rms = Math.sqrt(sum / buf.length);
+        var level = Math.min(1, rms * 6);   /* 話し声がだいたい 0.3〜0.8 に来る倍率 */
+
+        frames++;
+        if (level > peak) { peak = level; peakEl.style.left = pct(peak) + '%'; }
+        fillEl.style.width = pct(level) + '%';
+        fillEl.className = 'mc-fill' + (level > 0.12 ? ' loud' : '');
+
+        if (frames > 60) {
+          if (peak < 0.03) {
+            verdictEl.className = 'mc-verdict bad';
+            verdictEl.textContent = '無音のままです。声を出しても棒が動かないなら、端末側で拾えていません。';
+          } else if (peak < 0.12) {
+            verdictEl.className = 'mc-verdict bad';
+            verdictEl.textContent = '音は届いていますが小さすぎます。入力音量を上げるか、マイクに近づいてください。';
+          } else {
+            verdictEl.className = 'mc-verdict good';
+            verdictEl.textContent = '拾えています。この状態なら音声認識も動くはずです。';
+          }
+        }
+        raf = requestAnimationFrame(tick);
+      }
+      tick();
+    }).catch(function (e) {
+      var n = e && e.name;
+      if (n === 'NotAllowedError' || n === 'SecurityError') {
+        fail('マイクの使用が許可されていません。アドレスバーの錠前アイコンから許可にしてください。');
+      } else if (n === 'NotFoundError' || n === 'OverconstrainedError') {
+        fail('マイクが見つかりません。サウンド設定で入力デバイスを確認してください。');
+      } else if (n === 'NotReadableError') {
+        fail('マイクを他のアプリが使っています。Teams・Zoom・録音アプリを閉じてから、もう一度どうぞ。');
+      } else {
+        fail('マイクを開けませんでした（' + (n || 'unknown') + '）。');
+      }
+    });
+  }
+
+  btn.addEventListener('click', function () {
+    if (stream) { stop(); return; }
+    start();
+  });
+
+  /* 発音チェック側から呼ぶ。棒を出したままだとマイクを握り続け、
+     音声認識に音が届かない端末がある。 */
+  window.__stopMicCheck = function () { if (stream) stop(); };
+
+  window.addEventListener('pagehide', stop);
+})();
+</script>
+
+</body>
+</html>
