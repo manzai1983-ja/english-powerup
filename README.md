@@ -1,12 +1,13 @@
-# English PowerUp — 聞き取れなかった英文
+# English PowerUp
 
-NHKラジオ英会話2026のスタディファイルで「（全然聞こえない）」と印を付けた英文だけを集めた、
-音読・発音チェック用の1枚ページ。
+英語の音読・発音チェック用のページ。どちらも1ファイルで完結し、外部への通信はブラウザ内蔵の音声認識のみ。
 
-**<https://manzai1983-ja.github.io/english-powerup/>**
+| ページ | 中身 |
+|---|---|
+| **[聞き取れなかった英文](https://manzai1983-ja.github.io/english-powerup/)** | NHKラジオ英会話2026で「（全然聞こえない）」と印を付けた **277文 / 76回ぶん** |
+| **[動詞の文型リファレンス](https://manzai1983-ja.github.io/english-powerup/verbs.html)** | S+V+O+C / V 構文をとる **91語 / 3構文 / 16カテゴリ**。意味・使う場面・例文つき |
 
-277文 / 76回ぶん。ページは `index.html` 1ファイルで完結しており、外部への通信は
-ブラウザ内蔵の音声認識のみ。
+読み上げ・発音チェック・録音・伏字・記録のしくみは2つで共通（`build/tmpl.html`）。
 
 ## できること
 
@@ -31,7 +32,23 @@ NHKラジオ英会話2026のスタディファイルで「（全然聞こえな�
 - 記録はブラウザごと。パソコンとスマホで別々になる。
 - **日本語訳は教科書の訳例ではなく、英文から起こした参考訳**。
 
-## 作り直しかた
+## 作り直しかた（動詞ページ）
+
+出典は `build/verb_patterns_reference-v4.pdf`。PDFはサブセットフォントの16進文字列で
+書かれているので、ToUnicode CMap でグリフ番号を戻してからテキストにする。
+
+```
+node build/pdf-text.js build/verb_patterns_reference-v4.pdf > build/vp.txt
+node build/verbs-parse.js build/vp.txt   # → build/verbs.json
+node build/build-verbs.js                # → verbs.html（テンプレートも作り直す）
+node build/test-verbs.js                 # 78件
+```
+
+`build/tmpl-verbs.html` は `build/tmpl.html` から `make-tmpl-verbs.js` が毎回作る生成物なので
+コミットしない。**ページの見た目や機能に手を入れるときは `build/tmpl.html` を編集する** —
+2つのページ両方に反映される。
+
+## 作り直しかた（聞き取りページ）
 
 元データは `C:\Users\user\Documents\ラジオ英会話_2026.xlsx`（このリポジトリには含めない）。
 回を追加で転記したら、この順に流す。
@@ -55,8 +72,15 @@ node build/test.js        # DOM代役でページを実際に動かして確認
 ## ファイル
 
 ```
-index.html            公開されるページ（build.js が生成する。直接編集しない）
-build/tmpl.html       ページのテンプレート。手を入れるならここ
+index.html            聞き取りページ（build.js が生成する。直接編集しない）
+verbs.html            動詞ページ（build-verbs.js が生成する。直接編集しない）
+build/tmpl.html       ページのテンプレート。手を入れるならここ（両ページ共通）
+build/make-tmpl-verbs.js  tmpl.html を動詞ページ用に作り替える
+build/pdf-text.js     PDFのテキストを ToUnicode CMap 経由で取り出す
+build/verbs-parse.js  テキストを動詞1語＝1項目に構造化する
+build/build-verbs.js  動詞ページを組み立てる
+build/test-verbs.js   動詞ページのテスト（78件）
+build/verbs.json      動詞の抽出結果
 build/extract.js      xlsx から対象の英文を抜き出す
 build/xl.js           xlsx を直接読むための最小実装
 build/ja_a.js         参考訳 0〜137

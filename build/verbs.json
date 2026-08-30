@@ -1,0 +1,934 @@
+{
+ "sections": [
+  {
+   "no": 1,
+   "title": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "desc": "能動態において、Oのあとに to を伴わない動詞の原形を直接とるグループです。",
+   "count": 15
+  },
+  {
+   "no": 2,
+   "title": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "desc": "Oが「まさに〜している最中である」という生々しい状態や躍動感を捉えるグループです。",
+   "count": 22
+  },
+  {
+   "no": 3,
+   "title": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "desc": "「Oにこれから〜してもらう / させる」という未来志向・働きかけを表す最大のグループです。",
+   "count": 54
+  }
+ ],
+ "items": [
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "使役動詞",
+   "verb": "make",
+   "mean": "Oに強制的に〜させる",
+   "note": "上司の命令や逆らえない状況、プレッシャーなど、相手の意志に関係なく強制的に行動させるとき。",
+   "en": "He made me apologize.",
+   "ja": "彼は私に無理やり謝罪させた。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "使役動詞",
+   "verb": "have",
+   "mean": "Oに〜してもらう / させる",
+   "note": "当然の役割や業務、あるいはプロへの依頼として、相手にタスクを行わせるとき。",
+   "en": "I had him fix my computer.",
+   "ja": "私は彼にパソコンを修理してもらった。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "使役動詞",
+   "verb": "let",
+   "mean": "Oに〜させてあげる",
+   "note": "相手がやりたがっていることや求めていることに対して、許可を与えたり邪魔をしないでおくとき。",
+   "en": "Let me explain the situation.",
+   "ja": "私にその状況を説明させてください。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "知覚動詞",
+   "verb": "see",
+   "mean": "Oが〜するのを見る / 目撃する",
+   "note": "動作の一部始終や事実を自分の目でハッキリと目撃・確認したとき。",
+   "en": "I saw him cross the street.",
+   "ja": "私は彼が通りを渡るのを見た。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "知覚動詞",
+   "verb": "watch",
+   "mean": "Oが〜するのを見る / 見守る",
+   "note": "動きのある対象（スポーツや子供など）に意識を集中してじっと見つめるとき。",
+   "en": "She watched her son play soccer.",
+   "ja": "彼女は息子がサッカーをするのを見守った。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "知覚動詞",
+   "verb": "notice",
+   "mean": "Oが〜するのに気づく",
+   "note": "さりげなく相手の動作や異変、ちょっとした変化に気づいたとき。",
+   "en": "I noticed him leave the room.",
+   "ja": "私は彼が部屋を出ていくのに気づいた。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "知覚動詞",
+   "verb": "observe",
+   "mean": "Oが〜するのを観察する",
+   "note": "客観的・科学的、あるいは注意深く相手の行動を観察するとき。",
+   "en": "The scientist observed the chemical react.",
+   "ja": "科学者はその化学物質が反応するのを観察した。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "知覚動詞",
+   "verb": "hear",
+   "mean": "Oが〜するのを聞く",
+   "note": "音や声の一部始終、またはその事実を耳で捉えて聞き取ったとき。",
+   "en": "I heard someone knock on the door.",
+   "ja": "私は誰かがドアをノックする音を聞いた。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "知覚動詞",
+   "verb": "listen to",
+   "mean": "Oが〜するのに耳を傾ける",
+   "note": "意識的に注意を向けて、音や演奏、発話にじっくり耳を澄ますとき。",
+   "en": "We listened to the birds sing.",
+   "ja": "私たちは鳥が鳴くのに耳を傾けた。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "知覚動詞",
+   "verb": "feel",
+   "mean": "Oが〜するのを感じる",
+   "note": "五感（触覚など）や内面的な感覚で、相手の動作や事実をとらえたとき。",
+   "en": "She felt the ground shake.",
+   "ja": "彼女は地面が揺れるのを感じた。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "知覚動詞",
+   "verb": "smell",
+   "mean": "Oが〜するのの匂いを嗅ぐ",
+   "note": "何かの匂いが漂ってくるのを感じ取ったり確認したりするとき。",
+   "en": "He smelled something burn.",
+   "ja": "彼は何かが焦げる匂いを嗅ぎつけた。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "知覚動詞",
+   "verb": "taste",
+   "mean": "Oが〜するのを味わう",
+   "note": "飲食物の味を舌で感じ取ったり確かめたりするとき。",
+   "en": "I tasted salt in the soup.",
+   "ja": "私はスープに塩味を感じ取った。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "知覚動詞",
+   "verb": "perceive",
+   "mean": "Oが〜するのを感知する",
+   "note": "状況や相手の行動を深く理解・知覚するというフォーマルな場面。",
+   "en": "He perceived the danger approach.",
+   "ja": "彼は危険が近づくのを察知した。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "その他",
+   "verb": "help",
+   "mean": "Oが〜するのを手伝う",
+   "note": "相手の作業や目標達成をサポート・協同作業するとき（原形とto不定詞の両方可）。",
+   "en": "Please help me carry this box.",
+   "ja": "この箱を運ぶのをお手伝いください。"
+  },
+  {
+   "sec": 1,
+   "secTitle": "目的語 ＋ 原形不定詞（V-inf）をとる動詞",
+   "cat": "その他",
+   "verb": "bid",
+   "mean": "Oに〜するように命じる",
+   "note": "詩や物語などの古風・文学的な表現で、相手に命令を下すとき。",
+   "en": "He bade them enter.",
+   "ja": "彼は彼らに中に入るよう命じた。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "状態の継続",
+   "verb": "keep",
+   "mean": "Oを〜した状態に保つ",
+   "note": "相手をその状態のままキープさせ続けるとき。",
+   "en": "Sorry to keep you waiting.",
+   "ja": "お待たせしてすみません。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "状態の放置",
+   "verb": "leave",
+   "mean": "Oを〜させたままにしておく",
+   "note": "その場を放置して立ち去るような状況描写や、状態をそのままにするとき。",
+   "en": "Don't leave the engine running.",
+   "ja": "エンジンをかけたままにしておかないで。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "発見・遭遇",
+   "verb": "find",
+   "mean": "Oが〜しているところを発見する",
+   "note": "偶然、相手が何かをしている現場に鉢合わせたり見つけたりしたとき。",
+   "en": "I found him sleeping on the couch.",
+   "ja": "私は彼がソファで寝ているのを見つけた。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "発見・遭遇",
+   "verb": "catch",
+   "mean": "Oが〜しているところを捕まえる",
+   "note": "悪事や隠し事をしている真っ最中の現場を、不意に押さえたとき。",
+   "en": "She caught him cheating on the test.",
+   "ja": "彼女は彼がテストでカンニングしている現場を押さえた。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "発見・遭遇",
+   "verb": "spot",
+   "mean": "Oが〜しているところを見つける",
+   "note": "群衆や広範囲の中から、特定の人物が動いている姿をパッと見つけ出したとき。",
+   "en": "I spotted her dancing in the crowd.",
+   "ja": "私は彼女が群衆の中で踊っているのを見つけた。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "発見・遭遇",
+   "verb": "discover",
+   "mean": "Oが〜しているところを発見する",
+   "note": "調査や探索を通じて、相手の活動や事実を新しく見つけ出したとき。",
+   "en": "He discovered a leak dripping.",
+   "ja": "彼は水漏れがポタポタと滴っているのを発見した。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "発見・遭遇",
+   "verb": "send",
+   "mean": "Oを〜の状態に送り出す",
+   "note": "人を特定の動作に急き立てる、あるいは走らせるような状況に追い込むとき。",
+   "en": "The news sent everyone panicking.",
+   "ja": "そのニュースで誰もがパニックに陥った。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "イメージ",
+   "verb": "imagine",
+   "mean": "Oが〜しているところを想像する",
+   "note": "頭の中でダイナミックに動いているシーンや場面を思い描くとき。",
+   "en": "Can you imagine him flying a plane?",
+   "ja": "彼が飛行機を操縦している姿を想像できますか？"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "イメージ",
+   "verb": "picture",
+   "mean": "Oが〜しているところを心に描く",
+   "note": "具体的なビジュアルとして、相手の姿を頭の中にハッキリと映し出すとき。",
+   "en": "I pictured her smiling.",
+   "ja": "私は彼女が微笑んでいる姿を心に思い描いた。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "イメージ",
+   "verb": "envision",
+   "mean": "Oが〜しているところを思い描く",
+   "note": "未来の光景や発展している姿を、前向きにビジョンとして描くとき。",
+   "en": "We envision the company growing rapidly.",
+   "ja": "私たちは会社が急速に成長しているビジョンを描いている。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "妨害 (O from)",
+   "verb": "prevent",
+   "mean": "Oが〜するのを防ぐ",
+   "note": "事前に対策をして、事故やトラブル、相手の行動を未然にブロックするとき。",
+   "en": "The rain prevented us from playing.",
+   "ja": "雨のせいで私たちはプレーできなかった。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "妨害 (O from)",
+   "verb": "stop",
+   "mean": "Oが〜するのを止める",
+   "note": "進行中の動作や出来事を、途中でストップさせたり阻止したりするとき。",
+   "en": "Nothing can stop him from winning.",
+   "ja": "彼の勝利を阻むものは何もない。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "妨害 (O from)",
+   "verb": "prohibit",
+   "mean": "Oが〜するのを禁止する",
+   "note": "規則や法律などの公的なルールに基づいて、行為を固く禁じるとき。",
+   "en": "The law prohibits smokers from entering.",
+   "ja": "法律で喫煙者の立ち入りが禁止されている。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "妨害 (O from)",
+   "verb": "ban",
+   "mean": "Oが〜するのを禁止する",
+   "note": "社会的な影響を考慮して、公式に活動や立ち入りを排除・禁止するとき。",
+   "en": "They banned cars from entering the zone.",
+   "ja": "彼らはそのゾーンへの車の乗り入れを禁止した。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "妨害 (O from)",
+   "verb": "discourage",
+   "mean": "Oが〜するのを思いとどまらせる",
+   "note": "不安やネガティブな言葉を与えて、相手のやる気をそぎ辞めさせるとき。",
+   "en": "Don't let failures discourage you from trying.",
+   "ja": "失敗に挫けて挑戦を諦めたりしないで。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "妨害 (O from)",
+   "verb": "deter",
+   "mean": "Oが〜するのを抑止する",
+   "note": "恐怖心やペナルティなどの抑止力を働かせて、行動を思いとどまらせるとき。",
+   "en": "Cameras deter thieves from stealing.",
+   "ja": "カメラが泥棒の盗みを抑止する。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "妨害 (O from)",
+   "verb": "hinder",
+   "mean": "Oが〜するのを妨げる",
+   "note": "障害物を生じさせるなどして、スムーズな進行や行動の邪魔をするとき。",
+   "en": "Heavy traffic hindered us from arriving.",
+   "ja": "渋滞のせいで到着が妨げられた。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "妨害 (O from)",
+   "verb": "bar",
+   "mean": "Oが〜するのを妨げる/締め出す",
+   "note": "物理的・法的に扉を閉ざすように、通行や参加を拒絶するとき。",
+   "en": "Guards barred him from entering.",
+   "ja": "警備員が彼の入場を阻止した。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "妨害 (O from)",
+   "verb": "block",
+   "mean": "Oが〜するのを遮る",
+   "note": "物理的に通路や視界を塞いで、相手の行動や進行を完全にブロックするとき。",
+   "en": "A truck blocked traffic from moving.",
+   "ja": "トラックが交通の進行を遮った。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "妨害 (O from)",
+   "verb": "exclude",
+   "mean": "Oが〜するのを排除する",
+   "note": "対象のグループやリストから相手を外して、参加させないとき。",
+   "en": "They excluded him from joining the team.",
+   "ja": "彼らは彼をチームへの参加から除外した。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "時間・労力",
+   "verb": "spend",
+   "mean": "Oを〜するのに費やす",
+   "note": "時間やお金、労力をその活動にかけて消費するとき。",
+   "en": "I spend hours studying English.",
+   "ja": "私は英語の勉強に何時間も費やす。"
+  },
+  {
+   "sec": 2,
+   "secTitle": "目的語 ＋ 現在分詞（V-ing）をとる動詞",
+   "cat": "時間・労力",
+   "verb": "waste",
+   "mean": "Oを〜して無駄にする",
+   "note": "時間やリソースを価値のないことにむやみに浪費してしまうとき。",
+   "en": "Don't waste time arguing.",
+   "ja": "口論して時間を無駄にしないで。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "命令・依頼",
+   "verb": "tell",
+   "mean": "Oに〜するように言う",
+   "note": "言葉で明確に指示や伝言、命令を与えて行動を促すとき。",
+   "en": "I told him to wait here.",
+   "ja": "私は彼にここで待つように言った。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "命令・依頼",
+   "verb": "ask",
+   "mean": "Oに〜するように頼む",
+   "note": "相手に丁寧にお願いしたり、質問を兼ねて協力を求めるとき。",
+   "en": "She asked me to help her.",
+   "ja": "彼女は私に手伝ってほしいと頼んできた。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "命令・依頼",
+   "verb": "order",
+   "mean": "Oに〜するように命令する",
+   "note": "上下関係や権限を背景に、厳格に命令を下すとき。",
+   "en": "The captain ordered the troops to advance.",
+   "ja": "隊長は部隊に進軍を命じた。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "命令・依頼",
+   "verb": "command",
+   "mean": "Oに〜するように指令する",
+   "note": "軍隊や公的組織の指揮官として、絶対的な指示を出すとき。",
+   "en": "He commanded his dog to sit.",
+   "ja": "彼は犬におすわりをするよう命じた。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "命令・依頼",
+   "verb": "require",
+   "mean": "Oに〜することを要求する",
+   "note": "規則や状況の必要性に基づいて、義務として求めるフォーマルな場面。",
+   "en": "The rules require students to wear uniforms.",
+   "ja": "規則により学生は制服の着用が義務付けられている。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "命令・依頼",
+   "verb": "request",
+   "mean": "Oに〜することを依頼する",
+   "note": "公式な書類や丁寧な姿勢で、相手に要望を通すとき。",
+   "en": "I requested him to submit the report.",
+   "ja": "私は彼にレポートの提出を依頼した。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "命令・依頼",
+   "verb": "beg",
+   "mean": "Oに〜するように懇願する",
+   "note": "低姿勢で必死に頼み込んだり、慈悲を乞うような切実な場面。",
+   "en": "She begged him to stay.",
+   "ja": "彼女は彼に残ってほしいと懇願した。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "命令・依頼",
+   "verb": "direct",
+   "mean": "Oに〜するように指示する",
+   "note": "具体的な手順や方向性、やり方を指し示して動かすとき。",
+   "en": "The manager directed staff to follow the new policy.",
+   "ja": "マネージャーはスタッフに新方針に従うよう指示した。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "命令・依頼",
+   "verb": "instruct",
+   "mean": "Oに〜するように指導・指示する",
+   "note": "専門的な知識やトレーニング方法を教え込みながら指示するとき。",
+   "en": "He instructed me how to use the machine.",
+   "ja": "彼は私にその機械の使い方を指導した。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "希望・欲求",
+   "verb": "want",
+   "mean": "Oに〜してほしいと望む",
+   "note": "自分の個人的な欲求や要望をストレートに伝える日常的な場面。",
+   "en": "I want you to be honest with me.",
+   "ja": "私に対して正直でいてほしい。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "希望・欲求",
+   "verb": "would like",
+   "mean": "Oに〜してほしいと思う",
+   "note": "「want」よりも丁寧な響きで、上品に相手の行動を望むとき。",
+   "en": "I would like you to review this document.",
+   "ja": "この資料に目を通していただけますと幸いです。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "希望・欲求",
+   "verb": "desire",
+   "mean": "Oに〜することを強く望む",
+   "note": "熱烈な思いや強い意欲を込めて、相手の行動を望むかしこまった場面。",
+   "en": "She desired her son to become a doctor.",
+   "ja": "彼女は息子に医者になってほしいと強く望んだ。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "希望・欲求",
+   "verb": "wish",
+   "mean": "Oが〜することを願う",
+   "note": "実現可能性が低いことや、丁寧・格式ばった表現で望むとき。",
+   "en": "I wish you to understand my feelings.",
+   "ja": "私の気持ちを理解してほしいと願っている。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "希望・欲求",
+   "verb": "prefer",
+   "mean": "Oに〜してもらう方を好む",
+   "note": "いくつかの選択肢の中で、相手にこちらの希望する行動をとってほしいとき。",
+   "en": "I prefer you to work from home.",
+   "ja": "在宅勤務をしてもらえるとありがたいです。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "希望・欲求",
+   "verb": "choose",
+   "mean": "Oに〜することを選ぶ / させる",
+   "note": "相手に主体的に行動の選択権を与えたり、自ら選択させるとき。",
+   "en": "He chose to lead the team.",
+   "ja": "彼はチームを率いることを選んだ。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "希望・欲求",
+   "verb": "expect",
+   "mean": "Oが〜することを期待する",
+   "note": "当然そうなるだろうと予測・期待して、相手の行動を待つとき。",
+   "en": "We expect sales to increase.",
+   "ja": "売上が伸びることを期待している。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "希望・欲求",
+   "verb": "mean",
+   "mean": "Oに〜するつもりである",
+   "note": "自分の意図や計画として、相手に〜してもらうつもりでいるとき。",
+   "en": "I didn't mean to upset you.",
+   "ja": "あなたを怒らせるつもりはなかった。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "許可・可能",
+   "verb": "allow",
+   "mean": "Oが〜することを許す",
+   "note": "相手の行動に対して許可を与え、妨げないとき。",
+   "en": "The ticket allows you to enter twice.",
+   "ja": "このチケットで2回入場できます。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "許可・可能",
+   "verb": "permit",
+   "mean": "Oが〜することを許可する",
+   "note": "公式な認可や規則に基づいて、公に許可を与えるとき。",
+   "en": "Regulations permit visitors to take photos.",
+   "ja": "規則により来場者の写真撮影が許可されている。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "許可・可能",
+   "verb": "enable",
+   "mean": "Oが〜することを可能にする",
+   "note": "能力や環境、技術などを与えて「〜できるようにする」とき。",
+   "en": "This app enables you to learn quickly.",
+   "ja": "このアプリで素早く学習できるようになります。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "許可・可能",
+   "verb": "authorize",
+   "mean": "Oに〜する権限を与える",
+   "note": "法的・組織的な公的権限を正式に付与して行わせるとき。",
+   "en": "They authorized him to sign the contract.",
+   "ja": "彼らは彼に契約書への署名権限を与えた。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "許可・可能",
+   "verb": "entitle",
+   "mean": "Oに〜する権利を与える",
+   "note": "資格や法律上の根拠に基づいて、正当な権利を与えているとき。",
+   "en": "This pass entitles you to free rides.",
+   "ja": "このパスで乗り物が無料になります。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "許可・可能",
+   "verb": "empower",
+   "mean": "Oに権限・力を与える",
+   "note": "相手の能力や自信、決定権を引き出して自立・行動させるとき。",
+   "en": "The training empowers staff to solve issues.",
+   "ja": "その研修によりスタッフが自ら問題を解決できる力がつく。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "強制・動機",
+   "verb": "force",
+   "mean": "Oに無理やり〜させる",
+   "note": "圧倒的な力や状況の圧力によって、嫌がる相手に強制するとき。",
+   "en": "The storm forced us to cancel the trip.",
+   "ja": "嵐のため旅行を中止せざるを得なかった。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "強制・動機",
+   "verb": "compel",
+   "mean": "Oにむりやり〜させられる",
+   "note": "法律や抗えない客観的状況によって、仕方がなく行動させられるとき。",
+   "en": "Circumstances compelled him to resign.",
+   "ja": "状況的に彼は辞任せざるを得なかった。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "強制・動機",
+   "verb": "cause",
+   "mean": "Oに〜を引き起こす",
+   "note": "原因となって、相手が意図せず特定の行動をとる状態を生み出すとき。",
+   "en": "Her words caused me to think twice.",
+   "ja": "彼女の言葉で私は考え直さざるを得なかった。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "強制・動機",
+   "verb": "lead",
+   "mean": "Oを〜するよう導く",
+   "note": "自然な流れや説得によって、相手をその行動へと誘導するとき。",
+   "en": "His explanation led me to understand.",
+   "ja": "彼の説明のおかげで私は理解できた。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "強制・動機",
+   "verb": "get",
+   "mean": "Oを説得して〜させる",
+   "note": "あの手この手を尽くしたり交渉したりして、最終的に行動させるに至るとき。",
+   "en": "I got him to agree with the plan.",
+   "ja": "私は彼を説得してその計画に同意させた。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "強制・動機",
+   "verb": "induce",
+   "mean": "Oを説得して〜させる",
+   "note": "心理的な誘導や動機付けによって、相手に決心させるとき。",
+   "en": "What induced you to do such a thing?",
+   "ja": "何があなたにそんなことをさせたのですか？"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "強制・動機",
+   "verb": "prompt",
+   "mean": "Oに〜するよう促す",
+   "note": "ちょっとしたきっかけや動機を与えて、すぐに相手を行動に駆り立てるとき。",
+   "en": "His question prompted me to reply.",
+   "ja": "彼の質問が私に返答を促した。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "強制・動機",
+   "verb": "inspire",
+   "mean": "Oに〜するインスピレーションを与える",
+   "note": "精神的な刺激や感動を与えて、自発的なやる気を引き起こすとき。",
+   "en": "The speech inspired young people to act.",
+   "ja": "その演説は若者たちに行動を起こさせる刺激となった。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "強制・動機",
+   "verb": "motivate",
+   "mean": "Oに〜する動機を与える",
+   "note": "目標や報酬などを示して、相手の内発的な意欲を高めるとき。",
+   "en": "Praise motivates students to study harder.",
+   "ja": "褒めることで生徒の勉強への意欲が高まる。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "強制・動機",
+   "verb": "tempt",
+   "mean": "Oを誘惑して〜させる",
+   "note": "魅力的な条件や誘い水を出して、その気にさせるとき。",
+   "en": "The dessert tempted me to eat more.",
+   "ja": "そのデザートのおかげでもっと食べたくなった。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "強制・動機",
+   "verb": "challenge",
+   "mean": "Oに〜するよう挑む",
+   "note": "相手の能力を試すように、あえて難しい行動を促すとき。",
+   "en": "She challenged me to solve the puzzle.",
+   "ja": "彼女は私にそのパズルを解いてみろと挑んできた。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "助言・説得",
+   "verb": "advise",
+   "mean": "Oに〜するよう勧める / 助言する",
+   "note": "専門的な知見やアドバイスを授けて、そうすべきだと助言するとき。",
+   "en": "I advise you to rest today.",
+   "ja": "今日は休むことをお勧めします。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "助言・説得",
+   "verb": "counsel",
+   "mean": "Oに〜するよう助言する",
+   "note": "カウンセリングのように親身に相談に乗り、方向性を示して指導するとき。",
+   "en": "The expert counseled him to seek help.",
+   "ja": "専門家は彼に助けを求めるよう助言した。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "助言・説得",
+   "verb": "encourage",
+   "mean": "Oを勇気づけて〜させる",
+   "note": "前向きな言葉をかけて、相手の背中を押して挑戦を促すとき。",
+   "en": "Teachers encourage students to speak up.",
+   "ja": "先生方は生徒たちに発言するよう促している。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "助言・説得",
+   "verb": "warn",
+   "mean": "Oに〜するよう警告する",
+   "note": "危険や不利益をあらかじめ知らせて、そうしないよう注意を促すとき。",
+   "en": "I warned him not to touch it.",
+   "ja": "私は彼にそれに触らないよう警告した。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "助言・説得",
+   "verb": "persuade",
+   "mean": "Oを説得して〜させる",
+   "note": "言葉や論理で相手の考えを変えさせ、行動させるに至るとき。",
+   "en": "She persuaded me to join the club.",
+   "ja": "彼女は私を説得して部活に入らせた。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "助言・説得",
+   "verb": "invite",
+   "mean": "Oを〜するよう誘う",
+   "note": "公的・あるいは丁寧な姿勢で、イベントや行動への参加を促すとき。",
+   "en": "We invite you to share your feedback.",
+   "ja": "皆様からのご意見をお待ちしております。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "助言・説得",
+   "verb": "remind",
+   "mean": "Oに〜することを思い出させる",
+   "note": "忘れがちなことについて、念を押して注意や行動を喚起するとき。",
+   "en": "Please remind me to call her.",
+   "ja": "彼女に電話するのを忘れずに私に思い出させてね。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "認知・思考 (to be)",
+   "verb": "think",
+   "mean": "Oが〜であると考える",
+   "note": "客観的・主観的な思考として、〜であるとみなすとき（主にto be）。",
+   "en": "I think him to be honest.",
+   "ja": "私は彼が正直な人間だと思う。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "認知・思考 (to be)",
+   "verb": "believe",
+   "mean": "Oが〜であると信じる",
+   "note": "確信を持って、〜に違いないと固くみなすとき（主にto be）。",
+   "en": "They believe the plan to be effective.",
+   "ja": "彼らはその計画が効果的であると信じている。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "認知・思考 (to be)",
+   "verb": "consider",
+   "mean": "Oが〜であるとみなす",
+   "note": "じっくり検討した上で、評価や判断を下すとき（主にto be）。",
+   "en": "We consider this project to be crucial.",
+   "ja": "私たちはこのプロジェクトが極めて重要であるとみなしている。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "認知・思考 (to be)",
+   "verb": "find",
+   "mean": "Oが〜であるとわかる / 気づく",
+   "note": "実際に経験や調査を通じて、〜という性質だと判明したとき（主にto be）。",
+   "en": "I found the book to be useful.",
+   "ja": "私はその本が役立つとわかった。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "認知・思考 (to be)",
+   "verb": "know",
+   "mean": "Oが〜であると知っている",
+   "note": "事実として、相手がそうであることを認識しているとき（主にto be）。",
+   "en": "I know him to be a reliable person.",
+   "ja": "私は彼が信頼できる人物であると知っている。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "認知・思考 (to be)",
+   "verb": "understand",
+   "mean": "Oが〜であると理解する",
+   "note": "状況を把握して、〜であると納得しているとき（主にto be）。",
+   "en": "I understand the rules to be strict.",
+   "ja": "私はルールが厳しいものであると理解している。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "認知・思考 (to be)",
+   "verb": "prove",
+   "mean": "Oが〜であると証明する",
+   "note": "証拠を示して、客観的に〜であると立証するとき（主にto be）。",
+   "en": "The test proved the medicine to be safe.",
+   "ja": "その試験により薬の安全性が証明された。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "認知・思考 (to be)",
+   "verb": "show",
+   "mean": "Oが〜であることを示す",
+   "note": "データや事実によって、〜という側面を明らかにするとき（主にto be）。",
+   "en": "Records show the business to be growing.",
+   "ja": "記録によれば事業は成長している。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "認知・思考 (to be)",
+   "verb": "suppose",
+   "mean": "Oが〜であると想定する",
+   "note": "仮定の話として、〜であるとみなすとき（主にto be）。",
+   "en": "Let's suppose him to be innocent.",
+   "ja": "彼が無実であると仮定してみよう。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "認知・思考 (to be)",
+   "verb": "estimate",
+   "mean": "Oが〜であると見積もる",
+   "note": "数値や規模を大まかに計算して評価を下すとき（主にto be）。",
+   "en": "Experts estimate the cost to be high.",
+   "ja": "専門家はその費用が高額になると見積もっている。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "認知・思考 (to be)",
+   "verb": "declare",
+   "mean": "Oが〜であると宣言する",
+   "note": "公の場で公式に、〜であると表明するとき（主にto be）。",
+   "en": "The judge declared him to be guilty.",
+   "ja": "裁判官は彼を有罪と宣告した。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "認知・思考",
+   "verb": "appoint",
+   "mean": "Oを〜に任命する",
+   "note": "特定の役職や役割に人を選んで就かせるとき。",
+   "en": "They appointed him manager.",
+   "ja": "彼らは彼をマネージャーに任命した。"
+  },
+  {
+   "sec": 3,
+   "secTitle": "目的語 ＋ to不定詞（to V）をとる動詞",
+   "cat": "認知・思考",
+   "verb": "designate",
+   "mean": "Oを〜に指定する",
+   "note": "特定の名称や役割に割り当てて位置づけるとき。",
+   "en": "The city designated the area as a park.",
+   "ja": "市はその地域を公園に指定した。"
+  }
+ ]
+}
