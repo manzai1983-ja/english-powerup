@@ -6,8 +6,13 @@
 |---|---|
 | **[聞き取れなかった英文](https://manzai1983-ja.github.io/english-powerup/)** | NHKラジオ英会話2026で「（全然聞こえない）」と印を付けた **277文 / 76回ぶん** |
 | **[動詞の文型リファレンス](https://manzai1983-ja.github.io/english-powerup/verbs.html)** | S+V+O+C / V 構文をとる **91語 / 3構文 / 16カテゴリ**。意味・使う場面・例文つき |
+| **[イディオム例文集](https://manzai1983-ja.github.io/english-powerup/idioms.html)** | ラジオ英会話2026の Unknown のうちイディオム・熟語と、番組本文から取った例文。**毎週の転記分も自動で載る** |
 
-読み上げ・発音チェック・録音・伏字・記録のしくみは2つで共通（`build/tmpl.html`）。
+読み上げ・発音チェック・録音・伏字・記録のしくみは上2つで共通（`build/tmpl.html`）。
+
+イディオム例文集（`idioms.html`）は手書きの1ファイルで、生成の手順はない。データは開くたびに
+Google Apps Script のWebアプリ（`?data=unknown`。スプレッドシート「ラジオ英会話_2026」の Unknown と
+Drive の「ラジオ英会話_週次処理/例文.json」から作る）を読む。例文は週次処理が本文から自動で足す。
 
 ## できること
 

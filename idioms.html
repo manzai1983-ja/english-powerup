@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>イディオム例文集</title>
+<meta name="description" content="ラジオ英会話のUnknownに出てきたイディオム・熟語と、番組本文からの例文。読み上げと聞き取り（発音チェック）付き。">
+<style>
+  :root {
+    --paper: #F2F1EE; --surface: #FFFFFF; --ink: #1B1D22; --muted: #5F6570; --faint: #8D939D;
+    --accent: #2E4B7A; --accent-tint: #E4EAF3; --rule: #D9D8D4; --rule-soft: #E7E6E3;
+    --ok: #1F6B4E; --ok-tint: #E1EFE8; --near: #8A6410; --near-tint: #F7EED8; --ng: #A3372F; --ng-tint: #F7E2E0;
+    --hl: #FFE9A8; --on-accent: #FFFFFF;
+    --font-en: "Palatino Linotype", Palatino, "Iowan Old Style", Georgia, serif;
+    --font-jp: "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #12141A; --surface: #1A1D25; --ink: #E8EAEE; --muted: #A0A6B0; --faint: #79808B;
+      --accent: #7FA6DC; --accent-tint: #1D2941; --rule: #2C313B; --rule-soft: #232830;
+      --ok: #63C79A; --ok-tint: #16311F; --near: #DCB45C; --near-tint: #322A15; --ng: #E58279; --ng-tint: #35201E;
+      --hl: #5A4A17; --on-accent: #12141A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #12141A; --surface: #1A1D25; --ink: #E8EAEE; --muted: #A0A6B0; --faint: #79808B;
+    --accent: #7FA6DC; --accent-tint: #1D2941; --rule: #2C313B; --rule-soft: #232830;
+    --ok: #63C79A; --ok-tint: #16311F; --near: #DCB45C; --near-tint: #322A15; --ng: #E58279; --ng-tint: #35201E;
+    --hl: #5A4A17; --on-accent: #12141A;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-jp); line-height: 1.6; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 20px 16px 80px; }
+  header h1 { font-size: 1.35rem; margin: 0 0 4px; }
+  header p { margin: 0; color: var(--muted); font-size: .9rem; }
+  header a { color: var(--accent); }
+  .bar { position: sticky; top: 0; z-index: 5; background: var(--paper); padding: 10px 0; border-bottom: 1px solid var(--rule); margin: 14px 0 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .bar input[type=search], .bar select { font: inherit; font-size: .9rem; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); }
+  .bar input[type=search] { flex: 1 1 180px; min-width: 0; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+  .seg button { font: inherit; font-size: .82rem; padding: 6px 10px; border: 0; background: var(--surface); color: var(--muted); cursor: pointer; }
+  .seg button.on { background: var(--accent); color: var(--on-accent); }
+  label.chk { font-size: .85rem; color: var(--muted); display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+  .status { font-size: .82rem; color: var(--faint); margin: 0 0 10px; }
+  .help { font-size: .85rem; background: var(--near-tint); color: var(--ink); border-radius: 8px; padding: 8px 10px; margin: 0 0 10px; }
+  .ep-h { font-size: .85rem; color: var(--muted); margin: 22px 0 6px; font-weight: 600; }
+  .card { background: var(--surface); border: 1px solid var(--rule-soft); border-radius: 12px; padding: 12px 14px; margin: 0 0 10px; }
+  .top { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .no { font-size: .75rem; color: var(--faint); }
+  .phrase { font-family: var(--font-en); font-size: 1.12rem; font-weight: 700; }
+  .meaning { color: var(--muted); font-size: .92rem; }
+  .ex { font-family: var(--font-en); font-size: 1.08rem; margin: 8px 0 4px; line-height: 1.9; }
+  .ex .w { cursor: pointer; border-radius: 4px; padding: 1px 2px; }
+  .ex .w:hover { background: var(--accent-tint); }
+  .ex .w.now { background: var(--hl); }
+  .ex .w.miss { text-decoration: underline wavy var(--ng); text-underline-offset: 4px; }
+  .ex.hidden .w { color: transparent; background: var(--rule-soft); }
+  .ex.hidden .w.now { background: var(--hl); }
+  .noex { color: var(--faint); font-size: .85rem; margin: 6px 0; }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .btns button { font: inherit; font-size: .82rem; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+  .btns button.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .btns svg { width: 16px; height: 16px; }
+  .res { font-size: .88rem; margin-top: 8px; padding: 6px 10px; border-radius: 8px; }
+  .res:empty { display: none; }
+  .res.ok { background: var(--ok-tint); color: var(--ok); }
+  .res.near { background: var(--near-tint); color: var(--near); }
+  .res.ng { background: var(--ng-tint); color: var(--ng); }
+  .res .heard { display: block; color: var(--ink); font-family: var(--font-en); margin-top: 2px; }
+  .mark { font-size: .75rem; margin-left: auto; color: var(--faint); }
+  .mark.ok { color: var(--ok); } .mark.near { color: var(--near); } .mark.ng { color: var(--ng); }
+  .empty { color: var(--muted); text-align: center; padding: 40px 0; }
+  @media (max-width: 480px) { .phrase { font-size: 1.02rem; } .ex { font-size: 1rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>イディオム例文集</h1>
+  <p>ラジオ英会話の Unknown に出てきたイディオム・熟語と、番組の本文から取った例文です。
+     例文の<b>どの単語を押しても、そこから読み上げ</b>ます。🎤 で自分の発音を聞き取って判定します。
+     <a href="./">← 聞き取れなかった英文</a></p>
+</header>
+
+<div class="bar">
+  <input type="search" id="q" placeholder="英語・意味・例文で検索" aria-label="検索">
+  <select id="month" aria-label="月"><option value="">すべての月</option></select>
+  <div class="seg" id="speed" role="group" aria-label="読み上げの速さ">
+    <button data-s="slow">ゆっくり</button><button data-s="normal" class="on">ふつう</button><button data-s="fast">はやい</button>
+  </div>
+  <label class="chk"><input type="checkbox" id="onlyEx" checked> 例文があるものだけ</label>
+  <label class="chk"><input type="checkbox" id="hide"> 例文を隠す（聞き取り練習）</label>
+  <select id="rec" aria-label="記録で絞り込み">
+    <option value="">記録: すべて</option><option value="todo">まだ○でないもの</option><option value="ng">△×のもの</option>
+  </select>
+</div>
+<p class="status" id="status">読み込み中…</p>
+<p class="help" id="help" hidden></p>
+<div id="list"></div>
+</div>
+
+<script>
+/* データの取り出し元（Google Apps Script のWebアプリ。スプレッドシートと例文ファイルから毎回作る） */
+var DATA_URL = 'https://script.google.com/macros/s/AKfycbzkCIdC6N_U6qZYhR07t2buQtzO96BQoO5wqlan7Wy3n2W4n_AhZtZOcVh4u7jyLli1/exec?data=unknown';
+
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+var helpEl = document.getElementById('help');
+function note(html) { helpEl.innerHTML = html; helpEl.hidden = false; }
+
+/* ============================================================
+   読み上げ（English PowerUp と同じ方式。語の番号から読み始める）
+   ============================================================ */
+var TTS = (function () {
+  var synth = window.speechSynthesis;
+  if (!synth) { note('このブラウザは読み上げに対応していません。'); return { play: function () {}, stop: function () {}, setSpeed: function () {}, ok: false }; }
+  var RATES = { slow: 0.6, normal: 0.92, fast: 1.15 }, speed = 'normal', voice = null, cur = null;
+  function pick() {
+    var vs = synth.getVoices(); if (!vs.length) return;
+    var en = vs.filter(function (v) { return /^en(-|_)/i.test(v.lang); });
+    if (!en.length) { note('この端末に英語の読み上げ音声が入っていません。Windows なら 設定 → 時刻と言語 → 音声認識 で英語の音声を追加できます。'); return; }
+    var pref = ['Google US English', 'Microsoft Aria', 'Microsoft Jenny', 'Samantha', 'Microsoft Zira'];
+    for (var i = 0; i < pref.length && !voice; i++) for (var j = 0; j < en.length; j++) if (en[j].name.indexOf(pref[i]) >= 0) { voice = en[j]; break; }
+    if (!voice) for (var k = 0; k < en.length; k++) if (/^en-US/i.test(en[k].lang)) { voice = en[k]; break; }
+    if (!voice) voice = en[0];
+  }
+  pick(); if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = pick;
+  function stop() {
+    var st = cur; cur = null;
+    if (st) { if (st.timer) clearInterval(st.timer); if (st.btn) st.btn.classList.remove('on'); if (st.hooks.onStop) st.hooks.onStop(); }
+    synth.cancel();
+  }
+  /* words を from 番目から読む。hooks.onWord(index) で読んでいる語を知らせる */
+  function play(words, from, hooks, btn) {
+    stop(); if (!words.length) return;
+    from = Math.max(0, Math.min(from | 0, words.length - 1));
+    var chunk = words.slice(from), text = chunk.join(' '), offs = [], p = 0;
+    for (var i = 0; i < chunk.length; i++) { offs.push(p); p += chunk[i].length + 1; }
+    var u = new SpeechSynthesisUtterance(text);
+    if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
+    u.rate = RATES[speed];
+    var st = { hooks: hooks || {}, btn: btn || null, boundary: false, timer: null }; cur = st;
+    u.onboundary = function (e) {
+      if (cur !== st || typeof e.charIndex !== 'number') return;
+      st.boundary = true; var k = 0;
+      for (var j = 0; j < offs.length; j++) { if (offs[j] <= e.charIndex) k = j; else break; }
+      if (st.hooks.onWord) st.hooks.onWord(from + k);
+    };
+    u.onend = u.onerror = function () {
+      if (cur !== st) return; cur = null; if (st.timer) clearInterval(st.timer);
+      if (st.btn) st.btn.classList.remove('on'); if (st.hooks.onStop) st.hooks.onStop();
+    };
+    if (st.btn) st.btn.classList.add('on');
+    /* boundary を出さない音声では経過時間から位置を見積もる */
+    var t0 = Date.now();
+    st.timer = setInterval(function () {
+      if (cur !== st || st.boundary) return;
+      var k = Math.floor((Date.now() - t0) / 1000 * 2.6 * RATES[speed]);
+      if (st.hooks.onWord) st.hooks.onWord(Math.min(words.length - 1, from + k));
+    }, 120);
+    synth.speak(u);
+  }
+  return { ok: true, play: play, stop: stop, setSpeed: function (s) { speed = s; } };
+})();
+
+/* ============================================================
+   聞き取り（音声認識で発音チェック）
+   ============================================================ */
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!SR) note('このブラウザでは聞き取り（発音チェック）が使えません。Chrome・Edge・iPhone の Safari で開いてください。読み上げはこのままでも使えます。');
+var ONES = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+var TENS = ['', '', 'twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+function numWords(n) {
+  var out = [];
+  if (n >= 1000) { out = out.concat(numWords(Math.floor(n / 1000)), ['thousand']); n %= 1000; }
+  if (n >= 100) { out = out.concat(numWords(Math.floor(n / 100)), ['hundred']); n %= 100; }
+  if (n >= 20) { out.push(TENS[Math.floor(n / 10)]); n %= 10; if (n) out.push(ONES[n]); return out; }
+  if (n > 0 || !out.length) out.push(ONES[n]); return out;
+}
+/* 比べるための語の列。表示の語の番号（何番目の表示語か）も持つ */
+function keys(words) {
+  var key = [], at = [];
+  words.forEach(function (w, i) {
+    String(w).toLowerCase().replace(/[’]/g, "'").replace(/[^a-z0-9']+/g, ' ').trim().split(' ').forEach(function (p) {
+      p = p.replace(/^'+|'+$/g, ''); if (!p) return;
+      if (/^[0-9]{1,4}$/.test(p)) numWords(parseInt(p, 10)).forEach(function (x) { key.push(x); at.push(i); });
+      else { key.push(p); at.push(i); }
+    });
+  });
+  return { key: key, at: at };
+}
+function align(a, b) {
+  var m = a.length, n = b.length, d = [], f = [], i, j;
+  for (i = 0; i <= m; i++) { d[i] = [i]; f[i] = ['u']; }
+  for (j = 0; j <= n; j++) { d[0][j] = j; f[0][j] = 'l'; }
+  for (i = 1; i <= m; i++) for (j = 1; j <= n; j++) {
+    var same = a[i - 1] === b[j - 1], sub = d[i - 1][j - 1] + (same ? 0 : 1), del = d[i - 1][j] + 1, ins = d[i][j - 1] + 1, best = Math.min(sub, del, ins);
+    d[i][j] = best; f[i][j] = best === sub ? (same ? 'e' : 's') : (best === del ? 'u' : 'l');
+  }
+  var miss = []; i = m; j = n;
+  while (i > 0 || j > 0) {
+    var dir = (i > 0 && j > 0) ? f[i][j] : (i > 0 ? 'u' : 'l');
+    if (dir === 'e') { i--; j--; } else if (dir === 's') { miss.push(i - 1); i--; j--; } else if (dir === 'u') { miss.push(i - 1); i--; } else j--;
+  }
+  var max = Math.max(m, n);
+  return { miss: miss, score: max ? 1 - d[m][n] / max : 0 };
+}
+var MIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3.5"/></svg>';
+var SPK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
+var recNow = null;
+function listen(item, card, btn) {
+  if (recNow) { try { recNow.stop(); } catch (e) {} return; }
+  if (!SR) return;
+  TTS.stop();
+  var res = card.querySelector('.res'), exEl = card.querySelector('.ex'), target = keys(item.words);
+  var rec; try { rec = new SR(); } catch (e) { return; }
+  recNow = rec;
+  rec.lang = 'en-US'; rec.interimResults = true; rec.continuous = true; rec.maxAlternatives = 5;
+  var finals = [], alts = [];
+  var guard = setTimeout(function () { try { rec.stop(); } catch (e) {} }, Math.min(25000, 7000 + target.key.length * 600));
+  btn.classList.add('on'); btn.innerHTML = MIC + '<span>■ 終わったら押す</span>';
+  res.className = 'res'; res.innerHTML = '聞いています… 例文を英語で言ってください';
+  exEl.querySelectorAll('.w.miss').forEach(function (w) { w.classList.remove('miss'); });
+  rec.onresult = function (e) {
+    var interim = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      var r = e.results[i];
+      if (r.isFinal) { finals.push(r[0].transcript); for (var k = 0; k < r.length; k++) alts.push(r[k].transcript); }
+      else interim += r[0].transcript;
+    }
+    if (interim) res.innerHTML = '聞いています…<span class="heard">' + esc((finals.join(' ') + ' ' + interim).trim()) + '</span>';
+  };
+  var errMsg = '';
+  rec.onerror = function (e) {
+    var c = e.error || '';
+    if (c === 'no-speech') errMsg = '聞き取れませんでした。マイクに近づいてもう一度どうぞ。';
+    else if (c === 'not-allowed' || c === 'service-not-allowed') errMsg = 'マイクが使えません。アドレスバーの錠前アイコンから、このページのマイクを「許可」にしてください。';
+    else if (c === 'network') errMsg = '音声認識のサーバーに届きませんでした（ネット接続が必要です）。';
+    else if (c !== 'aborted') errMsg = '認識できませんでした（' + c + '）。';
+  };
+  rec.onend = function () {
+    clearTimeout(guard); recNow = null;
+    btn.classList.remove('on'); btn.innerHTML = MIC + '<span>聞き取り</span>';
+    var text = finals.join(' ').trim();
+    if (!text) { res.className = 'res ng'; res.innerHTML = errMsg || '聞き取れませんでした。もう一度どうぞ。'; return; }
+    /* 第1候補が外れていても、候補の中によく合うものがあればそれで判定する */
+    var best = null;
+    [text].concat(alts).forEach(function (t) { var a = align(target.key, keys(t.split(/\s+/)).key); if (!best || a.score > best.a.score) best = { t: t, a: a }; });
+    var sc = best.a.score, cls = sc >= 0.9 ? 'ok' : sc >= 0.7 ? 'near' : 'ng';
+    var missIdx = {}; best.a.miss.forEach(function (k) { missIdx[target.at[k]] = true; });
+    var ws = exEl.querySelectorAll('.w'); Object.keys(missIdx).forEach(function (i) { if (ws[i]) ws[i].classList.add('miss'); });
+    res.className = 'res ' + cls;
+    res.innerHTML = (cls === 'ok' ? '○ よく言えています' : cls === 'near' ? '△ おしい（波線の語を確認）' : '× もう一度（波線の語が聞き取れませんでした）') +
+      '（一致 ' + Math.round(sc * 100) + '%）<span class="heard">聞き取り: ' + esc(best.t) + '</span>';
+    Store.set(item.id, cls); updateMark(card, item.id);
+  };
+  try { rec.start(); } catch (e) { recNow = null; }
+}
+
+/* ============================================================
+   記録（この端末のブラウザに保存）
+   ============================================================ */
+var Store = (function () {
+  var KEY = 'english-powerup-idioms-v1', data = {};
+  try { data = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { data = {}; }
+  return {
+    get: function (id) { return data[id] || null; },
+    set: function (id, r) { data[id] = { r: r, t: Date.now() }; try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
+  };
+})();
+function updateMark(card, id) {
+  var m = card.querySelector('.mark'), s = Store.get(id);
+  m.className = 'mark' + (s ? ' ' + s.r : ''); m.textContent = s ? { ok: '○', near: '△', ng: '×' }[s.r] : '';
+}
+
+/* ============================================================
+   一覧
+   ============================================================ */
+var ALL = [];
+var listEl = document.getElementById('list'), statusEl = document.getElementById('status');
+function render() {
+  TTS.stop();
+  var q = document.getElementById('q').value.trim().toLowerCase(), mon = document.getElementById('month').value;
+  var onlyEx = document.getElementById('onlyEx').checked, hide = document.getElementById('hide').checked, recF = document.getElementById('rec').value;
+  var rows = ALL.filter(function (r) {
+    if (!r.idiom) return false;
+    if (onlyEx && !r.example) return false;
+    if (mon && r.month !== mon) return false;
+    if (q && (r.word + ' ' + r.meaning + ' ' + r.example).toLowerCase().indexOf(q) < 0) return false;
+    var s = Store.get(r.id);
+    if (recF === 'todo' && s && s.r === 'ok') return false;
+    if (recF === 'ng' && !(s && s.r !== 'ok')) return false;
+    return true;
+  });
+  statusEl.textContent = rows.length + ' 件表示（イディオム・熟語 ' + ALL.filter(function (r) { return r.idiom; }).length + ' 件中）　データ更新: ' + (window.__updated || '');
+  listEl.innerHTML = '';
+  if (!rows.length) { listEl.innerHTML = '<p class="empty">該当するものがありません。</p>'; return; }
+  var frag = document.createDocumentFragment(), lastEp = null;
+  rows.forEach(function (r) {
+    if (r.ep !== lastEp) { var h = document.createElement('div'); h.className = 'ep-h'; h.textContent = r.month + '月　第' + r.ep + '回'; frag.appendChild(h); lastEp = r.ep; }
+    var c = document.createElement('div'); c.className = 'card';
+    c.innerHTML = '<div class="top"><span class="no">No.' + r.no + '</span><span class="phrase">' + esc(r.word) + '</span><span class="meaning">' + esc(r.meaning) + '</span><span class="mark"></span></div>' +
+      (r.example ? '<div class="ex' + (hide ? ' hidden' : '') + '">' + r.words.map(function (w, i) { return '<span class="w" data-i="' + i + '">' + esc(w) + '</span>'; }).join(' ') + '</div>' : '<p class="noex">例文はまだありません</p>') +
+      '<div class="btns">' +
+        (r.example ? '<button class="b-ex">' + SPK + '<span>例文を読む</span></button>' : '') +
+        '<button class="b-ph">' + SPK + '<span>表現だけ</span></button>' +
+        (r.example && hide ? '<button class="b-show"><span>英文を見る</span></button>' : '') +
+        (r.example ? '<button class="b-mic">' + MIC + '<span>聞き取り</span></button>' : '') +
+      '</div><div class="res"></div>';
+    wire(c, r); updateMark(c, r.id); frag.appendChild(c);
+  });
+  listEl.appendChild(frag);
+}
+function wire(card, r) {
+  var exEl = card.querySelector('.ex'), ws = exEl ? exEl.querySelectorAll('.w') : [];
+  function hooks() {
+    return {
+      onWord: function (i) { ws.forEach(function (w) { w.classList.remove('now'); }); if (ws[i]) ws[i].classList.add('now'); },
+      onStop: function () { ws.forEach(function (w) { w.classList.remove('now'); }); }
+    };
+  }
+  /* 例文のどの語を押しても、そこから読む */
+  ws.forEach(function (w) { w.addEventListener('click', function () { TTS.play(r.words, +w.dataset.i, hooks(), card.querySelector('.b-ex')); }); });
+  var bEx = card.querySelector('.b-ex'); if (bEx) bEx.addEventListener('click', function () { if (bEx.classList.contains('on')) TTS.stop(); else TTS.play(r.words, 0, hooks(), bEx); });
+  var bPh = card.querySelector('.b-ph'); bPh.addEventListener('click', function () { TTS.play(phraseForSpeech(r.word).split(/\s+/), 0, {}, bPh); });
+  var bShow = card.querySelector('.b-show'); if (bShow) bShow.addEventListener('click', function () { exEl.classList.toggle('hidden'); bShow.querySelector('span').textContent = exEl.classList.contains('hidden') ? '英文を見る' : '英文を隠す'; });
+  var bMic = card.querySelector('.b-mic'); if (bMic) bMic.addEventListener('click', function () { listen(r, card, bMic); });
+}
+/* 「be stationed at A」の A・V・～ などは読み上げない */
+function phraseForSpeech(w) {
+  return String(w).replace(/\[([^\]]*)\]/g, function (m, x) { return x.split('/')[0]; }).replace(/\([^)]*\)/g, ' ')
+    .split(/\s+/).filter(function (t) { return t && !/^(A|B|V|V-ing|Ving|V-ed|V1|V2|S|～|〜|~|…)[,.?!]*$/.test(t); }).join(' ').replace(/[～〜]/g, '');
+}
+
+document.getElementById('q').addEventListener('input', render);
+['month', 'onlyEx', 'hide', 'rec'].forEach(function (id) { document.getElementById(id).addEventListener('change', render); });
+document.querySelectorAll('#speed button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    document.querySelectorAll('#speed button').forEach(function (x) { x.classList.remove('on'); });
+    b.classList.add('on'); TTS.setSpeed(b.dataset.s);
+  });
+});
+
+fetch(DATA_URL).then(function (r) { return r.json(); }).then(function (d) {
+  if (d.error) throw new Error(d.error);
+  window.__updated = d.updated;
+  ALL = d.rows.map(function (r) {
+    r.id = r.ep + '|' + r.word;
+    r.words = r.example ? r.example.split(/\s+/).filter(function (x) { return x; }) : [];
+    return r;
+  });
+  var months = [];
+  ALL.forEach(function (r) { if (r.idiom && months.indexOf(r.month) < 0) months.push(r.month); });
+  var sel = document.getElementById('month');
+  months.forEach(function (m) { var o = document.createElement('option'); o.value = m; o.textContent = m + '月'; sel.appendChild(o); });
+  render();
+}).catch(function (e) {
+  statusEl.textContent = 'データを読み込めませんでした（' + e.message + '）。時間をおいて開き直してください。';
+});
+</script>
+</body>
+</html>
