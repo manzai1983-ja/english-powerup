@@ -171,9 +171,17 @@ var TTS = (function () {
 var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 var rec = null, listening = false, paused = false, interimEl = null;
 /* 速くするための仕組み
-   ・Chrome が「文の終わり」と決めるまで（無音1秒以上）待たず、途中経過が COMMIT_MS 変わらなければその時点で訳す
+   ・Chrome が「文の終わり」と決めるまで（無音1秒以上）待たず、途中経過が COMMIT_MS 変わらなければ確定させて訳す
    ・読み上げ中はマイクを止めず「聞き流す」だけにする（止めて再起動すると時間がかかり、直後の発話も落ちるため） */
-var COMMIT_MS = 600;
+var COMMIT_MS = 1000;
+/* 同じ文が続けて確定したとき（数秒以内・記号や空白を除いて同じ）は2回目を捨てる */
+var lastDone = '', lastDoneAt = 0;
+function isRepeat(t) {
+  var n = t.replace(/[\s、。，．,.!?！？]/g, ''), now = Date.now();
+  var dup = n && n === lastDone && now - lastDoneAt < 5000;
+  lastDone = n; lastDoneAt = now;
+  return dup;
+}
 var commitTimer = null, committed = {}, ignoreBelow = 0, lastLen = 0, muted = false, liveSeq = 0, previewBusy = false, previewNext = null;
 if (!SR) { note('このブラウザでは音声の聞き取りが使えません。Chrome・Edge（パソコン／Android）か iPhone の Safari で開いてください。下の欄に文字で入れれば訳と読み上げは使えます。'); $('mic').disabled = true; $('mic').classList.add('wait'); }
 
@@ -184,23 +192,20 @@ function startRec() {
   rec.onresult = function (e) {
     lastLen = e.results.length;
     if (muted) return;                                   /* 読み上げ中（スピーカーの英語を拾わない） */
-    var parts = [], interim = '';
+    var interim = '';
     for (var i = e.resultIndex; i < e.results.length; i++) {
       if (i < ignoreBelow) continue;
       var t = e.results[i][0].transcript.trim();
-      if (e.results[i].isFinal) {
-        var c = committed[i]; delete committed[i];
-        if (c == null) { if (t) handle(t); }
-        else if (t.indexOf(c) === 0 && t.length > c.length) handle(t.slice(c.length).trim());   /* 先に訳した後の続きだけ */
-      } else if (committed[i] == null) { parts.push({ i: i, t: t }); interim += t; }
+      if (e.results[i].isFinal) { if (t && !isRepeat(t)) handle(t); }   /* 訳すのは確定した文だけ（二重に訳さない） */
+      else interim += t;
     }
     clearTimeout(commitTimer);
     if (!interim) return;
     showLive(interim, null, true);
     livePreview(interim);
-    commitTimer = setTimeout(function () {             /* 少し止まったら、文の終わりを待たずに訳す */
-      parts.forEach(function (p) { committed[p.i] = p.t; });
-      handle(interim);
+    var me = rec;
+    commitTimer = setTimeout(function () {             /* 少し止まったら Chrome に「ここで確定して」と頼む（文末の長い待ちを省く） */
+      if (rec === me && !muted) { try { me.stop(); } catch (x) {} }   /* 確定 → onend ですぐ聞き直す */
     }, COMMIT_MS);
   };
   rec.onerror = function (e) {
