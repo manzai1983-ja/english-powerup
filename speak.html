@@ -127,7 +127,9 @@ var Trans = (function () {
     if (local) { try { return { en: await local.translate(text), via: 'Chrome内蔵の翻訳' }; } catch (e) {} }
     return { en: await viaMyMemory(text), via: 'MyMemory（無料API）' };
   }
-  return { prepare: prepare, translate: translate };
+  /* 話している途中の下訳（端末内の翻訳があるときだけ。無料APIの上限を使わないため） */
+  async function preview(text) { if (!local) return null; try { return await local.translate(text); } catch (e) { return null; } }
+  return { prepare: prepare, translate: translate, preview: preview };
 })();
 
 /* ============================================================
@@ -168,28 +170,48 @@ var TTS = (function () {
    ============================================================ */
 var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 var rec = null, listening = false, paused = false, interimEl = null;
+/* 速くするための仕組み
+   ・Chrome が「文の終わり」と決めるまで（無音1秒以上）待たず、途中経過が COMMIT_MS 変わらなければその時点で訳す
+   ・読み上げ中はマイクを止めず「聞き流す」だけにする（止めて再起動すると時間がかかり、直後の発話も落ちるため） */
+var COMMIT_MS = 600;
+var commitTimer = null, committed = {}, ignoreBelow = 0, lastLen = 0, muted = false, liveSeq = 0, previewBusy = false, previewNext = null;
 if (!SR) { note('このブラウザでは音声の聞き取りが使えません。Chrome・Edge（パソコン／Android）か iPhone の Safari で開いてください。下の欄に文字で入れれば訳と読み上げは使えます。'); $('mic').disabled = true; $('mic').classList.add('wait'); }
 
 function startRec() {
   if (!SR || rec) return;
   rec = new SR(); rec.lang = 'ja-JP'; rec.continuous = true; rec.interimResults = true;
+  committed = {}; ignoreBelow = 0; lastLen = 0; clearTimeout(commitTimer);
   rec.onresult = function (e) {
-    var interim = '';
+    lastLen = e.results.length;
+    if (muted) return;                                   /* 読み上げ中（スピーカーの英語を拾わない） */
+    var parts = [], interim = '';
     for (var i = e.resultIndex; i < e.results.length; i++) {
+      if (i < ignoreBelow) continue;
       var t = e.results[i][0].transcript.trim();
-      if (e.results[i].isFinal) { if (t) handle(t); } else interim += t;
+      if (e.results[i].isFinal) {
+        var c = committed[i]; delete committed[i];
+        if (c == null) { if (t) handle(t); }
+        else if (t.indexOf(c) === 0 && t.length > c.length) handle(t.slice(c.length).trim());   /* 先に訳した後の続きだけ */
+      } else if (committed[i] == null) { parts.push({ i: i, t: t }); interim += t; }
     }
+    clearTimeout(commitTimer);
+    if (!interim) return;
     showLive(interim, null, true);
+    livePreview(interim);
+    commitTimer = setTimeout(function () {             /* 少し止まったら、文の終わりを待たずに訳す */
+      parts.forEach(function (p) { committed[p.i] = p.t; });
+      handle(interim);
+    }, COMMIT_MS);
   };
   rec.onerror = function (e) {
     if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { note('マイクの使用が許可されていません。アドレスバーの鍵アイコンからマイクを「許可」にしてください。'); stopAll(); }
     else if (e.error !== 'no-speech' && e.error !== 'aborted') setState('聞き取りエラー: ' + e.error + '（自動で再開します）');
   };
-  rec.onend = function () { rec = null; if (listening && !paused) setTimeout(startRec, 150); };   /* 無音が続くと切れるので再開 */
+  rec.onend = function () { rec = null; if (listening) startRec(); };   /* 無音が続くと切れるので、すぐ再開 */
   try { rec.start(); } catch (e) { rec = null; }
 }
 function stopRec() { if (rec) { var r = rec; rec = null; r.onend = null; try { r.abort(); } catch (e) {} } }
-function stopAll() { listening = false; paused = false; stopRec(); $('mic').classList.remove('on'); $('mic').textContent = '話す'; setState('止めました'); }
+function stopAll() { listening = false; paused = false; muted = false; clearTimeout(commitTimer); stopRec(); $('mic').classList.remove('on'); $('mic').textContent = '話す'; setState('止めました'); }
 
 $('mic').addEventListener('click', async function () {
   if (listening) { stopAll(); return; }
@@ -198,7 +220,26 @@ $('mic').addEventListener('click', async function () {
   startRec();
   Trans.prepare().then(function () { if (listening && !paused) setState('聞いています… 日本語で話してください'); });
 });
-TTS.onIdle(function () { if (paused) { paused = false; if (listening) { setState('聞いています… 日本語で話してください'); startRec(); } } });
+TTS.onIdle(function () {
+  if (!paused) return;
+  paused = false;
+  setTimeout(function () {                              /* 残響が消えるまで少し待ってから聞き直す */
+    muted = false; ignoreBelow = lastLen;               /* 読み上げ中に拾った分は捨てる */
+    if (listening) { setState('聞いています… 日本語で話してください'); if (!rec) startRec(); }
+  }, 250);
+});
+
+/* 話している途中も下訳を出す（前の下訳が終わってから最新の分だけ訳す） */
+function livePreview(ja) {
+  if (previewBusy) { previewNext = ja; return; }
+  previewBusy = true;
+  var seq = liveSeq;
+  Trans.preview(ja).then(function (en) {
+    if (en && seq === liveSeq) showLive(ja, en, true);
+    previewBusy = false;
+    if (previewNext) { var n = previewNext; previewNext = null; livePreview(n); }
+  });
+}
 
 /* ============================================================
    1文ごとの処理: 訳す → 履歴に足す → 読み上げる
@@ -211,6 +252,7 @@ function showLive(ja, en, interim) {
   if (h || !interim) $('live').innerHTML = h;
 }
 async function handle(ja) {
+  liveSeq++; previewNext = null;
   showLive(ja, '…', false);
   var card = addCard(ja);
   try {
@@ -219,7 +261,7 @@ async function handle(ja) {
     card.querySelector('.via').textContent = r.via;
     showLive(ja, r.en, false);
     if ($('speakOn').checked) {
-      if ($('pauseOn').checked && listening) { paused = true; stopRec(); setState('読み上げ中…'); }
+      if ($('pauseOn').checked && listening) { paused = true; muted = true; clearTimeout(commitTimer); setState('読み上げ中…'); }
       TTS.say(r.en, card.querySelector('.en'));
     }
   } catch (e) {
