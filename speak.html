@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>しゃべって英語</title>
+<meta name="description" content="日本語で話すと、その場で英語に訳して読み上げる。音声認識・翻訳・読み上げはすべて無料のブラウザ機能と無料APIで動く。">
+<style>
+  :root {
+    --paper: #F2F1EE; --surface: #FFFFFF; --ink: #1B1D22; --muted: #5F6570; --faint: #8D939D;
+    --accent: #2E4B7A; --accent-tint: #E4EAF3; --rule: #D9D8D4; --rule-soft: #E7E6E3;
+    --ng: #A3372F; --ng-tint: #F7E2E0; --near-tint: #F7EED8; --hl: #FFE9A8; --on-accent: #FFFFFF; --rec: #C0392B;
+    --font-en: "Palatino Linotype", Palatino, "Iowan Old Style", Georgia, serif;
+    --font-jp: "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #12141A; --surface: #1A1D25; --ink: #E8EAEE; --muted: #A0A6B0; --faint: #79808B;
+      --accent: #7FA6DC; --accent-tint: #1D2941; --rule: #2C313B; --rule-soft: #232830;
+      --ng: #E58279; --ng-tint: #35201E; --near-tint: #322A15; --hl: #5A4A17; --on-accent: #12141A; --rec: #E5675A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #12141A; --surface: #1A1D25; --ink: #E8EAEE; --muted: #A0A6B0; --faint: #79808B;
+    --accent: #7FA6DC; --accent-tint: #1D2941; --rule: #2C313B; --rule-soft: #232830;
+    --ng: #E58279; --ng-tint: #35201E; --near-tint: #322A15; --hl: #5A4A17; --on-accent: #12141A; --rec: #E5675A;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-jp); line-height: 1.6; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 20px 16px 80px; }
+  header h1 { font-size: 1.35rem; margin: 0 0 4px; }
+  header p { margin: 0; color: var(--muted); font-size: .9rem; }
+  header a { color: var(--accent); }
+  .help { font-size: .85rem; background: var(--near-tint); border-radius: 8px; padding: 8px 10px; margin: 12px 0 0; }
+  .stage { background: var(--surface); border: 1px solid var(--rule-soft); border-radius: 14px; padding: 18px 16px; margin: 16px 0; text-align: center; }
+  .mic { width: 112px; height: 112px; border-radius: 50%; border: 0; background: var(--accent); color: var(--on-accent); font: inherit; font-size: .95rem; font-weight: 700; cursor: pointer; }
+  .mic.on { background: var(--rec); animation: pulse 1.4s ease-in-out infinite; }
+  .mic.wait { opacity: .55; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--rec) 45%, transparent); } 50% { box-shadow: 0 0 0 14px transparent; } }
+  .state { font-size: .85rem; color: var(--faint); margin: 10px 0 0; min-height: 1.4em; }
+  .live { margin: 14px 0 0; min-height: 3.2em; text-align: left; }
+  .live .ja { font-size: 1.05rem; }
+  .live .ja.interim { color: var(--faint); }
+  .live .en { font-family: var(--font-en); font-size: 1.3rem; font-weight: 700; margin-top: 4px; }
+  .opts { display: flex; flex-wrap: wrap; gap: 10px 14px; justify-content: center; margin: 14px 0 0; font-size: .85rem; color: var(--muted); align-items: center; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+  .seg button { font: inherit; font-size: .82rem; padding: 5px 10px; border: 0; background: var(--surface); color: var(--muted); cursor: pointer; }
+  .seg button.on { background: var(--accent); color: var(--on-accent); }
+  label.chk { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+  .type { display: flex; gap: 8px; margin: 0 0 16px; }
+  .type input { flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); }
+  button.b { font: inherit; font-size: .85rem; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); cursor: pointer; }
+  button.b.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .hist-h { display: flex; justify-content: space-between; align-items: center; font-size: .85rem; color: var(--muted); margin: 0 0 6px; }
+  .card { background: var(--surface); border: 1px solid var(--rule-soft); border-radius: 12px; padding: 10px 14px; margin: 0 0 8px; }
+  .card .ja { font-size: .9rem; color: var(--muted); }
+  .card .en { font-family: var(--font-en); font-size: 1.12rem; font-weight: 700; }
+  .card .en.speaking { background: var(--hl); border-radius: 4px; }
+  .card .row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .card .via { font-size: .72rem; color: var(--faint); }
+  .card .err { color: var(--ng); font-size: .85rem; }
+  .empty { color: var(--faint); font-size: .88rem; text-align: center; padding: 16px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>しゃべって英語</h1>
+    <p>日本語で話すと、その場で英語に訳して読み上げます。<a href="index.html">English PowerUp</a> ／ <a href="idioms.html">イディオム例文集</a></p>
+    <p class="help" id="help" hidden></p>
+  </header>
+
+  <section class="stage">
+    <button class="mic" id="mic" type="button">話す</button>
+    <p class="state" id="state">ボタンを押して日本語で話してください</p>
+    <div class="live" id="live"></div>
+    <div class="opts">
+      <span>速さ <span class="seg" id="speed"><button data-s="slow">ゆっくり</button><button data-s="normal" class="on">ふつう</button><button data-s="fast">速い</button></span></span>
+      <label class="chk"><input type="checkbox" id="speakOn" checked>読み上げる</label>
+      <label class="chk" title="スピーカーで読み上げた英語をマイクが拾わないように、読み上げ中は聞き取りを止めます。イヤホンなら外してもかまいません"><input type="checkbox" id="pauseOn" checked>読み上げ中は聞き取りを止める</label>
+    </div>
+  </section>
+
+  <form class="type" id="typeForm">
+    <input id="typeIn" placeholder="文字で入力して訳すこともできます" autocomplete="off">
+    <button class="b primary" type="submit">訳す</button>
+  </form>
+
+  <div class="hist-h"><span>履歴（英語を押すともう一度読み上げ）</span><button class="b" id="clear" type="button">消す</button></div>
+  <div id="hist"><p class="empty">まだありません</p></div>
+</div>
+
+<script>
+'use strict';
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function note(t) { $('help').textContent = t; $('help').hidden = false; }
+function setState(t) { $('state').textContent = t; }
+
+/* ============================================================
+   翻訳（無料）
+     1) Chrome 内蔵の翻訳（Translator API。端末内で訳す・無料・回数制限なし。初回だけ言語データをダウンロード）
+     2) 使えなければ MyMemory の無料API（登録不要。1日あたりの文字数に上限あり）
+   ============================================================ */
+var Trans = (function () {
+  var local = null, localTried = false;
+  async function prepare() {     /* ボタンを押したとき（ユーザー操作中）に呼ぶ。言語データのダウンロードに操作が要るため */
+    if (localTried) return; localTried = true;
+    try {
+      if (!('Translator' in self)) return;
+      var a = await Translator.availability({ sourceLanguage: 'ja', targetLanguage: 'en' });
+      if (a === 'unavailable') return;
+      if (a !== 'available') setState('翻訳データを準備しています（初回だけ）…');
+      local = await Translator.create({ sourceLanguage: 'ja', targetLanguage: 'en' });
+    } catch (e) { local = null; }
+  }
+  async function viaMyMemory(text) {
+    var r = await fetch('https://api.mymemory.translated.net/get?langpair=ja|en&q=' + encodeURIComponent(text));
+    if (!r.ok) throw new Error('翻訳サービスの応答が異常です（' + r.status + '）');
+    var j = await r.json();
+    if (j.responseStatus && j.responseStatus != 200) throw new Error(j.responseDetails || '翻訳できませんでした');
+    var out = (j.responseData && j.responseData.translatedText) || '';
+    if (/MYMEMORY WARNING|QUOTA/i.test(out)) throw new Error('無料翻訳の1日の上限に達しました。Chrome の新しい版なら上限のない端末内翻訳が使えます');
+    return out;
+  }
+  async function translate(text) {
+    if (local) { try { return { en: await local.translate(text), via: 'Chrome内蔵の翻訳' }; } catch (e) {} }
+    return { en: await viaMyMemory(text), via: 'MyMemory（無料API）' };
+  }
+  return { prepare: prepare, translate: translate };
+})();
+
+/* ============================================================
+   読み上げ（英語）。順番待ちして1つずつ読む
+   ============================================================ */
+var TTS = (function () {
+  var synth = window.speechSynthesis, voice = null, rate = 0.95, queue = [], busy = false, onIdle = null;
+  var RATES = { slow: 0.7, normal: 0.95, fast: 1.15 };
+  if (!synth) note('このブラウザは読み上げに対応していません。訳は画面に出ます。');
+  function pick() {
+    if (!synth) return; var vs = synth.getVoices(); if (!vs.length) return;
+    var en = vs.filter(function (v) { return /^en(-|_)/i.test(v.lang); });
+    if (!en.length) { note('この端末に英語の読み上げ音声が入っていません。Windows なら 設定 → 時刻と言語 → 音声認識 で英語の音声を追加できます。'); return; }
+    var pref = ['Google US English', 'Microsoft Aria', 'Microsoft Jenny', 'Samantha', 'Microsoft Zira'];
+    voice = null;
+    for (var i = 0; i < pref.length && !voice; i++) for (var j = 0; j < en.length; j++) if (en[j].name.indexOf(pref[i]) >= 0) { voice = en[j]; break; }
+    if (!voice) voice = en.filter(function (v) { return /^en-US/i.test(v.lang); })[0] || en[0];
+  }
+  if (synth) { pick(); if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = pick; }
+  function next() {
+    if (!queue.length) { busy = false; if (onIdle) onIdle(); return; }
+    busy = true;
+    var it = queue.shift(), u = new SpeechSynthesisUtterance(it.text);
+    if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
+    u.rate = RATES[speedKey];
+    if (it.el) it.el.classList.add('speaking');
+    u.onend = u.onerror = function () { if (it.el) it.el.classList.remove('speaking'); next(); };
+    synth.speak(u);
+  }
+  var speedKey = 'normal';
+  function say(text, el) { if (!synth || !text) return; queue.push({ text: text, el: el }); if (!busy) next(); }
+  function stop() { queue = []; if (synth) synth.cancel(); }
+  return { say: say, stop: stop, busy: function () { return busy; }, setSpeed: function (s) { speedKey = s; }, onIdle: function (f) { onIdle = f; } };
+})();
+
+/* ============================================================
+   聞き取り（日本語）。話し続ける間は自動で再開する
+   ============================================================ */
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+var rec = null, listening = false, paused = false, interimEl = null;
+if (!SR) { note('このブラウザでは音声の聞き取りが使えません。Chrome・Edge（パソコン／Android）か iPhone の Safari で開いてください。下の欄に文字で入れれば訳と読み上げは使えます。'); $('mic').disabled = true; $('mic').classList.add('wait'); }
+
+function startRec() {
+  if (!SR || rec) return;
+  rec = new SR(); rec.lang = 'ja-JP'; rec.continuous = true; rec.interimResults = true;
+  rec.onresult = function (e) {
+    var interim = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      var t = e.results[i][0].transcript.trim();
+      if (e.results[i].isFinal) { if (t) handle(t); } else interim += t;
+    }
+    showLive(interim, null, true);
+  };
+  rec.onerror = function (e) {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { note('マイクの使用が許可されていません。アドレスバーの鍵アイコンからマイクを「許可」にしてください。'); stopAll(); }
+    else if (e.error !== 'no-speech' && e.error !== 'aborted') setState('聞き取りエラー: ' + e.error + '（自動で再開します）');
+  };
+  rec.onend = function () { rec = null; if (listening && !paused) setTimeout(startRec, 150); };   /* 無音が続くと切れるので再開 */
+  try { rec.start(); } catch (e) { rec = null; }
+}
+function stopRec() { if (rec) { var r = rec; rec = null; r.onend = null; try { r.abort(); } catch (e) {} } }
+function stopAll() { listening = false; paused = false; stopRec(); $('mic').classList.remove('on'); $('mic').textContent = '話す'; setState('止めました'); }
+
+$('mic').addEventListener('click', async function () {
+  if (listening) { stopAll(); return; }
+  listening = true; this.classList.add('on'); this.textContent = '止める';
+  setState('聞いています… 日本語で話してください');
+  startRec();
+  Trans.prepare().then(function () { if (listening && !paused) setState('聞いています… 日本語で話してください'); });
+});
+TTS.onIdle(function () { if (paused) { paused = false; if (listening) { setState('聞いています… 日本語で話してください'); startRec(); } } });
+
+/* ============================================================
+   1文ごとの処理: 訳す → 履歴に足す → 読み上げる
+   ============================================================ */
+var items = [];
+function showLive(ja, en, interim) {
+  var h = '';
+  if (ja) h += '<div class="ja' + (interim ? ' interim' : '') + '">' + esc(ja) + '</div>';
+  if (en) h += '<div class="en">' + esc(en) + '</div>';
+  if (h || !interim) $('live').innerHTML = h;
+}
+async function handle(ja) {
+  showLive(ja, '…', false);
+  var card = addCard(ja);
+  try {
+    var r = await Trans.translate(ja);
+    card.querySelector('.en').textContent = r.en;
+    card.querySelector('.via').textContent = r.via;
+    showLive(ja, r.en, false);
+    if ($('speakOn').checked) {
+      if ($('pauseOn').checked && listening) { paused = true; stopRec(); setState('読み上げ中…'); }
+      TTS.say(r.en, card.querySelector('.en'));
+    }
+  } catch (e) {
+    card.querySelector('.en').innerHTML = '<span class="err">' + esc(e.message || '翻訳できませんでした') + '</span>';
+  }
+}
+function addCard(ja) {
+  var h = $('hist'); if (!items.length) h.innerHTML = '';
+  var c = document.createElement('div'); c.className = 'card';
+  c.innerHTML = '<div class="ja">' + esc(ja) + '</div><div class="row"><div class="en" role="button" tabindex="0">…</div><span class="via"></span></div>';
+  c.querySelector('.en').addEventListener('click', function () { if (this.textContent && this.textContent !== '…') TTS.say(this.textContent, this); });
+  h.insertBefore(c, h.firstChild); items.push(c);
+  return c;
+}
+
+$('typeForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var t = $('typeIn').value.trim(); if (!t) return;
+  $('typeIn').value = '';
+  await Trans.prepare();
+  handle(t);
+});
+$('clear').addEventListener('click', function () { items = []; $('hist').innerHTML = '<p class="empty">まだありません</p>'; $('live').innerHTML = ''; });
+$('speed').addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  [].forEach.call(this.children, function (x) { x.classList.toggle('on', x === b); });
+  TTS.setSpeed(b.dataset.s);
+});
+</script>
+</body>
+</html>
