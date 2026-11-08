@@ -214,7 +214,7 @@ var TTS = (function () {
      声が出ている（音が大きく、高さが取れる）瞬間だけを使う。
    ============================================================ */
 var Voice = (function () {
-  var ctx = null, node = null, stream = null, frames = [], on = false, noise = 0.004;
+  var ctx = null, node = null, stream = null, frames = [], on = false, noise = 0.004, voicedN = 0;
   var FFT = 1024, NM = 24, NC = 12, D = NC + 1, melW = null, dct = null, spec;
   function build(sr) {
     var mel = function (f) { return 2595 * Math.log10(1 + f / 700); }, inv = function (m) { return 700 * (Math.pow(10, m / 2595) - 1); };
@@ -273,7 +273,8 @@ var Voice = (function () {
     var f = new Float32Array(D);
     for (var n = 0; n < NC; n++) { var c = 0; for (var j = 0; j < NM; j++) c += dct[n][j] * lm[j]; f[n] = c; }
     f[NC] = 12 * Math.log2(f0 / 100) / 3;      /* 声の高さ（半音を3で割って他と桁をそろえる） */
-    frames.push(f);
+    frames.push(f); voicedN++;
+    if (api.onVoiced) api.onVoiced();
     if (frames.length > 4000) frames.splice(0, 1000);
   }
   var WORKLET = "class P extends AudioWorkletProcessor{constructor(){super();this.b=new Float32Array(1024);this.i=0;this.k=0}" +
@@ -337,8 +338,9 @@ var Voice = (function () {
     return (lows.length ? lows[0] : score(fr, md)) - 6;
   }
   function add(a, b, sign) { return { n: a.n + sign * b.n, s: a.s.map(function (v, d) { return v + sign * b.s[d]; }), q: a.q.map(function (v, d) { return v + sign * b.q[d]; }) }; }
-  return { open: open, close: close, track: function () { return stream ? stream.getAudioTracks()[0] : null; }, setOn: function (b) { on = b; if (!b) frames = []; },
-           take: take, stats: stats, classify: classify, threshold: threshold, add: add, isOpen: function () { return !!stream; } };
+  var api = { onVoiced: null, open: open, close: close, track: function () { return stream ? stream.getAudioTracks()[0] : null; }, setOn: function (b) { on = b; if (!b) frames = []; },
+           take: take, voiced: function () { return voicedN; }, stats: stats, classify: classify, threshold: threshold, add: add, isOpen: function () { return !!stream; } };
+  return api;
 })();
 
 /* ============================================================
@@ -429,7 +431,8 @@ function startRec() {
   handledIdx = {}; ignoreBelow = 0; lastLen = 0; clearTimeout(commitTimer);
   dbg('聞き取り開始');
   rec.onresult = function (e) {
-    lastLen = e.results.length;
+    lastLen = e.results.length; lastResultAt = Date.now(); voicedAtResult = Voice.voiced();
+    if (!srWorked) { srWorked = true; saveSrMode(); }
     if (DEBUG) { var a = []; for (var k = e.resultIndex; k < e.results.length; k++) a.push(k + (e.results[k].isFinal ? '確' : '途') + ':' + e.results[k][0].transcript); dbg('ri=' + e.resultIndex + ' ' + a.join(' | ')); }
     if (muted) return;                                   /* 読み上げ中（スピーカーの英語を拾わない） */
     var interim = '';
@@ -454,16 +457,45 @@ function startRec() {
   };
   rec.onerror = function (e) {
     dbg('エラー ' + e.error);
+    if (e.error === 'audio-capture' && Voice.isOpen()) { fallback('マイクを取り合っている'); return; }
     if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { note('マイクの使用が許可されていません。アドレスバーの鍵アイコンからマイクを「許可」にしてください。'); stopAll(); }
     else if (e.error !== 'no-speech' && e.error !== 'aborted') setState('聞き取りエラー: ' + e.error + '（自動で再開します）');
   };
   rec.onend = function () { dbg('聞き取り終了'); rec = null; if (listening) startRec(); };   /* 無音が続くと切れるので、すぐ再開 */
   /* 声で人を見分けるときは、同じマイクの音を聞き取りにも渡す（対応していないブラウザでは普通に始める） */
-  var tr = Voice.track();
+  var tr = srMode === 'track' ? Voice.track() : null;
+  dbg('聞き取りの方式: ' + (tr ? 'マイクの音を渡す' : '聞き取りが自分でマイクを使う') + (Voice.isOpen() ? '（人の見分け: オン）' : '（人の見分け: オフ）'));
   try { if (tr) rec.start(tr); else rec.start(); }
   catch (e) { try { rec.start(); } catch (e2) { rec = null; } }
 }
 function stopRec() { if (rec) { var r = rec; rec = null; r.onend = null; try { r.abort(); } catch (e) {} } }
+/* 聞き取りが動いていないときの立て直し
+   声で人を見分けるためにマイクを開いていると、端末やブラウザによっては聞き取りに音が届かない（エラーも出ない）ことがある。
+   「声は届いているのに5秒以上なにも聞き取れない」ときは、次の方式に切り替える:
+     track（マイクの音を聞き取りに渡す）→ own（聞き取りが自分でマイクを使う）→ novoice（人の見分けを止めて聞き取りを優先）
+   うまくいった方式は覚えておき、次回からそれで始める */
+var srMode = 'track', srWorked = false, lastResultAt = 0, voicedAtResult = 0;
+try { srMode = localStorage.getItem('speak.srMode') || 'track'; } catch (e) {}
+function saveSrMode() { try { localStorage.setItem('speak.srMode', srMode); } catch (e) {} }
+function fallback(why) {
+  if (!listening) return;
+  dbg('立て直し（' + why + '）: ' + srMode + ' → ' + (srMode === 'track' ? 'own' : 'novoice'));
+  srWorked = false;
+  if (srMode === 'track') srMode = 'own';
+  else {
+    srMode = 'novoice'; Voice.setOn(false); Voice.close();
+    note('この端末では、声で人を見分ける機能と聞き取りを同時に使えないようです。聞き取りと翻訳を優先して、人の見分けを止めました。');
+  }
+  saveSrMode();
+  stopRec(); resetWatch(); startRec();
+}
+function resetWatch() { lastResultAt = Date.now(); voicedAtResult = Voice.voiced(); }
+/* 声が取れるたびに確かめる（タイマーは裏の画面で間引かれるので使わない） */
+Voice.onVoiced = function () {
+  if (!listening || muted || paused) return;
+  if (Voice.voiced() - voicedAtResult > 40 && Date.now() - lastResultAt > 4000) fallback('声は届いているのに聞き取れない');
+};
+
 function stopAll() {
   listening = false; paused = false; muted = false; clearTimeout(commitTimer); stopRec();
   Voice.setOn(false); Voice.close();
@@ -482,10 +514,11 @@ $('mic').addEventListener('click', async function () {
   listening = true; this.classList.add('on'); this.textContent = '止める';
   setState('聞いています… 日本語で話してください');
   if ($('voiceOn').checked && People.length) {
-    try { await Voice.open(); Voice.take(); Voice.setOn(true); }
+    if (srMode === 'novoice') note('この端末では、声で人を見分ける機能と聞き取りを同時に使えなかったため、人の見分けは止めています（「声で人を見分ける」を一度外して付け直すと、もう一度試します）。');
+    else try { await Voice.open(); Voice.take(); Voice.setOn(true); }
     catch (e) { note('声で人を見分けるためのマイクが使えませんでした（' + (e.message || e.name) + '）。聞き取りと翻訳はそのまま使えます。'); }
   }
-  startRec();
+  resetWatch(); startRec();
   Trans.prepare().then(function () { if (listening && !paused) setState('聞いています… 日本語で話してください'); });
 });
 TTS.onIdle(function () {
@@ -493,7 +526,7 @@ TTS.onIdle(function () {
   paused = false;
   setTimeout(function () {                              /* 残響が消えるまで少し待ってから聞き直す */
     muted = false; ignoreBelow = lastLen;               /* 読み上げ中に拾った分は捨てる */
-    Voice.take(); Voice.setOn(Voice.isOpen());          /* 読み上げの声も捨てる */
+    Voice.take(); Voice.setOn(Voice.isOpen()); resetWatch();   /* 読み上げの声も捨てる */
     if (listening) { setState('聞いています… 日本語で話してください'); if (!rec) startRec(); }
   }, 250);
 });
@@ -591,7 +624,7 @@ function savePrefs() { try { localStorage.setItem('speak.prefs', JSON.stringify(
   var p = {}; try { p = JSON.parse(localStorage.getItem('speak.prefs') || '{}'); } catch (e) {}
   if (p.recOn === false) $('recOn').checked = false;
   $('voiceOn').checked = p.voiceOn !== false;
-  $('voiceOn').addEventListener('change', savePrefs); $('recOn').addEventListener('change', savePrefs);
+  $('voiceOn').addEventListener('change', function () { if (this.checked) { srMode = 'track'; srWorked = false; saveSrMode(); } savePrefs(); }); $('recOn').addEventListener('change', savePrefs);
 })();
 
 /* 調べもの用の記録（URL の末尾に ?debug=1 を付けると下に出る） */
