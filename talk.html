@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>会話記録</title>
+<meta name="description" content="2人以上で話した会話を録音し、声で誰が話したかを見分けて、文字にして英訳して記録する。すべて端末内・無料。">
+<style>
+  :root {
+    --paper: #F2F1EE; --surface: #FFFFFF; --ink: #1B1D22; --muted: #5F6570; --faint: #8D939D;
+    --accent: #2E4B7A; --accent-tint: #E4EAF3; --rule: #D9D8D4; --rule-soft: #E7E6E3;
+    --ng: #A3372F; --near-tint: #F7EED8; --on-accent: #FFFFFF; --rec: #C0392B;
+    --font-en: "Palatino Linotype", Palatino, "Iowan Old Style", Georgia, serif;
+    --font-jp: "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #12141A; --surface: #1A1D25; --ink: #E8EAEE; --muted: #A0A6B0; --faint: #79808B;
+      --accent: #7FA6DC; --accent-tint: #1D2941; --rule: #2C313B; --rule-soft: #232830;
+      --ng: #E58279; --near-tint: #322A15; --on-accent: #12141A; --rec: #E5675A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #12141A; --surface: #1A1D25; --ink: #E8EAEE; --muted: #A0A6B0; --faint: #79808B;
+    --accent: #7FA6DC; --accent-tint: #1D2941; --rule: #2C313B; --rule-soft: #232830;
+    --ng: #E58279; --near-tint: #322A15; --on-accent: #12141A; --rec: #E5675A;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-jp); line-height: 1.6; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 20px 16px 80px; }
+  header h1 { font-size: 1.35rem; margin: 0 0 4px; }
+  header p { margin: 0; color: var(--muted); font-size: .9rem; }
+  a { color: var(--accent); }
+  .help { font-size: .85rem; background: var(--near-tint); border-radius: 8px; padding: 8px 10px; margin: 12px 0 0; }
+  .box { background: var(--surface); border: 1px solid var(--rule-soft); border-radius: 12px; padding: 12px 14px; margin: 14px 0; font-size: .88rem; }
+  .box h2 { font-size: .95rem; margin: 0 0 6px; }
+  .line { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+  .pchip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 4px 2px 9px; border: 1px solid var(--rule); border-radius: 99px; }
+  .pchip button { font: inherit; border: 0; background: none; color: var(--faint); cursor: pointer; padding: 0 4px; }
+  .pchip i, .who i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .read { background: var(--accent-tint); border-radius: 8px; padding: 8px 10px; margin: 6px 0; line-height: 1.8; }
+  .go { display: flex; gap: 8px; }
+  input[type=text] { flex: 1; min-width: 0; font: inherit; padding: 6px 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); }
+  select { font: inherit; padding: 4px 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); }
+  button.b { font: inherit; font-size: .85rem; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); cursor: pointer; white-space: nowrap; }
+  button.b.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .bar { height: 6px; background: var(--rule-soft); border-radius: 3px; margin: 8px 0 4px; overflow: hidden; }
+  .bar span { display: block; height: 100%; width: 0; background: var(--rec); transition: width .1s linear; }
+  .bar.model span { background: var(--accent); }
+  .msg { color: var(--muted); min-height: 1.3em; margin: 0; }
+  .stage { text-align: center; }
+  .recb { width: 120px; height: 120px; border-radius: 50%; border: 0; background: var(--accent); color: var(--on-accent); font: inherit; font-weight: 700; cursor: pointer; }
+  .recb.on { background: var(--rec); animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--rec) 45%, transparent); } 50% { box-shadow: 0 0 0 14px transparent; } }
+  .state { font-size: .85rem; color: var(--muted); margin: 10px 0 0; min-height: 1.4em; }
+  .meter { height: 8px; max-width: 240px; margin: 8px auto 0; background: var(--rule-soft); border-radius: 4px; overflow: hidden; }
+  .meter span { display: block; height: 100%; width: 0; background: var(--accent); }
+  .meter.talk span { background: var(--rec); }
+  .card { background: var(--surface); border: 1px solid var(--rule-soft); border-radius: 12px; padding: 10px 14px; margin: 0 0 8px; }
+  .card .top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .card .t { font-size: .72rem; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .card .ja { font-size: .95rem; }
+  .card .ja.wait { color: var(--faint); }
+  .card .en { font-family: var(--font-en); font-size: 1.05rem; font-weight: 700; }
+  .who { font: inherit; font-size: .75rem; display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border: 1px solid var(--rule); border-radius: 99px; background: var(--paper); color: var(--ink); cursor: pointer; white-space: nowrap; }
+  .who.unsure { border-style: dashed; color: var(--muted); }
+  .empty { color: var(--faint); font-size: .88rem; text-align: center; padding: 16px 0; }
+  .faint { color: var(--faint); }
+  details summary { cursor: pointer; color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>会話記録</h1>
+    <p>2人以上で話した会話を録音し、<b>声で誰が話したかを見分けて</b>、文字にして英訳して記録します。<a href="speak-stats.html"><b>記録と統計</b></a> ／ <a href="speak.html">しゃべって英語（その場で翻訳）</a></p>
+    <p class="help" id="help" hidden></p>
+  </header>
+
+  <section class="box" aria-label="話す人">
+    <h2>1. 話す人の声を登録（1人12秒・最初だけ）</h2>
+    <div class="line" id="people"></div>
+    <details id="enrollBox" style="margin-top:8px">
+      <summary>声を登録する</summary>
+      名前を入れて「録音」を押し、次の文をふだんの声で読んでください。同じ名前でもう一度読むと、より正確になります。
+      <div class="read">今日はいい天気ですね。駅前の新しいお店で、コーヒーとケーキを注文しました。明日の予定は、午前中に買い物をして、午後は友だちと会います。</div>
+      <div class="go"><input type="text" id="enName" placeholder="名前（例: 父、ゆき）" autocomplete="off"><button class="b primary" id="enGo" type="button">録音（12秒）</button></div>
+      <div class="bar"><span id="enBar"></span></div>
+      <p class="msg" id="enMsg"></p>
+    </details>
+  </section>
+
+  <section class="box" aria-label="文字にする部品">
+    <h2>2. 文字にする部品（端末内で動く音声認識 Whisper）</h2>
+    <div class="line">
+      <label>精度 <select id="size"><option value="base">ふつう（約80MB・速い）</option><option value="small">高い（約250MB・遅い）</option></select></label>
+      <button class="b" id="load" type="button">準備する</button>
+    </div>
+    <div class="bar model"><span id="mBar"></span></div>
+    <p class="msg" id="mMsg">初回だけ部品をダウンロードします（Wi-Fi 推奨）。2回目からは端末に保存した分を使います。</p>
+  </section>
+
+  <section class="box stage" aria-label="録音">
+    <h2 style="text-align:left">3. 会話を録音</h2>
+    <button class="recb" id="rec" type="button">録音を始める</button>
+    <div class="meter" id="meter"><span></span></div>
+    <p class="state" id="state">スマホを2人の間に置いて、ふつうに話してください</p>
+    <p class="msg" id="queue"></p>
+  </section>
+
+  <div class="line" style="justify-content:space-between;margin:0 0 6px;font-size:.85rem;color:var(--muted)"><span>今日の会話（名前を押すと話した人を直せます）</span></div>
+  <div id="hist"><p class="empty">まだありません</p></div>
+</div>
+
+<script src="speak-lib.js"></script>
+<script src="voice.js"></script>
+<script>
+'use strict';
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function note(t) { $('help').textContent = t; $('help').hidden = false; }
+var DEBUG = /[?&]debug=1/.test(location.search);
+function dbg() { if (DEBUG) console.log.apply(console, ['[talk]'].concat([].slice.call(arguments))); }
+
+/* ============================================================
+   話す人
+   ============================================================ */
+var People = [];
+function personOf(id) { for (var i = 0; i < People.length; i++) if (People[i].id === id) return People[i]; return null; }
+function voiced() { return People.filter(function (p) { return p.st; }); }
+function loadPeople() { return SpeakLib.all('speakers').then(function (a) { People = (a || []).sort(function (x, y) { return x.created - y.created; }); renderPeople(); }); }
+function renderPeople() {
+  var h = '';
+  People.forEach(function (p) { h += '<span class="pchip"><i style="background:' + p.color + '"></i>' + esc(p.name) + (p.st ? '' : '<span class="faint">（声なし）</span>') + '<button type="button" data-del="' + p.id + '" aria-label="' + esc(p.name) + 'を消す">×</button></span>'; });
+  $('people').innerHTML = h || '<span class="faint">まだ誰も登録していません。話す人全員の声を登録してください。</span>';
+  if (voiced().length < 2) $('enrollBox').open = true;
+}
+$('people').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-del]'); if (!b) return;
+  var p = personOf(b.dataset.del); if (!p || !confirm(p.name + ' の声の登録を消しますか？（話した記録は残ります）')) return;
+  SpeakLib.del('speakers', p.id).then(loadPeople);
+});
+$('enGo').addEventListener('click', async function () {
+  var name = $('enName').value.trim();
+  if (!name) { $('enMsg').textContent = '名前を入れてください'; $('enName').focus(); return; }
+  if (recording) { $('enMsg').textContent = '録音を止めてから登録してください'; return; }
+  var btn = this; btn.disabled = true; $('enMsg').textContent = '';
+  try { await Voice.open(); } catch (e) { $('enMsg').textContent = 'マイクが使えません: ' + (e.message || e.name); btn.disabled = false; return; }
+  Voice.take(); Voice.setOn(true);
+  var t0 = Date.now();
+  await new Promise(function (res) { var iv = setInterval(function () { var p = Math.min(1, (Date.now() - t0) / 12000); $('enBar').style.width = (p * 100) + '%'; if (p >= 1) { clearInterval(iv); res(); } }, 100); });
+  var fr = Voice.take(); Voice.setOn(false); Voice.close();
+  btn.disabled = false; $('enBar').style.width = '0';
+  if (fr.length < 60) { $('enMsg').textContent = '声が少なすぎました（' + fr.length + '）。マイクに近づいて、もう一度読んでください'; return; }
+  var st = Voice.stats(fr), old = People.filter(function (p) { return p.name === name; })[0];
+  var p = old || { id: 'p' + Date.now(), name: name, created: Date.now(), color: SpeakLib.COLORS[People.length % SpeakLib.COLORS.length] };
+  p.st = old && old.st ? Voice.add(old.st, st, 1) : st;
+  p.thr = Voice.threshold(fr, p.st);
+  await SpeakLib.put('speakers', p);
+  $('enMsg').textContent = name + ' の声を' + (old && old.st ? '追加で覚えました' : '覚えました') + '（' + fr.length + '）';
+  $('enName').value = '';
+  loadPeople();
+});
+
+/* ============================================================
+   文字にする部品（Whisper を Web Worker で動かす。端末内・無料）
+   ============================================================ */
+var WORKER_SRC = [
+  "import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1';",
+  "env.allowLocalModels = false;",
+  "let asr = null;",
+  "async function load(size, device) {",
+  "  const dtype = device === 'webgpu' ? { encoder_model: 'fp32', decoder_model_merged: 'q4' } : 'q8';",
+  "  asr = await pipeline('automatic-speech-recognition', 'onnx-community/whisper-' + size, { device, dtype, progress_callback: p => self.postMessage({ type: 'progress', p }) });",
+  "  self.postMessage({ type: 'ready', device });",
+  "}",
+  "self.onmessage = async (e) => {",
+  "  const m = e.data;",
+  "  if (m.type === 'load') {",
+  "    let gpu = false; try { gpu = !!(navigator.gpu && await navigator.gpu.requestAdapter()); } catch (x) {}",
+  "    try { await load(m.size, gpu ? 'webgpu' : 'wasm'); }",
+  "    catch (err) { if (gpu) { try { await load(m.size, 'wasm'); return; } catch (e2) { err = e2; } } self.postMessage({ type: 'error', msg: String(err && err.message || err) }); }",
+  "  } else if (m.type === 'run') {",
+  "    try { const t0 = performance.now(); const out = await asr(m.audio, { language: 'japanese', task: 'transcribe' }); self.postMessage({ type: 'done', id: m.id, text: out.text || '', ms: performance.now() - t0 }); }",
+  "    catch (err) { self.postMessage({ type: 'done', id: m.id, text: '', err: String(err && err.message || err) }); }",
+  "  }",
+  "};"
+].join('\n');
+var ASR = (function () {
+  var w = null, ready = false, loading = null, jobs = [], busy = null, files = {};
+  function start(size) {
+    if (loading) return loading;
+    loading = new Promise(function (res, rej) {
+      w = new Worker(URL.createObjectURL(new Blob([WORKER_SRC], { type: 'text/javascript' })), { type: 'module' });
+      w.onmessage = function (e) {
+        var m = e.data;
+        if (m.type === 'progress') {
+          var p = m.p; if (p.status === 'progress' && p.total) files[p.file] = [p.loaded, p.total];
+          var L = 0, T = 0; Object.keys(files).forEach(function (k) { L += files[k][0]; T += files[k][1]; });
+          if (T) { $('mBar').style.width = Math.round(L / T * 100) + '%'; $('mMsg').textContent = '部品をダウンロード中… ' + Math.round(L / 1048576) + ' / ' + Math.round(T / 1048576) + ' MB'; }
+        } else if (m.type === 'ready') {
+          ready = true; $('mBar').style.width = '100%';
+          $('mMsg').textContent = '準備できました（' + (m.device === 'webgpu' ? 'GPU で高速に動きます' : 'CPU で動きます。長い会話は文字になるまで少し遅れます') + '）';
+          res(); next();
+        } else if (m.type === 'error') {
+          $('mMsg').textContent = '部品を準備できませんでした: ' + m.msg; loading = null; rej(new Error(m.msg));
+        } else if (m.type === 'done') {
+          var j = busy; busy = null;
+          dbg('文字起こし', Math.round(m.ms) + 'ms', m.text, m.err || '');
+          if (j) j.res(m.text);
+          next();
+        }
+      };
+      w.onerror = function (e) { $('mMsg').textContent = '部品を読み込めませんでした（' + (e.message || 'このブラウザは対応していない可能性があります') + '）'; loading = null; rej(e); };
+      $('mMsg').textContent = '部品を準備しています…';
+      w.postMessage({ type: 'load', size: size });
+    });
+    return loading;
+  }
+  function next() {
+    showQueue();
+    if (!ready || busy || !jobs.length) return;
+    busy = jobs.shift();
+    w.postMessage({ type: 'run', id: 1, audio: busy.audio }, [busy.audio.buffer]);
+  }
+  function run(audio) { return new Promise(function (res) { jobs.push({ audio: audio, res: res }); next(); }); }
+  return { start: start, run: run, pending: function () { return jobs.length + (busy ? 1 : 0); }, isReady: function () { return ready; } };
+})();
+function showQueue() { var n = ASR.pending(); $('queue').textContent = n ? '文字にする待ち: ' + n + ' 件' + (ASR.isReady() ? '' : '（部品の準備ができたら始めます）') : ''; }
+$('load').addEventListener('click', function () { ASR.start($('size').value).catch(function () {}); this.disabled = true; $('size').disabled = true; });
+try { var sz = localStorage.getItem('talk.size'); if (sz) $('size').value = sz; } catch (e) {}
+$('size').addEventListener('change', function () { try { localStorage.setItem('talk.size', this.value); } catch (e) {} });
+
+/* ============================================================
+   翻訳（Chrome 内蔵の翻訳 → だめなら MyMemory 無料API）
+   ============================================================ */
+var Trans = (function () {
+  var local = null, tried = false;
+  async function prepare() {
+    if (tried) return; tried = true;
+    try { if (!('Translator' in self)) return; var a = await Translator.availability({ sourceLanguage: 'ja', targetLanguage: 'en' }); if (a === 'unavailable') return; local = await Translator.create({ sourceLanguage: 'ja', targetLanguage: 'en' }); } catch (e) { local = null; }
+  }
+  async function translate(t) {
+    if (local) { try { return await local.translate(t); } catch (e) {} }
+    try {
+      var r = await fetch('https://api.mymemory.translated.net/get?langpair=ja|en&q=' + encodeURIComponent(t)); var j = await r.json();
+      var out = (j.responseData && j.responseData.translatedText) || '';
+      return /MYMEMORY WARNING|QUOTA/i.test(out) ? '' : out;
+    } catch (e) { return ''; }
+  }
+  return { prepare: prepare, translate: translate };
+})();
+
+/* ============================================================
+   録音 → 発言に区切る → 誰の声か決める
+   ============================================================ */
+var recording = false, wakeLock = null;
+var SRATE = 48000, BLK = 1024;
+var noise = 0.004, speechRun = 0, silRun = 0, seg = null, pre = [], fbuf = [];
+var PRE_BLKS, SIL_END, MAX_BLKS, MIN_BLKS;
+function setupTiming() {
+  var bps = SRATE / BLK;                       /* 1秒あたりの塊の数（48kHz なら約47） */
+  PRE_BLKS = Math.round(0.3 * bps);            /* 話し始めの前 0.3 秒も入れる */
+  SIL_END = Math.round(0.55 * bps);            /* 0.55 秒黙ったら発言の終わり */
+  MAX_BLKS = Math.round(20 * bps);             /* 1つの発言は最大 20 秒で区切る */
+  MIN_BLKS = Math.round(0.4 * bps);            /* 0.4 秒より短い音は捨てる */
+}
+function onRaw(x, n) {
+  if (!recording) return;
+  var e = 0; for (var i = 0; i < x.length; i++) e += x[i] * x[i];
+  var rms = Math.sqrt(e / x.length);
+  if (rms < noise * 2) noise = Math.max(0.0015, noise * 0.97 + rms * 0.03);
+  var loud = rms > Math.max(noise * 3, 0.008);
+  meter(rms, loud);
+  var blk = { x: new Float32Array(x), n: n };
+  if (!seg) {
+    pre.push(blk); if (pre.length > PRE_BLKS) pre.shift();
+    speechRun = loud ? speechRun + 1 : 0;
+    if (speechRun >= 3) { seg = { blks: pre.slice(), t0: Date.now() - pre.length * BLK / SRATE * 1000 }; pre = []; silRun = 0; }
+    return;
+  }
+  seg.blks.push(blk);
+  silRun = loud ? 0 : silRun + 1;
+  if (silRun >= SIL_END || seg.blks.length >= MAX_BLKS) endSegment();
+}
+var mt = 0;
+function meter(rms, loud) {
+  var now = Date.now(); if (now - mt < 80) return; mt = now;
+  $('meter').firstChild.style.width = Math.min(100, Math.round(rms * 600)) + '%';
+  $('meter').classList.toggle('talk', !!seg);
+}
+
+function endSegment() {
+  var s = seg; seg = null; speechRun = 0;
+  var keep = Math.max(0, s.blks.length - silRun + Math.round(0.15 * SRATE / BLK));   /* 後ろの無音は少しだけ残す */
+  s.blks = s.blks.slice(0, keep); silRun = 0;
+  if (s.blks.length < MIN_BLKS) return;
+  var b0 = s.blks[0].n, b1 = s.blks[s.blks.length - 1].n;
+  fbuf = fbuf.concat(Voice.take());
+  var fr = fbuf.filter(function (f) { return f.b >= b0 && f.b <= b1; });
+  fbuf = fbuf.filter(function (f) { return f.b > b1; });
+  splitBySpeaker(s, fr).forEach(function (piece) { submit(piece); });
+}
+
+/* 1つの発言の中で話す人が替わったら分ける（0.7秒ぶんの声ごとに一番近い人を出し、2つ以上続いたら別の人とみなす） */
+var WIN = 16;
+function splitBySpeaker(s, fr) {
+  var ppl = voiced();
+  var whole = [{ blks: s.blks, fr: fr, t0: s.t0 }];
+  if (ppl.length < 2 || fr.length < WIN * 4) return whole;
+  var wins = [];
+  for (var i = 0; i + WIN <= fr.length; i += WIN) { var w = fr.slice(i, i + WIN); var c = Voice.classify(w, ppl, true); wins.push({ sp: c.sp, a: w[0].b, z: w[w.length - 1].b }); }
+  var runs = [];
+  wins.forEach(function (w) { var r = runs[runs.length - 1]; if (r && r.sp === w.sp) { r.k++; r.z = w.z; } else runs.push({ sp: w.sp, k: 1, a: w.a, z: w.z }); });
+  /* 1窓だけの短い揺れは、長いほうの隣にくっつける */
+  function coalesce() { var m = []; runs.forEach(function (r) { var q = m[m.length - 1]; if (q && q.sp === r.sp) { q.k += r.k; q.z = r.z; } else m.push(r); }); runs = m; }
+  coalesce();
+  for (;;) {
+    var j = -1; for (var x = 0; x < runs.length; x++) if (runs[x].k < 2) { j = x; break; }
+    if (j < 0 || runs.length < 2) break;
+    var L = runs[j - 1], R = runs[j + 1], t2 = !L ? R : !R ? L : (L.k >= R.k ? L : R);
+    t2.k += runs[j].k; t2.a = Math.min(t2.a, runs[j].a); t2.z = Math.max(t2.z, runs[j].z);
+    runs.splice(j, 1); coalesce();
+  }
+  if (runs.length < 2) return whole;
+  dbg('話す人の切り替わり', runs.map(function (r) { return (personOf(r.sp) || {}).name + '×' + r.k; }).join(' → '));
+  var out = [], start = 0;
+  for (var k = 0; k < runs.length; k++) {
+    var cut = k < runs.length - 1 ? Math.round((runs[k].z + runs[k + 1].a) / 2) : Infinity;
+    var bl = s.blks.filter(function (b) { return b.n >= (k ? start : -Infinity) && b.n < cut; });
+    out.push({ blks: bl, fr: fr.filter(function (f) { return f.b >= (k ? start : -Infinity) && f.b < cut; }), t0: s.t0 + (bl.length ? (bl[0].n - s.blks[0].n) * BLK / SRATE * 1000 : 0) });
+    start = cut;
+  }
+  return out.filter(function (p) { return p.blks.length >= MIN_BLKS; });
+}
+
+/* 48kHz などの音を Whisper 用の 16kHz にする（区間の平均をとって間引く） */
+function to16k(blks) {
+  var n = blks.length * BLK, src = new Float32Array(n);
+  blks.forEach(function (b, i) { src.set(b.x, i * BLK); });
+  var ratio = SRATE / 16000, m = Math.floor(n / ratio), out = new Float32Array(m);
+  for (var i = 0; i < m; i++) { var a = Math.floor(i * ratio), z = Math.min(n, Math.floor((i + 1) * ratio)), s = 0; for (var k = a; k < z; k++) s += src[k]; out[i] = s / Math.max(1, z - a); }
+  return out;
+}
+
+/* Whisper が無音や雑音で出しがちな決まり文句は捨てる */
+var JUNK = /^(ご視聴ありがとうございました|ご清聴ありがとうございました|チャンネル登録.*|字幕.*|おやすみなさい。?|はい。?|うん。?)$/;
+async function submit(piece) {
+  var ppl = voiced(), c = Voice.classify(piece.fr, ppl);
+  if (!c.sp && ppl.length && piece.fr.length >= 12) { var c2 = Voice.classify(piece.fr, ppl, true); c = { sp: c2.sp, conf: 0, s: c2.s }; }   /* 似ていなくても一番近い人に（？付き） */
+  var r = { ts: piece.t0, day: SpeakLib.dayKey(piece.t0), ja: '', en: '', via: 'talk', sp: c.sp, conf: c.conf, fs: piece.fr.length >= 12 ? Voice.stats(piece.fr) : null, voice: true, src: 'talk' };
+  var card = addCard(r, true);
+  var text = (await ASR.run(to16k(piece.blks))).trim();
+  if (!text || JUNK.test(text) || !/[一-龯ぁ-んァ-ヶA-Za-z0-9]/.test(text)) { card.remove(); if (!$('hist').children.length) $('hist').innerHTML = '<p class="empty">まだありません</p>'; return; }
+  r.ja = text; r.up = Date.now();
+  card.querySelector('.ja').textContent = text; card.querySelector('.ja').classList.remove('wait');
+  r.en = await Trans.translate(text);
+  card.querySelector('.en').textContent = r.en;
+  try { r.id = await SpeakLib.put('utt', r); } catch (e) { dbg('記録できませんでした', e); }
+}
+
+function chipHtml(r) {
+  var p = personOf(r.sp), unsure = r.sp && r.conf < 0.25;
+  return '<button type="button" class="who' + (unsure || !r.sp ? ' unsure' : '') + '" title="押すと話した人を直せます"><i style="background:' + (p ? p.color : 'var(--faint)') + '"></i>' + esc(p ? p.name : 'だれか') + (unsure ? '？' : '') + '</button>';
+}
+function addCard(r, waiting) {
+  if ($('hist').querySelector('.empty')) $('hist').innerHTML = '';
+  var d = new Date(r.ts), c = document.createElement('div'); c.className = 'card'; c._rec = r;
+  c.innerHTML = '<div class="top">' + chipHtml(r) + '<span class="t">' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2) + '</span></div>' +
+    '<div class="ja' + (waiting ? ' wait' : '') + '">' + esc(waiting ? '文字にしています…' : r.ja) + '</div><div class="en">' + esc(r.en || '') + '</div>';
+  $('hist').insertBefore(c, $('hist').firstChild);
+  return c;
+}
+/* 話した人の直し（直した声はその人の声として覚え足す） */
+$('hist').addEventListener('click', async function (e) {
+  var b = e.target.closest('.who'); if (!b) return;
+  var card = b.closest('.card'), r = card._rec;
+  var ids = People.map(function (p) { return p.id; }).concat([null]);
+  var next = ids[(ids.indexOf(r.sp) + 1) % ids.length];
+  if (r.fs && r.learned) { var old = personOf(r.learned); if (old && old.st) { old.st = Voice.add(old.st, r.fs, -1); await SpeakLib.put('speakers', old); } r.learned = null; }
+  r.sp = next; r.conf = 1; r.up = Date.now();
+  if (r.fs && next) { var np = personOf(next); if (np && np.st) { np.st = Voice.add(np.st, r.fs, 1); await SpeakLib.put('speakers', np); r.learned = next; } }
+  if (r.id) await SpeakLib.put('utt', r);
+  b.outerHTML = chipHtml(r);
+});
+
+$('rec').addEventListener('click', async function () {
+  if (recording) { stopRec(); return; }
+  if (voiced().length < 2) { if (!confirm('声を登録した人が' + voiced().length + '人です。誰が話したかを見分けるには、話す人全員の声の登録が必要です。このまま録音しますか？')) return; }
+  Trans.prepare();
+  ASR.start($('size').value).catch(function () {});
+  $('load').disabled = true; $('size').disabled = true;
+  try { await Voice.open(); } catch (e) { note('マイクが使えません: ' + (e.message || e.name)); return; }
+  SRATE = Voice.sampleRate(); setupTiming();
+  Voice.take(); fbuf = []; pre = []; seg = null; speechRun = 0; silRun = 0;
+  Voice.onRaw = onRaw; Voice.setOn(true);
+  recording = true; this.classList.add('on'); this.textContent = '止める';
+  $('state').textContent = '録音中… ふつうに話してください（画面はつけたままにしてください）';
+  try { if (navigator.wakeLock) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+});
+function stopRec() {
+  if (seg) endSegment();
+  recording = false; Voice.onRaw = null; Voice.setOn(false); Voice.close();
+  $('rec').classList.remove('on'); $('rec').textContent = '録音を始める';
+  $('state').textContent = '止めました。' + (ASR.pending() ? '残りを文字にしています…' : '');
+  $('meter').firstChild.style.width = '0';
+  if (wakeLock) { try { wakeLock.release(); } catch (e) {} wakeLock = null; }
+}
+document.addEventListener('visibilitychange', async function () { if (recording && document.visibilityState === 'visible' && navigator.wakeLock) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} } });
+
+/* 起動時: 登録した人と、今日の会話記録 */
+loadPeople().then(function () { return SpeakLib.byDay(SpeakLib.dayKey()); }).then(function (rs) {
+  (rs || []).filter(function (r) { return r.src === 'talk'; }).sort(function (a, b) { return a.ts - b.ts; }).slice(-60).forEach(function (r) { addCard(r, false); });
+}).catch(function (e) { note('記録を読み込めませんでした（' + (e && e.message || e) + '）'); });
+</script>
+</body>
+</html>
