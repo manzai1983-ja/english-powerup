@@ -127,7 +127,7 @@
   </select>
   <select id="mode" aria-label="出し方">
     <option value="auto">おまかせ（全部5回までは均等→その後は苦手多め）</option>
-    <option value="weak">苦手を多めにランダム</option><option value="onlyweak">苦手だけ</option><option value="new">まだ出ていないもの</option><option value="flat">完全ランダム</option>
+    <option value="weak">苦手を多めにランダム</option><option value="onlyweak">苦手だけ</option><option value="new">まだ出ていないもの</option><option value="flat">完全ランダム</option><option value="mastered">一発正解したもの（ふだんは出ない）</option>
   </select>
   <select id="asked" aria-label="出題日で絞り込み">
     <option value="">出題日: すべて</option>
@@ -158,6 +158,11 @@
 <details class="weak" id="weakBox">
   <summary>苦手なもの（間違いの多い順）</summary>
   <ul class="wl" id="weakList"></ul>
+</details>
+<details class="weak" id="mastBox">
+  <summary>一発正解（次から出題しないもの）<span id="mastCnt"></span></summary>
+  <p class="note">1回目にヒントなしで正解したものです。出題に戻したいものは「出題に戻す」を押してください。出し方を「一発正解したもの」にすると、これだけで復習できます。</p>
+  <ul class="wl" id="mastList"></ul>
 </details>
 <div class="tools">
   <button id="btnExport">記録を書き出す</button>
@@ -453,6 +458,8 @@ function stat(key) {
   if (!s.log) s.log = s.t ? [[s.t, s.h.slice(-1) || 'o']] : [];
   return s;
 }
+/* 一発正解: 1回目にヒントなしで○。「出題に戻す」を押したもの（back）は除く */
+function isMastered(s) { return !s.back && s.log.length > 0 && s.log[0][1] === 'o' && s.log[0][2] !== 'h'; }
 function pad2(n) { return ('0' + n).slice(-2); }
 function dayKey(t) { var d = new Date(t); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
 function fmtDay(t) { var d = new Date(t); return (d.getMonth() + 1) + '/' + d.getDate(); }
@@ -493,6 +500,8 @@ function pool() {
     var s = stat(it.key);
     if (as && !dayMatch(as, s.log.map(function (l) { return l[0]; }), ad)) return false;
     if (ws && !dayMatch(ws, s.log.filter(function (l) { return l[1] !== 'o'; }).map(function (l) { return l[0]; }), wd)) return false;
+    if (mode === 'mastered') return isMastered(s);
+    if (isMastered(s)) return false;   /* 一発正解は出さない */
     if (mode === 'onlyweak') return isWeak(s);
     if (mode === 'new') return !s.n;
     return true;
@@ -542,15 +551,15 @@ function record(key, v, prev) {
 /* ============ 画面 ============ */
 var cur = null, session = { n: 0, ok: 0 };
 function renderScore() {
-  var p = pool(), all = ITEMS.length, done = 0, weak = 0;
-  ITEMS.forEach(function (it) { var s = stat(it.key); if (s.n) done++; if (isWeak(s)) weak++; });
+  var p = pool(), all = ITEMS.length, done = 0, weak = 0, mast = 0;
+  ITEMS.forEach(function (it) { var s = stat(it.key); if (s.n) done++; if (isWeak(s)) weak++; if (isMastered(s)) mast++; });
   var reached = p.filter(function (it) { return stat(it.key).n >= GOAL; }).length, minN = Infinity;
   p.forEach(function (it) { minN = Math.min(minN, stat(it.key).n); });
   $('score').innerHTML =
     ($('mode').value === 'auto' && p.length ? '<span>' + (minN < GOAL ? '均等に出題中（範囲内の最少 ' + minN + ' 回）' : '全部 ' + GOAL + ' 回済み → 苦手多め') + ' · ' + GOAL + '回到達 <b>' + reached + '</b>/' + p.length + '</span>' : '') +
     '<span>今回 <b>' + session.n + '</b> 問</span><span class="ok">正解 <b>' + session.ok + '</b></span>' +
     '<span>出題範囲 <b>' + p.length + '</b></span><span>これまでに解いた <b>' + done + '</b>/' + all + '</span>' +
-    '<span class="ng">苦手 <b>' + weak + '</b></span>';
+    '<span class="ng">苦手 <b>' + weak + '</b></span><span class="ok">一発正解（出題しない） <b>' + mast + '</b></span>';
 }
 function shapeOf(word) {
   /* 語数とかたちのヒント: 頭文字だけ見せる */
@@ -564,7 +573,7 @@ function next() {
   cur = pick();
   var st = $('stage');
   if (!cur) {
-    st.innerHTML = '<div class="card empty">' + ($('mode').value === 'onlyweak' ? 'この範囲に苦手なものはありません。' : $('mode').value === 'new' ? 'この範囲はぜんぶ一度は解きました。' : ($('asked').value || $('wrong').value) ? '出題日・間違えた日の条件に合う問題がありません。' : '出題できるものがありません。') + '</div>';
+    st.innerHTML = '<div class="card empty">' + ($('mode').value === 'onlyweak' ? 'この範囲に苦手なものはありません。' : $('mode').value === 'mastered' ? 'この範囲に一発正解したものはまだありません。' : $('mode').value === 'new' ? 'この範囲はぜんぶ一度は解きました。' : ($('asked').value || $('wrong').value) ? '出題日・間違えた日の条件に合う問題がありません。' : '出題できるものがありません。') + '</div>';
     renderScore(); return;
   }
   cur.done = false; cur.v = null; cur.hinted = false;   /* 同じ問題がまた出たとき前回の状態を持ち越さない */
@@ -639,10 +648,12 @@ function check(giveup) {
         (r.v !== 'ok' && user ? '<span>この答えでも合っている →</span><button id="fixOk">正解にする</button>' : '') +
         (r.v === 'ok' ? '<span>自信がなかった →</span><button id="fixNg">不正解にする</button>' : '') +
       '</div>' +
+      (isMastered(stat(cur.key)) && stat(cur.key).n === 1 ? '<div class="simnote" id="mastNote">一発正解！ この問題は次から出題しません（下の「一発正解」に入ります）。 <button class="pill" id="mastBack">また出す</button></div>' : '') +
       '<div class="hist" id="hist"></div>' +
       '<div class="acts"><button class="primary" id="next">次の問題 →</button></div>' +
     '</div>';
   renderHist();
+  if ($('mastBack')) $('mastBack').onclick = function () { setBack(cur.key); $('mastNote').textContent = 'この問題はこれからも出題します。'; };
   $('sayAns').onclick = function () { TTS.say(expandAlt(cleanWord(cur.word))[0].replace(/[～〜~]/g, ''), this); };
   if ($('sayEx')) $('sayEx').onclick = function () { TTS.say(cur.ex, this); };
   if ($('repeat')) $('repeat').onclick = function () {
@@ -655,7 +666,7 @@ function check(giveup) {
     });
   };
   if ($('fixOk')) $('fixOk').onclick = function () { record(cur.key, 'ok', cur.v); if (cur.v !== 'ok') session.ok++; cur.v = 'ok'; this.parentNode.innerHTML = '<span>正解として記録しました。</span>'; renderScore(); renderHist(); renderWeak(); };
-  if ($('fixNg')) $('fixNg').onclick = function () { record(cur.key, 'ng', cur.v); session.ok--; cur.v = 'ng'; this.parentNode.innerHTML = '<span>不正解として記録しました。</span>'; renderScore(); renderHist(); renderWeak(); };
+  if ($('fixNg')) $('fixNg').onclick = function () { record(cur.key, 'ng', cur.v); session.ok--; cur.v = 'ng'; if ($('mastNote')) $('mastNote').remove(); this.parentNode.innerHTML = '<span>不正解として記録しました。</span>'; renderScore(); renderHist(); renderWeak(); };
   $('next').onclick = next;
   $('ans').readOnly = true;
   $('ans').focus();
@@ -679,7 +690,19 @@ function renderWeak() {
   $('weakList').innerHTML = list.length ? list.map(function (x) {
     return '<li><span class="en">' + esc(cleanWord(x.it.word)) + '</span><span class="cnt">× ' + x.s.ng + (x.s.near ? ' △ ' + x.s.near : '') + ' / ' + x.s.n + '回</span><span class="jp">' + esc(x.it.ja) + '（第' + esc(x.it.ep) + '回' + (lastWrong(x.s) ? '・最後に間違えた ' + fmtDay(lastWrong(x.s)) : '') + '）</span></li>';
   }).join('') : '<li><span class="jp">まだありません。</span></li>';
+  var mast = ITEMS.map(function (it) { return { it: it, s: stat(it.key) }; })
+    .filter(function (x) { return isMastered(x.s); })
+    .sort(function (a, b) { return b.s.log[0][0] - a.s.log[0][0]; });
+  $('mastCnt').textContent = '　' + mast.length + '件';
+  $('mastList').innerHTML = mast.length ? mast.map(function (x) {
+    return '<li><span class="en">' + esc(cleanWord(x.it.word)) + '</span><span class="cnt"><button class="pill" data-back="' + esc(x.it.key) + '">出題に戻す</button></span><span class="jp">' + esc(x.it.ja) + '（第' + esc(x.it.ep) + '回・' + fmtDay(x.s.log[0][0]) + ' に一発正解' + (x.s.n > 1 ? '・その後 ' + (x.s.n - 1) + '回復習' : '') + '）</span></li>';
+  }).join('') : '<li><span class="jp">まだありません。</span></li>';
 }
+function setBack(key) { var s = stat(key); s.back = true; REC[key] = s; lsSet(LS_REC, REC); renderWeak(); renderScore(); }
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('[data-back]');
+  if (b) setBack(b.getAttribute('data-back'));
+});
 
 /* ============ 設定・記録の出し入れ ============ */
 function syncDateInputs() {
