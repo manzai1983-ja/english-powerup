@@ -106,7 +106,7 @@
       <span>話す人</span><span class="line" id="people"></span>
     </div>
     <div class="line" style="margin-top:6px">
-      <label class="chk" title="登録した声と比べて、誰が話したかを記録します"><input type="checkbox" id="voiceOn">声で人を見分ける</label>
+      <label class="chk" title="「声で見分ける」は登録した声と比べて自動で決めます。人を選ぶと、選び直すまでその人の発言として記録します">話している人 <select id="whoSel"></select></label>
       <label class="chk" title="話した内容をこの端末に保存し、「記録と統計」で1日ごとに集計します"><input type="checkbox" id="recOn" checked>記録する</label>
     </div>
     <details>
@@ -353,9 +353,24 @@ function renderPeople() {
   var h = '';
   People.forEach(function (p) { h += '<span class="pchip"><i style="background:' + p.color + '"></i>' + esc(p.name) + '<button type="button" data-del="' + p.id + '" title="' + esc(p.name) + 'の声を消す" aria-label="' + esc(p.name) + 'の声を消す">×</button></span>'; });
   $('people').innerHTML = h || '<span class="faint">まだ誰も登録していません</span>';
-  $('voiceOn').disabled = !People.length;
-  if (!People.length) $('voiceOn').checked = false;
+  var cur = $('whoSel').value || whoPref, h2 = '';
+  var canAuto = !IS_ANDROID && People.some(function (p) { return p.st; });
+  h2 += '<option value="auto"' + (canAuto ? '' : ' disabled') + '>声で見分ける' + (IS_ANDROID ? '（Androidでは使えません）' : People.length ? '' : '（声の登録が必要）') + '</option>';
+  People.forEach(function (p) { h2 += '<option value="' + p.id + '">' + esc(p.name) + '</option>'; });
+  h2 += '<option value="none">指定しない</option>';
+  $('whoSel').innerHTML = h2;
+  if ((cur === 'auto' && !canAuto) || (cur !== 'auto' && cur !== 'none' && !personOf(cur))) cur = canAuto ? 'auto' : (People[0] ? People[0].id : 'none');
+  $('whoSel').value = cur;
 }
+/* Android の Chrome は聞き取り中にマイクを独り占めするので、声の分析と同時に使えない → 人は選んで決める */
+var IS_ANDROID = /Android/i.test(navigator.userAgent), whoPref = 'auto';
+if (IS_ANDROID) {
+  document.querySelector('.enroll .read').hidden = true;
+  document.querySelector('.people summary').textContent = '人を追加する';
+  $('enGo').textContent = '追加';
+  document.querySelector('.enroll').firstChild.textContent = 'Android の Chrome では、聞き取り中に声で人を見分けられません（聞き取りがマイクを独り占めするため）。名前を追加して、話す前に「話している人」で選んでください。';
+}
+function manualWho() { var v = $('whoSel').value; return personOf(v) ? { sp: v, conf: 1, fs: null } : null; }
 $('people').addEventListener('click', function (e) {
   var b = e.target.closest('[data-del]'); if (!b) return;
   var p = personOf(b.dataset.del); if (!p || !confirm(p.name + ' の声の登録を消しますか？（話した記録は残ります）')) return;
@@ -369,6 +384,13 @@ $('enGo').addEventListener('click', async function () {
   if (!name) { $('enMsg').textContent = '名前を入れてください'; $('enName').focus(); return; }
   if (listening) stopAll();
   var btn = this; btn.disabled = true; $('enMsg').textContent = '';
+  if (IS_ANDROID) {                                       /* 声は録らず、名前だけ足す */
+    if (!People.some(function (p) { return p.name === name; })) {
+      var np = { id: 'p' + Date.now(), name: name, created: Date.now(), color: SpeakLib.COLORS[People.length % SpeakLib.COLORS.length], st: null, thr: 0 };
+      await SpeakLib.put('speakers', np); await loadPeople(); $('whoSel').value = np.id; savePrefs();
+    }
+    $('enMsg').textContent = name + ' を追加しました'; $('enName').value = ''; btn.disabled = false; return;
+  }
   try { await Voice.open(); } catch (e) { $('enMsg').textContent = 'マイクが使えません: ' + (e.message || e.name); btn.disabled = false; return; }
   Voice.take(); Voice.setOn(true);
   var t0 = Date.now();
@@ -392,7 +414,7 @@ $('enGo').addEventListener('click', async function () {
   $('enMsg').textContent = name + ' の声を' + (old ? '追加で覚えました' : '覚えました') + '（' + fr.length + '）';
   $('enName').value = '';
   await loadPeople();
-  $('voiceOn').checked = true; savePrefs();
+  $('whoSel').value = 'auto'; savePrefs();
 });
 
 /* ============================================================
@@ -502,8 +524,8 @@ function stopAll() {
   $('mic').classList.remove('on'); $('mic').textContent = '話す'; setState('止めました');
 }
 function whoSpoke() {
-  if (!Voice.isOpen()) return null;
-  var fr = Voice.take(), c = Voice.classify(fr, People);
+  if (!Voice.isOpen()) return manualWho();
+  var fr = Voice.take(), c = Voice.classify(fr, People.filter(function (p) { return p.st; }));
   c.fs = fr.length >= 12 ? Voice.stats(fr) : null;
   dbg('声: ' + fr.length + 'コマ → ' + (c.sp ? personOf(c.sp).name : '不明') + ' (確からしさ ' + c.conf + ', 点 ' + (c.s ? c.s.toFixed(1) : '-') + ')');
   return c;
@@ -513,8 +535,8 @@ $('mic').addEventListener('click', async function () {
   if (listening) { stopAll(); return; }
   listening = true; this.classList.add('on'); this.textContent = '止める';
   setState('聞いています… 日本語で話してください');
-  if ($('voiceOn').checked && People.length) {
-    if (srMode === 'novoice') note('この端末では、声で人を見分ける機能と聞き取りを同時に使えなかったため、人の見分けは止めています（「声で人を見分ける」を一度外して付け直すと、もう一度試します）。');
+  if ($('whoSel').value === 'auto' && !IS_ANDROID && People.length) {
+    if (srMode === 'novoice') note('この端末では、声で人を見分ける機能と聞き取りを同時に使えなかったため、人の見分けは止めています（「話している人」を別のものにしてから「声で見分ける」に戻すと、もう一度試します）。');
     else try { await Voice.open(); Voice.take(); Voice.setOn(true); }
     catch (e) { note('声で人を見分けるためのマイクが使えませんでした（' + (e.message || e.name) + '）。聞き取りと翻訳はそのまま使えます。'); }
   }
@@ -597,9 +619,9 @@ $('hist').addEventListener('click', async function (e) {
   var card = b.closest('.card'), r = card._rec; if (!r) return;
   var ids = People.map(function (p) { return p.id; }).concat([null]);
   var next = ids[(ids.indexOf(r.sp) + 1) % ids.length];
-  if (r.fs && r.learned) { var old = personOf(r.learned); if (old) { old.st = Voice.add(old.st, r.fs, -1); await SpeakLib.put('speakers', old); } r.learned = null; }
+  if (r.fs && r.learned) { var old = personOf(r.learned); if (old && old.st) { old.st = Voice.add(old.st, r.fs, -1); await SpeakLib.put('speakers', old); } r.learned = null; }
   r.sp = next; r.conf = 1; r.up = Date.now();
-  if (r.fs && next) { var np = personOf(next); if (np) { np.st = Voice.add(np.st, r.fs, 1); await SpeakLib.put('speakers', np); r.learned = next; } }
+  if (r.fs && next) { var np = personOf(next); if (np && np.st) { np.st = Voice.add(np.st, r.fs, 1); await SpeakLib.put('speakers', np); r.learned = next; } }
   if (r.id) await SpeakLib.put('utt', r);
   b.outerHTML = chipHtml(r);
 });
@@ -609,7 +631,7 @@ $('typeForm').addEventListener('submit', async function (e) {
   var t = $('typeIn').value.trim(); if (!t) return;
   $('typeIn').value = '';
   await Trans.prepare();
-  handle(t, null);
+  handle(t, manualWho());
 });
 $('clear').addEventListener('click', function () { items = []; $('hist').innerHTML = '<p class="empty">画面から消しました（記録は「記録と統計」に残っています）</p>'; $('live').innerHTML = ''; });
 $('speed').addEventListener('click', function (e) {
@@ -619,12 +641,12 @@ $('speed').addEventListener('click', function (e) {
 });
 
 /* 設定（この端末だけに覚える） */
-function savePrefs() { try { localStorage.setItem('speak.prefs', JSON.stringify({ voiceOn: $('voiceOn').checked, recOn: $('recOn').checked })); } catch (e) {} }
+function savePrefs() { try { localStorage.setItem('speak.prefs', JSON.stringify({ who: $('whoSel').value, recOn: $('recOn').checked })); } catch (e) {} }
 (function () {
   var p = {}; try { p = JSON.parse(localStorage.getItem('speak.prefs') || '{}'); } catch (e) {}
   if (p.recOn === false) $('recOn').checked = false;
-  $('voiceOn').checked = p.voiceOn !== false;
-  $('voiceOn').addEventListener('change', function () { if (this.checked) { srMode = 'track'; srWorked = false; saveSrMode(); } savePrefs(); }); $('recOn').addEventListener('change', savePrefs);
+  if (p.who) whoPref = p.who;
+  $('whoSel').addEventListener('change', function () { if (this.value === 'auto') { srMode = 'track'; srWorked = false; saveSrMode(); } savePrefs(); }); $('recOn').addEventListener('change', savePrefs);
 })();
 
 /* 調べもの用の記録（URL の末尾に ?debug=1 を付けると下に出る） */
