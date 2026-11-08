@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>話した記録と統計</title>
+<meta name="description" content="しゃべって英語で話した内容を1日ごとに集計し、人ごとによく使った英単語・イディオム・フレーズ・日本語の言葉を出す。">
+<style>
+  :root {
+    --paper: #F2F1EE; --surface: #FFFFFF; --ink: #1B1D22; --muted: #5F6570; --faint: #8D939D;
+    --accent: #2E4B7A; --accent-tint: #E4EAF3; --rule: #D9D8D4; --rule-soft: #E7E6E3;
+    --ng: #A3372F; --near-tint: #F7EED8; --on-accent: #FFFFFF; --bar: #9FB3D1;
+    --font-en: "Palatino Linotype", Palatino, "Iowan Old Style", Georgia, serif;
+    --font-jp: "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #12141A; --surface: #1A1D25; --ink: #E8EAEE; --muted: #A0A6B0; --faint: #79808B;
+      --accent: #7FA6DC; --accent-tint: #1D2941; --rule: #2C313B; --rule-soft: #232830;
+      --ng: #E58279; --near-tint: #322A15; --on-accent: #12141A; --bar: #3D5378;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #12141A; --surface: #1A1D25; --ink: #E8EAEE; --muted: #A0A6B0; --faint: #79808B;
+    --accent: #7FA6DC; --accent-tint: #1D2941; --rule: #2C313B; --rule-soft: #232830;
+    --ng: #E58279; --near-tint: #322A15; --on-accent: #12141A; --bar: #3D5378;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-jp); line-height: 1.6; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 20px 16px 80px; }
+  header h1 { font-size: 1.35rem; margin: 0 0 4px; }
+  header p { margin: 0; color: var(--muted); font-size: .9rem; }
+  a { color: var(--accent); }
+  .ctl { background: var(--surface); border: 1px solid var(--rule-soft); border-radius: 12px; padding: 12px 14px; margin: 16px 0; display: grid; gap: 10px; font-size: .85rem; }
+  .ctl .line { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+  .ctl .lbl { color: var(--muted); min-width: 3em; }
+  select { font: inherit; padding: 5px 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); max-width: 100%; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; flex-wrap: wrap; }
+  .seg button { font: inherit; font-size: .82rem; padding: 5px 10px; border: 0; background: var(--surface); color: var(--muted); cursor: pointer; }
+  .seg button.on { background: var(--accent); color: var(--on-accent); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font: inherit; font-size: .8rem; display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border: 1px solid var(--rule); border-radius: 99px; background: var(--surface); color: var(--ink); cursor: pointer; }
+  .chip.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  button.b { font: inherit; font-size: .82rem; padding: 5px 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); cursor: pointer; }
+  button.b.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  button.b.danger { color: var(--ng); }
+  .notice { background: var(--near-tint); border-radius: 8px; padding: 8px 10px; font-size: .85rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+  .kpi { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 12px; }
+  .kpi div { background: var(--surface); border: 1px solid var(--rule-soft); border-radius: 12px; padding: 8px 14px; min-width: 110px; }
+  .kpi b { display: block; font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: .75rem; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
+  .box { background: var(--surface); border: 1px solid var(--rule-soft); border-radius: 12px; padding: 12px 14px; min-width: 0; }
+  .box.wide { grid-column: 1 / -1; }
+  .box h2 { font-size: .95rem; margin: 0 0 2px; }
+  .box .sub { font-size: .75rem; color: var(--faint); margin: 0 0 8px; }
+  .rank { list-style: none; margin: 0; padding: 0; }
+  .rank li { display: grid; grid-template-columns: minmax(0, 1fr) 2.2em; gap: 8px; align-items: center; padding: 3px 0; font-size: .9rem; }
+  .rank .w { position: relative; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 1px 6px; border-radius: 4px; }
+  .rank .w::before { content: ''; position: absolute; inset: 0; width: var(--p); background: var(--accent-tint); border-radius: 4px; z-index: 0; }
+  .rank .w span { position: relative; }
+  .rank .n { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; font-size: .82rem; }
+  .en { font-family: var(--font-en); }
+  .idi { border-top: 1px solid var(--rule-soft); padding: 8px 0; }
+  .idi:first-of-type { border-top: 0; }
+  .idi .h { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .idi .h b { font-family: var(--font-en); font-size: 1.05rem; }
+  .idi .h .n { margin-left: auto; color: var(--muted); font-size: .82rem; }
+  .tag { font-size: .68rem; padding: 0 6px; border-radius: 4px; border: 1px solid var(--rule); color: var(--muted); }
+  .tag.radio { border-color: var(--accent); color: var(--accent); }
+  .idi .m { font-size: .8rem; color: var(--muted); }
+  .idi .ex { font-size: .82rem; margin: 2px 0 0; padding-left: 10px; border-left: 2px solid var(--rule); }
+  .idi .ex .ja { color: var(--faint); font-size: .78rem; }
+  .empty { color: var(--faint); font-size: .85rem; padding: 6px 0; }
+  .utt { font-size: .85rem; border-top: 1px solid var(--rule-soft); padding: 6px 0; display: grid; grid-template-columns: 3.2em minmax(0, 1fr); gap: 8px; }
+  .utt .t { color: var(--faint); font-variant-numeric: tabular-nums; font-size: .78rem; }
+  .utt .ja { color: var(--muted); }
+  .utt .en { font-weight: 700; }
+  .utt .who { font-size: .72rem; display: inline-flex; align-items: center; gap: 4px; margin-right: 6px; }
+  .utt .who i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  details summary { cursor: pointer; color: var(--accent); font-size: .9rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>話した記録と統計</h1>
+    <p><a href="speak.html">← しゃべって英語</a>　記録はこの端末のブラウザだけに入っています。集計は1日ごと（終わった日の分は、次に開いたときに自動で作ります）。</p>
+  </header>
+
+  <section class="ctl">
+    <div class="line"><span class="lbl">日付</span><select id="day"></select>
+      <span class="seg" id="range"><button data-r="1" class="on">この日</button><button data-r="7">7日間</button><button data-r="30">30日間</button><button data-r="0">全部</button></span></div>
+    <div class="line"><span class="lbl">人</span><div class="chips" id="who"></div></div>
+    <div class="notice" id="todayNote" hidden><span id="todayMsg"></span><button class="b primary" id="runToday" type="button">今日の分を今すぐ集計</button></div>
+  </section>
+
+  <div id="out"><p class="empty">読み込み中…</p></div>
+
+  <details style="margin-top:16px">
+    <summary>この日の話した内容（すべて）</summary>
+    <div id="utts"></div>
+  </details>
+
+  <div class="tools">
+    <button class="b" id="csv" type="button">全記録を CSV で保存</button>
+    <button class="b danger" id="delDay" type="button">この日の記録を消す</button>
+  </div>
+</div>
+
+<script src="speak-lib.js"></script>
+<script>
+'use strict';
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+var IDIOMS = [], DAILY = {}, PEOPLE = {}, DAYS = [], sel = { day: null, range: 1, who: '*' }, TODAY = SpeakLib.dayKey();
+
+function personName(k) { return k === '*' ? 'みんな' : k === '?' ? 'だれか（不明）' : (PEOPLE[k] ? PEOPLE[k].name : '削除した人'); }
+function personColor(k) { return PEOPLE[k] ? PEOPLE[k].color : 'var(--faint)'; }
+function fmtDay(d) { var w = '日月火水木金土'[new Date(d + 'T00:00:00').getDay()]; return d.replace(/^(\d+)-(\d+)-(\d+)$/, function (_, y, m, dd) { return +m + '月' + (+dd) + '日'; }) + '（' + w + '）' + (d === TODAY ? '・今日' : ''); }
+
+async function init() {
+  var res = await Promise.all([SpeakLib.loadRadio(), SpeakLib.all('speakers'), SpeakLib.all('utt')]);
+  IDIOMS = SpeakLib.buildIdioms(res[0]);
+  res[1].forEach(function (p) { PEOPLE[p.id] = p; });
+  var dset = {}; res[2].forEach(function (r) { dset[r.day] = 1; });
+  DAYS = Object.keys(dset).sort().reverse();
+  await refreshDaily(false);
+  if (!DAYS.length) { $('out').innerHTML = '<p class="empty">まだ記録がありません。<a href="speak.html">しゃべって英語</a>で話すと、ここに集計が出ます。</p>'; $('day').innerHTML = '<option>—</option>'; return; }
+  sel.day = DAYS[0];
+  $('day').innerHTML = DAYS.map(function (d) { return '<option value="' + d + '">' + fmtDay(d) + '</option>'; }).join('');
+  render();
+}
+async function refreshDaily(forceToday) {
+  var list = await SpeakLib.ensureDaily(IDIOMS, forceToday);
+  DAILY = {}; list.forEach(function (d) { DAILY[d.day] = d; });
+}
+
+function daysInRange() {
+  if (sel.range === 1) return [sel.day];
+  var end = new Date(sel.day + 'T00:00:00'), out = [];
+  return DAYS.filter(function (d) { if (sel.range === 0) return true; var t = new Date(d + 'T00:00:00'); return t <= end && (end - t) / 864e5 < sel.range; });
+}
+
+function render() {
+  var days = daysInRange();
+  /* 人の選択肢: 範囲内に出てくる人 */
+  var keys = {};
+  days.forEach(function (d) { if (DAILY[d]) Object.keys(DAILY[d].groups).forEach(function (k) { if (k !== '*') keys[k] = 1; }); });
+  var ks = ['*'].concat(Object.keys(keys).sort(function (a, b) { return a === '?' ? 1 : b === '?' ? -1 : personName(a) < personName(b) ? -1 : 1; }));
+  if (ks.indexOf(sel.who) < 0) sel.who = '*';
+  $('who').innerHTML = ks.map(function (k) { return '<button type="button" class="chip' + (k === sel.who ? ' on' : '') + '" data-k="' + esc(k) + '">' + (k === '*' || k === '?' ? '' : '<i style="background:' + personColor(k) + '"></i>') + esc(personName(k)) + '</button>'; }).join('');
+
+  /* 今日の分はまだ集計していない（または古い）ことを知らせる */
+  var tIn = days.indexOf(TODAY) >= 0;
+  $('todayNote').hidden = !tIn;
+  if (tIn) $('todayMsg').textContent = DAILY[TODAY] ? '今日の分は ' + new Date(DAILY[TODAY].at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) + ' 時点の集計です（明日になると全部で確定します）' : '今日の分はまだ集計していません（明日、自動で集計します）';
+
+  var g = SpeakLib.merge(days.map(function (d) { return DAILY[d] && DAILY[d].groups[sel.who]; }));
+  var h = '<div class="kpi"><div><b>' + g.n + '</b><span>話した文</span></div><div><b>' + g.idioms.length + '</b><span>使ったイディオム・決まり文句</span></div><div><b>' + g.words.length + '</b><span>よく出た英単語（上位）</span></div></div>';
+  if (!g.n) { $('out').innerHTML = h + '<p class="empty">この範囲には集計済みの記録がありません。' + (tIn ? '「今日の分を今すぐ集計」を押すと出ます。' : '') + '</p>'; renderUtts(); return; }
+  h += '<div class="grid">';
+  h += '<section class="box wide"><h2>使ったイディオム・決まり文句</h2><p class="sub"><span class="tag radio">ラジオ英会話</span> はラジオ英会話で「知らなかった」と記録した表現。訳された英語の中に出てきた回数です</p>' +
+    (g.idioms.length ? g.idioms.map(function (d) {
+      return '<div class="idi"><div class="h"><b>' + esc(d.label) + '</b><span class="tag' + (d.src === 'radio' ? ' radio' : '') + '">' + (d.src === 'radio' ? 'ラジオ英会話' : 'よく使う表現') + '</span>' +
+        (d.meaning ? '<span class="m">' + esc(d.meaning) + '</span>' : '') + '<span class="n">' + d.n + '回</span></div>' +
+        d.ex.map(function (e) { return '<p class="ex"><span class="en">' + esc(e[0]) + '</span><br><span class="ja">' + esc(e[1]) + '</span></p>'; }).join('') + '</div>';
+    }).join('') : '<p class="empty">まだありません</p>') + '</section>';
+  h += rankBox('よく使った英単語', 'a / the / is などの基本語は除いています', g.words, true);
+  h += rankBox('よく出たフレーズ', '2〜4語のつながりで2回以上出たもの', g.phrases, true);
+  h += rankBox('よく話した日本語の言葉', '話した日本語から', g.ja, false, true);
+  h += '</div>';
+  $('out').innerHTML = h;
+  renderUtts();
+}
+function rankBox(title, sub, list, en, wide) {
+  var max = list.length ? list[0][1] : 1;
+  return '<section class="box' + (wide ? ' wide' : '') + '"><h2>' + title + '</h2><p class="sub">' + sub + '</p>' + (list.length ? '<ol class="rank">' + list.slice(0, 20).map(function (a) {
+    return '<li><span class="w' + (en ? ' en' : '') + '" style="--p:' + Math.round(a[1] / max * 100) + '%"><span>' + esc(a[0]) + '</span></span><span class="n">' + a[1] + '</span></li>';
+  }).join('') + '</ol>' : '<p class="empty">まだありません</p>') + '</section>';
+}
+async function renderUtts() {
+  var rs = (await SpeakLib.byDay(sel.day)).sort(function (a, b) { return a.ts - b.ts; });
+  if (sel.who !== '*') rs = rs.filter(function (r) { return (r.sp || '?') === sel.who; });
+  $('utts').innerHTML = rs.length ? rs.map(function (r) {
+    var d = new Date(r.ts), k = r.sp || '?';
+    return '<div class="utt"><span class="t">' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + '</span><div>' +
+      (r.voice || r.sp ? '<span class="who"><i style="background:' + personColor(k) + '"></i>' + esc(personName(k)) + '</span>' : '') +
+      '<span class="ja">' + esc(r.ja) + '</span><br><span class="en">' + esc(r.en) + '</span></div></div>';
+  }).join('') : '<p class="empty">ありません</p>';
+}
+
+$('day').addEventListener('change', function () { sel.day = this.value; render(); });
+$('range').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; [].forEach.call(this.children, function (x) { x.classList.toggle('on', x === b); }); sel.range = +b.dataset.r; render(); });
+$('who').addEventListener('click', function (e) { var b = e.target.closest('[data-k]'); if (!b) return; sel.who = b.dataset.k; render(); });
+$('runToday').addEventListener('click', async function () { this.disabled = true; await refreshDaily(true); this.disabled = false; render(); });
+$('delDay').addEventListener('click', async function () {
+  if (!sel.day || !confirm(fmtDay(sel.day) + ' の記録をすべて消しますか？（元に戻せません）')) return;
+  var rs = await SpeakLib.byDay(sel.day);
+  for (var i = 0; i < rs.length; i++) await SpeakLib.del('utt', rs[i].id);
+  await SpeakLib.del('daily', sel.day);
+  location.reload();
+});
+$('csv').addEventListener('click', async function () {
+  var rs = (await SpeakLib.all('utt')).sort(function (a, b) { return a.ts - b.ts; });
+  var q = function (s) { return '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"'; };
+  var lines = ['日付,時刻,話した人,日本語,英語'].concat(rs.map(function (r) { var d = new Date(r.ts); return [r.day, d.toTimeString().slice(0, 8), personName(r.sp || '?'), r.ja, r.en].map(q).join(','); }));
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv' }));
+  a.download = 'しゃべって英語_記録_' + TODAY + '.csv'; a.click();
+});
+
+init().catch(function (e) { $('out').innerHTML = '<p class="empty">記録を読み込めませんでした（' + esc(e && e.message || e) + '）。プライベートブラウズでは記録が使えません。</p>'; });
+</script>
+</body>
+</html>

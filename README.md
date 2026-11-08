@@ -8,6 +8,7 @@
 | **[動詞の文型リファレンス](https://manzai1983-ja.github.io/english-powerup/verbs.html)** | S+V+O+C / V 構文をとる **91語 / 3構文 / 16カテゴリ**。意味・使う場面・例文つき |
 | **[イディオム例文集](https://manzai1983-ja.github.io/english-powerup/idioms.html)** | ラジオ英会話2026の Unknown のうちイディオム・熟語と、番組本文から取った例文。**毎週の転記分も自動で載る** |
 | **[しゃべって英語](https://manzai1983-ja.github.io/english-powerup/speak.html)** | 日本語で話すと、その場で英語に訳して読み上げる。翻訳は Chrome 内蔵の翻訳（端末内・無料）、使えなければ MyMemory の無料API（登録不要・1日の文字数に上限あり） |
+| **[話した記録と統計](https://manzai1983-ja.github.io/english-powerup/speak-stats.html)** | しゃべって英語で話した内容を端末内に記録し、**1日ごとに集計**。人ごと（登録した声で自動判別）に、よく使った英単語・イディオム（ラジオ英会話の Unknown＋よく使う表現）・フレーズ・日本語の言葉を出す。共通部品は `speak-lib.js` |
 
 読み上げ・発音チェック・録音・伏字・記録のしくみは上2つで共通（`build/tmpl.html`）。
 

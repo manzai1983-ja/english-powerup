@@ -51,7 +51,8 @@
   .type input { flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); }
   button.b { font: inherit; font-size: .85rem; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); cursor: pointer; }
   button.b.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-  .hist-h { display: flex; justify-content: space-between; align-items: center; font-size: .85rem; color: var(--muted); margin: 0 0 6px; }
+  .hist-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: .85rem; color: var(--muted); margin: 0 0 6px; }
+  .hist-h button { white-space: nowrap; flex: none; }
   .card { background: var(--surface); border: 1px solid var(--rule-soft); border-radius: 12px; padding: 10px 14px; margin: 0 0 8px; }
   .card .ja { font-size: .9rem; color: var(--muted); }
   .card .en { font-family: var(--font-en); font-size: 1.12rem; font-weight: 700; }
@@ -60,13 +61,32 @@
   .card .via { font-size: .72rem; color: var(--faint); }
   .card .err { color: var(--ng); font-size: .85rem; }
   .empty { color: var(--faint); font-size: .88rem; text-align: center; padding: 16px 0; }
+  .faint { color: var(--faint); }
+  .card .top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .who { font: inherit; font-size: .75rem; display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border: 1px solid var(--rule); border-radius: 99px; background: var(--paper); color: var(--ink); cursor: pointer; white-space: nowrap; }
+  .who.unsure { border-style: dashed; color: var(--muted); }
+  .who i, .pchip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .people { background: var(--surface); border: 1px solid var(--rule-soft); border-radius: 12px; padding: 10px 14px; margin: 0 0 16px; font-size: .85rem; }
+  .people .line { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+  .pchip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 4px 2px 9px; border: 1px solid var(--rule); border-radius: 99px; }
+  .pchip button { font: inherit; border: 0; background: none; color: var(--faint); cursor: pointer; padding: 0 4px; }
+  .people summary { cursor: pointer; color: var(--accent); margin-top: 8px; }
+  .enroll { margin-top: 8px; }
+  .enroll .read { background: var(--accent-tint); border-radius: 8px; padding: 8px 10px; margin: 6px 0; line-height: 1.8; }
+  .enroll .go { display: flex; gap: 8px; }
+  .enroll input { flex: 1; min-width: 0; font: inherit; padding: 6px 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); }
+  .bar { height: 6px; background: var(--rule-soft); border-radius: 3px; margin: 8px 0 4px; overflow: hidden; }
+  .bar span { display: block; height: 100%; width: 0; background: var(--rec); transition: width .1s linear; }
+  .msg { color: var(--muted); min-height: 1.3em; margin: 0; }
+  .dbg { margin-top: 20px; font-size: .72rem; }
+  .dbg pre { white-space: pre-wrap; word-break: break-all; background: var(--surface); border: 1px solid var(--rule-soft); border-radius: 8px; padding: 8px; max-height: 320px; overflow: auto; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>しゃべって英語</h1>
-    <p>日本語で話すと、その場で英語に訳して読み上げます。<a href="index.html">English PowerUp</a> ／ <a href="idioms.html">イディオム例文集</a></p>
+    <p>日本語で話すと、その場で英語に訳して読み上げます。<a href="speak-stats.html"><b>記録と統計</b></a> ／ <a href="index.html">English PowerUp</a> ／ <a href="idioms.html">イディオム例文集</a></p>
     <p class="help" id="help" hidden></p>
   </header>
 
@@ -81,15 +101,37 @@
     </div>
   </section>
 
+  <section class="people" aria-label="話す人">
+    <div class="line">
+      <span>話す人</span><span class="line" id="people"></span>
+    </div>
+    <div class="line" style="margin-top:6px">
+      <label class="chk" title="登録した声と比べて、誰が話したかを記録します"><input type="checkbox" id="voiceOn">声で人を見分ける</label>
+      <label class="chk" title="話した内容をこの端末に保存し、「記録と統計」で1日ごとに集計します"><input type="checkbox" id="recOn" checked>記録する</label>
+    </div>
+    <details>
+      <summary>声を登録する（1人12秒）</summary>
+      <div class="enroll">
+        名前を入れて「録音」を押し、次の文をふだんの声で読んでください。同じ名前でもう一度読むと、より正確になります。
+        <div class="read">今日はいい天気ですね。駅前の新しいお店で、コーヒーとケーキを注文しました。明日の予定は、午前中に買い物をして、午後は友だちと会います。</div>
+        <div class="go"><input id="enName" placeholder="名前（例: 父、ゆき）" autocomplete="off"><button class="b primary" id="enGo" type="button">録音（12秒）</button></div>
+        <div class="bar"><span id="enBar"></span></div>
+        <p class="msg" id="enMsg"></p>
+      </div>
+    </details>
+  </section>
+
   <form class="type" id="typeForm">
     <input id="typeIn" placeholder="文字で入力して訳すこともできます" autocomplete="off">
     <button class="b primary" type="submit">訳す</button>
   </form>
 
-  <div class="hist-h"><span>履歴（英語を押すともう一度読み上げ）</span><button class="b" id="clear" type="button">消す</button></div>
+  <div class="hist-h"><span>今日の履歴（英語を押すともう一度読み上げ・名前を押すと話した人を直せます）</span><button class="b" id="clear" type="button">画面を消す</button></div>
   <div id="hist"><p class="empty">まだありません</p></div>
+  <section class="dbg" id="dbg" hidden><b>調べもの用の記録</b>（新しい順）<pre id="dbgLog"></pre></section>
 </div>
 
+<script src="speak-lib.js"></script>
 <script>
 'use strict';
 function $(id) { return document.getElementById(id); }
@@ -166,62 +208,283 @@ var TTS = (function () {
 })();
 
 /* ============================================================
+   声で人を見分ける（端末内だけで計算・無料）
+     マイクの音から 0.03 秒ごとに「声の特徴」（MFCC 12個＋声の高さ）を取り、
+     登録した人ごとの特徴の平均・ばらつきと比べて、いちばん近い人を選ぶ。
+     声が出ている（音が大きく、高さが取れる）瞬間だけを使う。
+   ============================================================ */
+var Voice = (function () {
+  var ctx = null, node = null, stream = null, frames = [], on = false, noise = 0.004;
+  var FFT = 1024, NM = 24, NC = 12, D = NC + 1, melW = null, dct = null, spec;
+  function build(sr) {
+    var mel = function (f) { return 2595 * Math.log10(1 + f / 700); }, inv = function (m) { return 700 * (Math.pow(10, m / 2595) - 1); };
+    var lo = mel(80), hi = mel(Math.min(7600, sr / 2 - 100)), pts = [];
+    for (var i = 0; i < NM + 2; i++) pts.push(inv(lo + (hi - lo) * i / (NM + 1)) / (sr / FFT));
+    melW = [];
+    for (var m = 0; m < NM; m++) {
+      var w = new Float32Array(FFT / 2), a = pts[m], b = pts[m + 1], c = pts[m + 2];
+      for (var k = Math.floor(a); k <= Math.ceil(c) && k < FFT / 2; k++) w[k] = k < a || k > c ? 0 : (k <= b ? (k - a) / (b - a) : (c - k) / (c - b));
+      melW.push(w);
+    }
+    dct = [];
+    for (var n = 1; n <= NC; n++) { var row = new Float32Array(NM); for (var j = 0; j < NM; j++) row[j] = Math.cos(Math.PI * n * (j + 0.5) / NM); dct.push(row); }
+  }
+  function pitch(x, sr) {                     /* 自己相関で声の高さ（70〜400Hz）。取れなければ 0 */
+    var N = x.length, minL = Math.floor(sr / 400), maxL = Math.min(Math.floor(sr / 70), N - 200), best = 0, bestL = 0;
+    for (var L = minL; L <= maxL; L += 2) {
+      var s = 0, e1 = 0, e2 = 0;
+      for (var i = 0; i + L < N; i += 2) { s += x[i] * x[i + L]; e1 += x[i] * x[i]; e2 += x[i + L] * x[i + L]; }
+      var r = s / Math.sqrt(e1 * e2 + 1e-12); if (r > best) { best = r; bestL = L; }
+    }
+    return best > 0.55 ? sr / bestL : 0;
+  }
+  /* 1024点 FFT（ハン窓）。パワースペクトルを返す */
+  var fftCos = null, fftSin = null, rev = null, hann = null;
+  function fftInit() {
+    fftCos = new Float32Array(FFT / 2); fftSin = new Float32Array(FFT / 2); rev = new Uint16Array(FFT); hann = new Float32Array(FFT);
+    for (var i = 0; i < FFT / 2; i++) { fftCos[i] = Math.cos(2 * Math.PI * i / FFT); fftSin[i] = -Math.sin(2 * Math.PI * i / FFT); }
+    var bits = Math.log2(FFT); for (var j = 0; j < FFT; j++) { var r = 0; for (var b = 0; b < bits; b++) r |= ((j >> b) & 1) << (bits - 1 - b); rev[j] = r; }
+    for (var k = 0; k < FFT; k++) hann[k] = 0.5 - 0.5 * Math.cos(2 * Math.PI * k / (FFT - 1));
+  }
+  var re = new Float32Array(FFT), im = new Float32Array(FFT);
+  function power(x, out) {
+    for (var i = 0; i < FFT; i++) { re[rev[i]] = x[i] * hann[i]; im[rev[i]] = 0; }
+    for (var size = 2; size <= FFT; size <<= 1) {
+      var half = size >> 1, step = FFT / size;
+      for (var s = 0; s < FFT; s += size) for (var k = 0; k < half; k++) {
+        var a = s + k, b = a + half, c = fftCos[k * step], d = fftSin[k * step];
+        var tr = re[b] * c - im[b] * d, ti = re[b] * d + im[b] * c;
+        re[b] = re[a] - tr; im[b] = im[a] - ti; re[a] += tr; im[a] += ti;
+      }
+    }
+    for (var m = 0; m < FFT / 2; m++) out[m] = re[m] * re[m] + im[m] * im[m];
+  }
+  /* 音の処理側から 1024 サンプルずつ受け取る（画面が裏に回ってもタイマーのように間引かれない） */
+  function onBlock(x) {
+    if (!on) return;
+    var e = 0; for (var i = 0; i < FFT; i++) e += x[i] * x[i];
+    var rms = Math.sqrt(e / FFT);
+    if (rms < noise * 2) noise = Math.max(0.0015, noise * 0.97 + rms * 0.03);   /* 周りの雑音の大きさを追う */
+    if (rms < Math.max(noise * 3.5, 0.006)) return;
+    var f0 = pitch(x, ctx.sampleRate); if (!f0) return;
+    power(x, spec);
+    var lm = new Float32Array(NM);
+    for (var m = 0; m < NM; m++) { var w = melW[m], s = 0; for (var k = 0; k < FFT / 2; k++) if (w[k]) s += w[k] * spec[k]; lm[m] = Math.log(s + 1e-10); }
+    var f = new Float32Array(D);
+    for (var n = 0; n < NC; n++) { var c = 0; for (var j = 0; j < NM; j++) c += dct[n][j] * lm[j]; f[n] = c; }
+    f[NC] = 12 * Math.log2(f0 / 100) / 3;      /* 声の高さ（半音を3で割って他と桁をそろえる） */
+    frames.push(f);
+    if (frames.length > 4000) frames.splice(0, 1000);
+  }
+  var WORKLET = "class P extends AudioWorkletProcessor{constructor(){super();this.b=new Float32Array(1024);this.i=0;this.k=0}" +
+    "process(inp){var x=inp[0]&&inp[0][0];if(x){for(var j=0;j<x.length;j++){this.b[this.i++]=x[j];if(this.i===1024){if((this.k++&1)===0)this.port.postMessage(this.b.slice());this.i=0}}}return true}}" +
+    "registerProcessor('voice-feat',P);";
+  async function open() {
+    if (stream) return stream;
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') { try { await ctx.resume(); } catch (e) {} }
+    spec = new Float32Array(FFT / 2); build(ctx.sampleRate); fftInit();
+    var src = ctx.createMediaStreamSource(stream), sink = ctx.createGain(); sink.gain.value = 0; sink.connect(ctx.destination);
+    if (ctx.audioWorklet) {
+      var url = URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' }));
+      await ctx.audioWorklet.addModule(url);
+      node = new AudioWorkletNode(ctx, 'voice-feat');
+      node.port.onmessage = function (e) { onBlock(e.data); };
+    } else {                                    /* 古いブラウザ向け */
+      node = ctx.createScriptProcessor(1024, 1, 1);
+      node.onaudioprocess = function (e) { onBlock(e.inputBuffer.getChannelData(0)); };
+    }
+    src.connect(node); node.connect(sink);
+    return stream;
+  }
+  function close() { if (node) { try { node.disconnect(); } catch (e) {} node = null; } if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; if (ctx) ctx.close(); ctx = null; frames = []; }
+  function take() { var f = frames; frames = []; return f; }
+  function stats(fr) {
+    var s = new Array(D).fill(0), q = new Array(D).fill(0);
+    fr.forEach(function (f) { for (var d = 0; d < D; d++) { s[d] += f[d]; q[d] += f[d] * f[d]; } });
+    var r = function (a) { return a.map(function (v) { return Math.round(v * 1000) / 1000; }); };
+    return { n: fr.length, s: r(s), q: r(q) };
+  }
+  function model(st, pooled) {
+    var mu = [], v = [];
+    for (var d = 0; d < D; d++) { mu[d] = st.s[d] / st.n; var x = st.q[d] / st.n - mu[d] * mu[d]; v[d] = Math.max(0.02, 0.8 * x + 0.2 * (pooled ? pooled[d] : x)); }
+    return { mu: mu, v: v };
+  }
+  function score(fr, md) {
+    var tot = 0;
+    fr.forEach(function (f) { var l = 0; for (var d = 0; d < D; d++) { var z = f[d] - md.mu[d]; l += z * z / md.v[d] + Math.log(md.v[d]); } tot += -0.5 * l; });
+    return tot / fr.length;
+  }
+  function pooledVar(people) {
+    var n = 0, s = new Array(D).fill(0), q = new Array(D).fill(0);
+    people.forEach(function (p) { n += p.st.n; for (var d = 0; d < D; d++) { s[d] += p.st.s[d]; q[d] += p.st.q[d]; } });
+    return n ? s.map(function (_, d) { var m = s[d] / n; return Math.max(0.02, q[d] / n - m * m); }) : null;
+  }
+  /* いちばん近い人。声が短すぎる・誰にも似ていないときは sp:null */
+  function classify(fr, people) {
+    if (fr.length < 12 || !people.length) return { sp: null, conf: 0 };
+    var pv = pooledVar(people), rs = people.map(function (p) { return { p: p, s: score(fr, model(p.st, pv)) }; }).sort(function (a, b) { return b.s - a.s; });
+    var best = rs[0], gap = rs.length > 1 ? best.s - rs[1].s : 9;
+    if (best.s < best.p.thr) return { sp: null, conf: 0, s: best.s };
+    return { sp: best.p.id, conf: Math.round(Math.min(1, gap / 2) * 100) / 100, s: best.s };
+  }
+  /* 登録した声で「自分らしさ」の下限を決める（0.6秒ずつに区切って一番低い点より少し下） */
+  function threshold(fr, st) {
+    var md = model(st), lows = [];
+    for (var i = 0; i + 20 <= fr.length; i += 20) lows.push(score(fr.slice(i, i + 20), md));
+    lows.sort(function (a, b) { return a - b; });
+    return (lows.length ? lows[0] : score(fr, md)) - 6;
+  }
+  function add(a, b, sign) { return { n: a.n + sign * b.n, s: a.s.map(function (v, d) { return v + sign * b.s[d]; }), q: a.q.map(function (v, d) { return v + sign * b.q[d]; }) }; }
+  return { open: open, close: close, track: function () { return stream ? stream.getAudioTracks()[0] : null; }, setOn: function (b) { on = b; if (!b) frames = []; },
+           take: take, stats: stats, classify: classify, threshold: threshold, add: add, isOpen: function () { return !!stream; } };
+})();
+
+/* ============================================================
+   話す人（登録した声）。端末内に保存
+   ============================================================ */
+var People = [], unknownName = 'だれか';
+function personOf(id) { for (var i = 0; i < People.length; i++) if (People[i].id === id) return People[i]; return null; }
+function loadPeople() { return SpeakLib.all('speakers').then(function (a) { People = (a || []).sort(function (x, y) { return x.created - y.created; }); renderPeople(); }); }
+function renderPeople() {
+  var h = '';
+  People.forEach(function (p) { h += '<span class="pchip"><i style="background:' + p.color + '"></i>' + esc(p.name) + '<button type="button" data-del="' + p.id + '" title="' + esc(p.name) + 'の声を消す" aria-label="' + esc(p.name) + 'の声を消す">×</button></span>'; });
+  $('people').innerHTML = h || '<span class="faint">まだ誰も登録していません</span>';
+  $('voiceOn').disabled = !People.length;
+  if (!People.length) $('voiceOn').checked = false;
+}
+$('people').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-del]'); if (!b) return;
+  var p = personOf(b.dataset.del); if (!p || !confirm(p.name + ' の声の登録を消しますか？（話した記録は残ります）')) return;
+  SpeakLib.del('speakers', p.id).then(loadPeople);
+});
+
+/* 登録: 12秒ほど、表示した文を声に出して読んでもらう */
+var ENROLL_SEC = 12;
+$('enGo').addEventListener('click', async function () {
+  var name = $('enName').value.trim();
+  if (!name) { $('enMsg').textContent = '名前を入れてください'; $('enName').focus(); return; }
+  if (listening) stopAll();
+  var btn = this; btn.disabled = true; $('enMsg').textContent = '';
+  try { await Voice.open(); } catch (e) { $('enMsg').textContent = 'マイクが使えません: ' + (e.message || e.name); btn.disabled = false; return; }
+  Voice.take(); Voice.setOn(true);
+  var t0 = Date.now();
+  await new Promise(function (res) {
+    var iv = setInterval(function () {
+      var p = Math.min(1, (Date.now() - t0) / (ENROLL_SEC * 1000));
+      $('enBar').style.width = (p * 100) + '%';
+      if (p >= 1) { clearInterval(iv); res(); }
+    }, 100);
+  });
+  var fr = Voice.take(); Voice.setOn(false);
+  if (!listening) Voice.close();
+  btn.disabled = false; $('enBar').style.width = '0';
+  if (fr.length < 100) { $('enMsg').textContent = '声が少なすぎました（' + fr.length + '）。マイクに近づいて、もう一度読んでください'; return; }
+  var st = Voice.stats(fr);
+  var old = People.filter(function (p) { return p.name === name; })[0];
+  var p = old || { id: 'p' + Date.now(), name: name, created: Date.now(), color: SpeakLib.COLORS[People.length % SpeakLib.COLORS.length] };
+  p.st = old ? Voice.add(old.st, st, 1) : st;              /* 同じ名前ならもう一度読むほど正確になる */
+  p.thr = Voice.threshold(fr, p.st);
+  await SpeakLib.put('speakers', p);
+  $('enMsg').textContent = name + ' の声を' + (old ? '追加で覚えました' : '覚えました') + '（' + fr.length + '）';
+  $('enName').value = '';
+  await loadPeople();
+  $('voiceOn').checked = true; savePrefs();
+});
+
+/* ============================================================
    聞き取り（日本語）。話し続ける間は自動で再開する
    ============================================================ */
 var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-var rec = null, listening = false, paused = false, interimEl = null;
+var rec = null, listening = false, paused = false;
 /* 速くするための仕組み
    ・Chrome が「文の終わり」と決めるまで（無音1秒以上）待たず、途中経過が COMMIT_MS 変わらなければ確定させて訳す
    ・読み上げ中はマイクを止めず「聞き流す」だけにする（止めて再起動すると時間がかかり、直後の発話も落ちるため） */
 var COMMIT_MS = 1000;
-/* 同じ文が続けて確定したとき（数秒以内・記号や空白を除いて同じ）は2回目を捨てる */
-var lastDone = '', lastDoneAt = 0;
-function isRepeat(t) {
-  var n = t.replace(/[\s、。，．,.!?！？]/g, ''), now = Date.now();
-  var dup = n && n === lastDone && now - lastDoneAt < 5000;
-  lastDone = n; lastDoneAt = now;
-  return dup;
-}
-var commitTimer = null, committed = {}, ignoreBelow = 0, lastLen = 0, muted = false, liveSeq = 0, previewBusy = false, previewNext = null;
+var commitTimer = null, handledIdx = {}, ignoreBelow = 0, lastLen = 0, muted = false, liveSeq = 0, previewBusy = false, previewNext = null;
 if (!SR) { note('このブラウザでは音声の聞き取りが使えません。Chrome・Edge（パソコン／Android）か iPhone の Safari で開いてください。下の欄に文字で入れれば訳と読み上げは使えます。'); $('mic').disabled = true; $('mic').classList.add('wait'); }
+
+/* 二重に訳さないための確認
+   ブラウザによっては（とくにスマホ）、①同じ確定結果を2回送る ②前の文を含めて送り直す ③聞き直した直後に前の文をもう一度返す
+   ことがある。直近12秒に訳した文と比べ、同じ・含まれている → 捨てる、前の文で始まる → 続きの部分だけ訳す */
+var recent = [];
+function normJa(t) { return t.replace(/[\s、。，．,.!?！？「」『』…・]/g, ''); }
+function cutPrefix(t, k) { var i = 0; while (i < t.length && k > 0) { if (normJa(t[i])) k--; i++; } return t.slice(i).trim(); }
+function dedupe(t) {
+  var n = normJa(t), now = Date.now(); if (!n) return '';
+  recent = recent.filter(function (r) { return now - r.at < 12000; });
+  for (var i = recent.length - 1; i >= 0; i--) {
+    var r = recent[i];
+    if (r.n === n || (n.length >= 4 && now - r.at < 6000 && r.n.indexOf(n) >= 0)) { dbg('二重なので捨てた: ' + t); return ''; }
+    if (r.n.length >= 4 && n.indexOf(r.n) === 0) { var rest = cutPrefix(t, r.n.length); dbg('前の文を含んでいたので続きだけ: ' + rest); recent.push({ n: n, at: now }); return normJa(rest) ? rest : ''; }
+  }
+  recent.push({ n: n, at: now });
+  return t;
+}
 
 function startRec() {
   if (!SR || rec) return;
   rec = new SR(); rec.lang = 'ja-JP'; rec.continuous = true; rec.interimResults = true;
-  committed = {}; ignoreBelow = 0; lastLen = 0; clearTimeout(commitTimer);
+  handledIdx = {}; ignoreBelow = 0; lastLen = 0; clearTimeout(commitTimer);
+  dbg('聞き取り開始');
   rec.onresult = function (e) {
     lastLen = e.results.length;
+    if (DEBUG) { var a = []; for (var k = e.resultIndex; k < e.results.length; k++) a.push(k + (e.results[k].isFinal ? '確' : '途') + ':' + e.results[k][0].transcript); dbg('ri=' + e.resultIndex + ' ' + a.join(' | ')); }
     if (muted) return;                                   /* 読み上げ中（スピーカーの英語を拾わない） */
     var interim = '';
     for (var i = e.resultIndex; i < e.results.length; i++) {
       if (i < ignoreBelow) continue;
       var t = e.results[i][0].transcript.trim();
-      if (e.results[i].isFinal) { if (t && !isRepeat(t)) handle(t); }   /* 訳すのは確定した文だけ（二重に訳さない） */
-      else interim += t;
+      if (e.results[i].isFinal) {
+        if (handledIdx[i]) continue;                     /* 同じ番号の確定結果がもう一度来た */
+        handledIdx[i] = true;
+        t = dedupe(t);
+        if (t) handle(t, whoSpoke());
+      } else interim += t;
     }
     clearTimeout(commitTimer);
     if (!interim) return;
     showLive(interim, null, true);
     livePreview(interim);
     var me = rec;
-    commitTimer = setTimeout(function () {             /* 少し止まったら Chrome に「ここで確定して」と頼む（文末の長い待ちを省く） */
-      if (rec === me && !muted) { try { me.stop(); } catch (x) {} }   /* 確定 → onend ですぐ聞き直す */
+    commitTimer = setTimeout(function () {             /* 少し止まったら「ここで確定して」と頼む（文末の長い待ちを省く） */
+      if (rec === me && !muted) { dbg('確定を依頼'); try { me.stop(); } catch (x) {} }   /* 確定 → onend ですぐ聞き直す */
     }, COMMIT_MS);
   };
   rec.onerror = function (e) {
+    dbg('エラー ' + e.error);
     if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { note('マイクの使用が許可されていません。アドレスバーの鍵アイコンからマイクを「許可」にしてください。'); stopAll(); }
     else if (e.error !== 'no-speech' && e.error !== 'aborted') setState('聞き取りエラー: ' + e.error + '（自動で再開します）');
   };
-  rec.onend = function () { rec = null; if (listening) startRec(); };   /* 無音が続くと切れるので、すぐ再開 */
-  try { rec.start(); } catch (e) { rec = null; }
+  rec.onend = function () { dbg('聞き取り終了'); rec = null; if (listening) startRec(); };   /* 無音が続くと切れるので、すぐ再開 */
+  /* 声で人を見分けるときは、同じマイクの音を聞き取りにも渡す（対応していないブラウザでは普通に始める） */
+  var tr = Voice.track();
+  try { if (tr) rec.start(tr); else rec.start(); }
+  catch (e) { try { rec.start(); } catch (e2) { rec = null; } }
 }
 function stopRec() { if (rec) { var r = rec; rec = null; r.onend = null; try { r.abort(); } catch (e) {} } }
-function stopAll() { listening = false; paused = false; muted = false; clearTimeout(commitTimer); stopRec(); $('mic').classList.remove('on'); $('mic').textContent = '話す'; setState('止めました'); }
+function stopAll() {
+  listening = false; paused = false; muted = false; clearTimeout(commitTimer); stopRec();
+  Voice.setOn(false); Voice.close();
+  $('mic').classList.remove('on'); $('mic').textContent = '話す'; setState('止めました');
+}
+function whoSpoke() {
+  if (!Voice.isOpen()) return null;
+  var fr = Voice.take(), c = Voice.classify(fr, People);
+  c.fs = fr.length >= 12 ? Voice.stats(fr) : null;
+  dbg('声: ' + fr.length + 'コマ → ' + (c.sp ? personOf(c.sp).name : '不明') + ' (確からしさ ' + c.conf + ', 点 ' + (c.s ? c.s.toFixed(1) : '-') + ')');
+  return c;
+}
 
 $('mic').addEventListener('click', async function () {
   if (listening) { stopAll(); return; }
   listening = true; this.classList.add('on'); this.textContent = '止める';
   setState('聞いています… 日本語で話してください');
+  if ($('voiceOn').checked && People.length) {
+    try { await Voice.open(); Voice.take(); Voice.setOn(true); }
+    catch (e) { note('声で人を見分けるためのマイクが使えませんでした（' + (e.message || e.name) + '）。聞き取りと翻訳はそのまま使えます。'); }
+  }
   startRec();
   Trans.prepare().then(function () { if (listening && !paused) setState('聞いています… 日本語で話してください'); });
 });
@@ -230,6 +493,7 @@ TTS.onIdle(function () {
   paused = false;
   setTimeout(function () {                              /* 残響が消えるまで少し待ってから聞き直す */
     muted = false; ignoreBelow = lastLen;               /* 読み上げ中に拾った分は捨てる */
+    Voice.take(); Voice.setOn(Voice.isOpen());          /* 読み上げの声も捨てる */
     if (listening) { setState('聞いています… 日本語で話してください'); if (!rec) startRec(); }
   }, 250);
 });
@@ -247,7 +511,7 @@ function livePreview(ja) {
 }
 
 /* ============================================================
-   1文ごとの処理: 訳す → 履歴に足す → 読み上げる
+   1文ごとの処理: 訳す → 履歴に足す → 記録する → 読み上げる
    ============================================================ */
 var items = [];
 function showLive(ja, en, interim) {
@@ -256,45 +520,95 @@ function showLive(ja, en, interim) {
   if (en) h += '<div class="en">' + esc(en) + '</div>';
   if (h || !interim) $('live').innerHTML = h;
 }
-async function handle(ja) {
+async function handle(ja, who) {
   liveSeq++; previewNext = null;
   showLive(ja, '…', false);
-  var card = addCard(ja);
+  var r0 = { ts: Date.now(), day: SpeakLib.dayKey(), ja: ja, en: '', via: '', sp: who ? who.sp : null, conf: who ? who.conf : 0, fs: who ? who.fs : null, voice: !!who };
+  r0.up = r0.ts;
+  var card = addCard(r0);
   try {
     var r = await Trans.translate(ja);
+    r0.en = r.en; r0.via = r.via;
     card.querySelector('.en').textContent = r.en;
     card.querySelector('.via').textContent = r.via;
     showLive(ja, r.en, false);
     if ($('speakOn').checked) {
-      if ($('pauseOn').checked && listening) { paused = true; muted = true; clearTimeout(commitTimer); setState('読み上げ中…'); }
+      if ($('pauseOn').checked && listening) { paused = true; muted = true; clearTimeout(commitTimer); Voice.setOn(false); setState('読み上げ中…'); }
       TTS.say(r.en, card.querySelector('.en'));
     }
   } catch (e) {
     card.querySelector('.en').innerHTML = '<span class="err">' + esc(e.message || '翻訳できませんでした') + '</span>';
   }
+  if ($('recOn').checked) {
+    try { r0.id = await SpeakLib.put('utt', r0); card.dataset.id = r0.id; } catch (e) { dbg('記録できませんでした: ' + e); }
+  }
 }
-function addCard(ja) {
+function chipHtml(r) {
+  if (!r.voice && !r.sp) return '';
+  var p = personOf(r.sp);
+  return '<button type="button" class="who' + (r.sp && r.conf < 0.25 ? ' unsure' : '') + '" title="押すと話した人を直せます">' +
+    '<i style="background:' + (p ? p.color : 'var(--faint)') + '"></i>' + esc(p ? p.name : (r.sp ? '削除した人' : unknownName)) + (r.sp && r.conf < 0.25 ? '？' : '') + '</button>';
+}
+function addCard(r) {
   var h = $('hist'); if (!items.length) h.innerHTML = '';
   var c = document.createElement('div'); c.className = 'card';
-  c.innerHTML = '<div class="ja">' + esc(ja) + '</div><div class="row"><div class="en" role="button" tabindex="0">…</div><span class="via"></span></div>';
+  c.innerHTML = '<div class="top">' + chipHtml(r) + '<span class="ja">' + esc(r.ja) + '</span></div><div class="row"><div class="en" role="button" tabindex="0">' + esc(r.en || '…') + '</div><span class="via">' + esc(r.via || '') + '</span></div>';
   c.querySelector('.en').addEventListener('click', function () { if (this.textContent && this.textContent !== '…') TTS.say(this.textContent, this); });
+  c._rec = r;
   h.insertBefore(c, h.firstChild); items.push(c);
   return c;
 }
+/* 話した人の直し: チップを押すと、登録した人 → だれか → … の順に変わる。直した分の声は、その人の声として覚え足す */
+$('hist').addEventListener('click', async function (e) {
+  var b = e.target.closest('.who'); if (!b) return;
+  var card = b.closest('.card'), r = card._rec; if (!r) return;
+  var ids = People.map(function (p) { return p.id; }).concat([null]);
+  var next = ids[(ids.indexOf(r.sp) + 1) % ids.length];
+  if (r.fs && r.learned) { var old = personOf(r.learned); if (old) { old.st = Voice.add(old.st, r.fs, -1); await SpeakLib.put('speakers', old); } r.learned = null; }
+  r.sp = next; r.conf = 1; r.up = Date.now();
+  if (r.fs && next) { var np = personOf(next); if (np) { np.st = Voice.add(np.st, r.fs, 1); await SpeakLib.put('speakers', np); r.learned = next; } }
+  if (r.id) await SpeakLib.put('utt', r);
+  b.outerHTML = chipHtml(r);
+});
 
 $('typeForm').addEventListener('submit', async function (e) {
   e.preventDefault();
   var t = $('typeIn').value.trim(); if (!t) return;
   $('typeIn').value = '';
   await Trans.prepare();
-  handle(t);
+  handle(t, null);
 });
-$('clear').addEventListener('click', function () { items = []; $('hist').innerHTML = '<p class="empty">まだありません</p>'; $('live').innerHTML = ''; });
+$('clear').addEventListener('click', function () { items = []; $('hist').innerHTML = '<p class="empty">画面から消しました（記録は「記録と統計」に残っています）</p>'; $('live').innerHTML = ''; });
 $('speed').addEventListener('click', function (e) {
   var b = e.target.closest('button'); if (!b) return;
   [].forEach.call(this.children, function (x) { x.classList.toggle('on', x === b); });
   TTS.setSpeed(b.dataset.s);
 });
+
+/* 設定（この端末だけに覚える） */
+function savePrefs() { try { localStorage.setItem('speak.prefs', JSON.stringify({ voiceOn: $('voiceOn').checked, recOn: $('recOn').checked })); } catch (e) {} }
+(function () {
+  var p = {}; try { p = JSON.parse(localStorage.getItem('speak.prefs') || '{}'); } catch (e) {}
+  if (p.recOn === false) $('recOn').checked = false;
+  $('voiceOn').checked = p.voiceOn !== false;
+  $('voiceOn').addEventListener('change', savePrefs); $('recOn').addEventListener('change', savePrefs);
+})();
+
+/* 調べもの用の記録（URL の末尾に ?debug=1 を付けると下に出る） */
+var DEBUG = /[?&]debug=1/.test(location.search), dbgLines = [];
+function dbg(t) {
+  if (!DEBUG) return;
+  var d = new Date(); dbgLines.push(('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2) + '.' + String(d.getMilliseconds()).padStart(3, '0').slice(0, 1) + ' ' + t);
+  if (dbgLines.length > 300) dbgLines.shift();
+  $('dbg').hidden = false; $('dbgLog').textContent = dbgLines.slice().reverse().join('\n');
+}
+
+/* 起動時: 登録した人と、今日の記録を出す */
+loadPeople().then(function () {
+  return SpeakLib.byDay(SpeakLib.dayKey());
+}).then(function (rs) {
+  (rs || []).sort(function (a, b) { return a.ts - b.ts; }).slice(-50).forEach(addCard);
+}).catch(function (e) { note('記録を読み込めませんでした（' + (e && e.message || e) + '）。プライベートブラウズでは記録できません。'); });
 </script>
 </body>
 </html>
