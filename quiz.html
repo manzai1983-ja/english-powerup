@@ -36,6 +36,9 @@
   header p { margin: 0; color: var(--muted); font-size: .9rem; }
   header a { color: var(--accent); }
   .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0 10px; }
+  .bar input[type=date] { font: inherit; font-size: .88rem; padding: 5px 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); }
+  .hist { font-size: .8rem; color: var(--muted); margin-top: 10px; line-height: 1.8; }
+  .hist .o { color: var(--ok); } .hist .x { color: var(--ng); } .hist .n { color: var(--near); }
   .bar select { font: inherit; font-size: .88rem; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); max-width: 100%; }
   .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
   .seg button { font: inherit; font-size: .82rem; padding: 6px 10px; border: 0; background: var(--surface); color: var(--muted); cursor: pointer; }
@@ -112,8 +115,25 @@
     <option value="">すべての種類</option><option value="phrase">熟語・イディオム</option><option value="word">単語</option><option value="sent">文・セリフ</option>
   </select>
   <select id="mode" aria-label="出し方">
+    <option value="auto">おまかせ（全部5回までは均等→その後は苦手多め）</option>
     <option value="weak">苦手を多めにランダム</option><option value="onlyweak">苦手だけ</option><option value="new">まだ出ていないもの</option><option value="flat">完全ランダム</option>
   </select>
+  <select id="asked" aria-label="出題日で絞り込み">
+    <option value="">出題日: すべて</option>
+    <option value="in:0">今日出題したもの</option><option value="in:1">昨日出題したもの</option><option value="in:0-6">過去1週間に出題したもの</option>
+    <option value="ex:0">今日出題したものを除く</option><option value="ex:1">昨日出題したものを除く</option>
+    <option value="ex:0-1">昨日・今日出題したものを除く</option><option value="ex:0-6">過去1週間に出題したものを除く</option>
+    <option value="in:date">日付を指定して、その日に出題したもの</option><option value="ex:date">日付を指定して、その日に出題したものを除く</option>
+  </select>
+  <input type="date" id="adate" aria-label="出題日" hidden>
+  <select id="wrong" aria-label="間違えた日で絞り込み">
+    <option value="">間違えた日: すべて</option>
+    <option value="in:0">今日間違えたもの</option><option value="in:1">昨日間違えたもの</option>
+    <option value="in:0-6">過去1週間に間違えたもの</option><option value="in:0-29">過去30日に間違えたもの</option>
+    <option value="ex:0-6">過去1週間に間違えたものを除く</option>
+    <option value="in:date">日付を指定して、その日に間違えたもの</option>
+  </select>
+  <input type="date" id="wdate" aria-label="間違えた日" hidden>
   <div class="seg" id="speed" role="group" aria-label="読み上げの速さ">
     <button data-s="slow">ゆっくり</button><button data-s="normal" class="on">ふつう</button>
   </div>
@@ -332,7 +352,30 @@ function build(rows) {
 }
 
 /* ============ 記録と出題 ============ */
-function stat(key) { return REC[key] || { n: 0, ok: 0, near: 0, ng: 0, h: '', t: 0 }; }
+function stat(key) {
+  var s = REC[key] || { n: 0, ok: 0, near: 0, ng: 0, h: '', t: 0 };
+  /* log: [解いた時刻, 'o'|'△'|'x'] の並び。以前の記録には最後の1回だけ補う */
+  if (!s.log) s.log = s.t ? [[s.t, s.h.slice(-1) || 'o']] : [];
+  return s;
+}
+function pad2(n) { return ('0' + n).slice(-2); }
+function dayKey(t) { var d = new Date(t); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function fmtDay(t) { var d = new Date(t); return (d.getMonth() + 1) + '/' + d.getDate(); }
+function fmtTime(t) { var d = new Date(t); return fmtDay(t) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+function lastWrong(s) { for (var i = s.log.length - 1; i >= 0; i--) if (s.log[i][1] !== 'o') return s.log[i][0]; return 0; }
+/* spec "in:0-6" / "ex:1" / "in:date" と、その記録に出てくる日の一覧が合うか */
+function dayMatch(spec, times, dateVal) {
+  if (!spec) return true;
+  var p = spec.split(':'), want = {};
+  if (p[1] === 'date') { if (!dateVal) return true; want[dateVal] = 1; }
+  else {
+    var r = p[1].split('-'), a = +r[0], b = r.length > 1 ? +r[1] : a, now = new Date();
+    for (var k = a; k <= b; k++) want[dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - k, 12).getTime())] = 1;
+  }
+  var hit = times.some(function (t) { return want[dayKey(t)]; });
+  return p[0] === 'in' ? hit : !hit;
+}
+var GOAL = 5;   /* おまかせ: 範囲内のすべてがこの回数に届くまでは均等に出す */
 function errRate(s) { return (s.ng + 0.5 * s.near + 0.5) / (s.n + 1); }
 function isWeak(s) { return s.n > 0 && (s.ng + s.near * 0.5 >= 1) && (s.h.slice(-2) !== 'oo'); }
 function weight(it) {
@@ -348,10 +391,13 @@ function weight(it) {
 }
 function pool() {
   var mo = $('month').value, kd = $('kind').value, mode = $('mode').value;
+  var as = $('asked').value, ws = $('wrong').value, ad = $('adate').value, wd = $('wdate').value;
   return ITEMS.filter(function (it) {
     if (mo && it.month !== mo) return false;
     if (kd && it.kind !== kd) return false;
     var s = stat(it.key);
+    if (as && !dayMatch(as, s.log.map(function (l) { return l[0]; }), ad)) return false;
+    if (ws && !dayMatch(ws, s.log.filter(function (l) { return l[1] !== 'o'; }).map(function (l) { return l[0]; }), wd)) return false;
     if (mode === 'onlyweak') return isWeak(s);
     if (mode === 'new') return !s.n;
     return true;
@@ -363,8 +409,20 @@ function pick() {
   var avoid = Math.min(recent.length, Math.max(0, p.length - 1), 12);
   var cand = p.filter(function (it) { return recent.slice(-avoid).indexOf(it.key) < 0; });
   if (!cand.length) cand = p;
+  var mode = $('mode').value;
+  /* おまかせ: まだ GOAL 回に届いていないものがあれば、いちばん回数の少ないものから均等に */
+  if (mode === 'auto') {
+    var minN = Infinity;
+    p.forEach(function (it) { minN = Math.min(minN, stat(it.key).n); });
+    if (minN < GOAL) {
+      var low = cand.filter(function (it) { return stat(it.key).n === minN; });
+      if (!low.length) low = p.filter(function (it) { return stat(it.key).n === minN; });
+      return low[Math.floor(Math.random() * low.length)];
+    }
+    mode = 'weak';
+  }
   /* 苦手なものは、全体が多くても約3回に1回は出す（直近5問に出たものは除く） */
-  if ($('mode').value === 'weak' && Math.random() < 0.35) {
+  if (mode === 'weak' && Math.random() < 0.35) {
     var wk = p.filter(function (it) { return isWeak(stat(it.key)) && recent.slice(-5).indexOf(it.key) < 0; });
     if (wk.length) cand = wk;
   }
@@ -375,8 +433,14 @@ function pick() {
 }
 function record(key, v, prev) {
   var s = stat(key);
-  if (prev) { s[prev]--; s.n--; s.h = s.h.slice(0, -1); }
-  s[v]++; s.n++; s.h = (s.h + (v === 'ok' ? 'o' : v === 'near' ? '△' : 'x')).slice(-10); s.t = Date.now();
+  var mk = v === 'ok' ? 'o' : v === 'near' ? '△' : 'x';
+  if (prev) {   /* 判定の手直し: 回数は増やさず、最後の記録を書き換える */
+    s[prev]--; s[v]++; s.h = s.h.slice(0, -1) + mk;
+    if (s.log.length) s.log[s.log.length - 1][1] = mk;
+  } else {
+    s[v]++; s.n++; s.h = (s.h + mk).slice(-10); s.t = Date.now();
+    s.log.push([s.t, mk]); if (s.log.length > 200) s.log = s.log.slice(-200);
+  }
   REC[key] = s; lsSet(LS_REC, REC);
 }
 
@@ -385,7 +449,10 @@ var cur = null, session = { n: 0, ok: 0 };
 function renderScore() {
   var p = pool(), all = ITEMS.length, done = 0, weak = 0;
   ITEMS.forEach(function (it) { var s = stat(it.key); if (s.n) done++; if (isWeak(s)) weak++; });
+  var reached = p.filter(function (it) { return stat(it.key).n >= GOAL; }).length, minN = Infinity;
+  p.forEach(function (it) { minN = Math.min(minN, stat(it.key).n); });
   $('score').innerHTML =
+    ($('mode').value === 'auto' && p.length ? '<span>' + (minN < GOAL ? '均等に出題中（範囲内の最少 ' + minN + ' 回）' : '全部 ' + GOAL + ' 回済み → 苦手多め') + ' · ' + GOAL + '回到達 <b>' + reached + '</b>/' + p.length + '</span>' : '') +
     '<span>今回 <b>' + session.n + '</b> 問</span><span class="ok">正解 <b>' + session.ok + '</b></span>' +
     '<span>出題範囲 <b>' + p.length + '</b></span><span>これまでに解いた <b>' + done + '</b>/' + all + '</span>' +
     '<span class="ng">苦手 <b>' + weak + '</b></span>';
@@ -402,16 +469,18 @@ function next() {
   cur = pick();
   var st = $('stage');
   if (!cur) {
-    st.innerHTML = '<div class="card empty">' + ($('mode').value === 'onlyweak' ? 'この範囲に苦手なものはありません。' : $('mode').value === 'new' ? 'この範囲はぜんぶ一度は解きました。' : '出題できるものがありません。') + '</div>';
+    st.innerHTML = '<div class="card empty">' + ($('mode').value === 'onlyweak' ? 'この範囲に苦手なものはありません。' : $('mode').value === 'new' ? 'この範囲はぜんぶ一度は解きました。' : ($('asked').value || $('wrong').value) ? '出題日・間違えた日の条件に合う問題がありません。' : '出題できるものがありません。') + '</div>';
     renderScore(); return;
   }
+  cur.done = false; cur.v = null; cur.hinted = false;   /* 同じ問題がまた出たとき前回の状態を持ち越さない */
   recent.push(cur.key); if (recent.length > 30) recent.shift();
   var s = stat(cur.key), kindLabel = { phrase: '熟語・イディオム', word: '単語', sent: '文・セリフ' }[cur.kind];
   var hasPH = toks(cleanWord(cur.word), true).indexOf('\u0000') >= 0;
   st.innerHTML =
     '<div class="card">' +
       '<div class="meta"><span>' + esc(cur.month) + '月 第' + esc(cur.ep) + '回</span><span class="tag">' + kindLabel + '</span>' +
-        (s.n ? '<span>これまで ' + s.ok + '/' + s.n + ' 正解 ' + esc(s.h.slice(-5)) + '</span>' : '<span>はじめて</span>') +
+        (s.n ? '<span>これまで ' + s.ok + '/' + s.n + ' 正解 ' + esc(s.h.slice(-5)) + '</span><span>前回 ' + fmtDay(s.t) + '</span>' +
+          (lastWrong(s) ? '<span>最後に間違えた ' + fmtDay(lastWrong(s)) + '</span>' : '') : '<span>はじめて</span>') +
         (isWeak(s) ? '<span class="tag weak">苦手</span>' : '') + '</div>' +
       '<div class="ja">' + esc(cur.ja) + '</div>' +
       (hasPH ? '<div class="note">A・V などの記号はそのまま書いても、具体的な語を入れても正解です。</div>' : '') +
@@ -463,8 +532,10 @@ function check(giveup) {
         (r.v !== 'ok' && user ? '<span>この答えでも合っている →</span><button id="fixOk">正解にする</button>' : '') +
         (r.v === 'ok' ? '<span>自信がなかった →</span><button id="fixNg">不正解にする</button>' : '') +
       '</div>' +
+      '<div class="hist" id="hist"></div>' +
       '<div class="acts"><button class="primary" id="next">次の問題 →</button></div>' +
     '</div>';
+  renderHist();
   $('sayAns').onclick = function () { TTS.say(expandAlt(cleanWord(cur.word))[0].replace(/[～〜~]/g, ''), this); };
   if ($('sayEx')) $('sayEx').onclick = function () { TTS.say(cur.ex, this); };
   if ($('repeat')) $('repeat').onclick = function () {
@@ -476,13 +547,22 @@ function check(giveup) {
       $('repRes').innerHTML = '聞き取り: <span style="font-family:var(--font-en)">' + esc(box.value) + '</span> — 一致 <b>' + pct + '%</b>';
     });
   };
-  if ($('fixOk')) $('fixOk').onclick = function () { record(cur.key, 'ok', cur.v); if (cur.v !== 'ok') session.ok++; cur.v = 'ok'; this.parentNode.innerHTML = '<span>正解として記録しました。</span>'; renderScore(); };
-  if ($('fixNg')) $('fixNg').onclick = function () { record(cur.key, 'ng', cur.v); session.ok--; cur.v = 'ng'; this.parentNode.innerHTML = '<span>不正解として記録しました。</span>'; renderScore(); };
+  if ($('fixOk')) $('fixOk').onclick = function () { record(cur.key, 'ok', cur.v); if (cur.v !== 'ok') session.ok++; cur.v = 'ok'; this.parentNode.innerHTML = '<span>正解として記録しました。</span>'; renderScore(); renderHist(); renderWeak(); };
+  if ($('fixNg')) $('fixNg').onclick = function () { record(cur.key, 'ng', cur.v); session.ok--; cur.v = 'ng'; this.parentNode.innerHTML = '<span>不正解として記録しました。</span>'; renderScore(); renderHist(); renderWeak(); };
   $('next').onclick = next;
   $('ans').readOnly = true;
   $('ans').focus();
   if (r.v === 'ok') TTS.say(cur.ex || cleanWord(cur.word));
   renderScore(); renderWeak();
+}
+/* この問題の出題履歴（新しい順） */
+function renderHist() {
+  var el = $('hist'); if (!el || !cur) return;
+  var log = stat(cur.key).log.slice().reverse();
+  el.innerHTML = '出題履歴: ' + log.slice(0, 20).map(function (l) {
+    var c = l[1] === 'o' ? 'o' : l[1] === 'x' ? 'x' : 'n';
+    return '<span class="' + c + '">' + fmtTime(l[0]) + ' ' + (l[1] === 'o' ? '○' : l[1]) + '</span>';
+  }).join(' · ') + (log.length > 20 ? ' …ほか' + (log.length - 20) + '回' : '');
 }
 function renderWeak() {
   var list = ITEMS.map(function (it) { return { it: it, s: stat(it.key) }; })
@@ -490,13 +570,23 @@ function renderWeak() {
     .sort(function (a, b) { return (b.s.ng + b.s.near * .5) - (a.s.ng + a.s.near * .5) || errRate(b.s) - errRate(a.s); })
     .slice(0, 50);
   $('weakList').innerHTML = list.length ? list.map(function (x) {
-    return '<li><span class="en">' + esc(cleanWord(x.it.word)) + '</span><span class="cnt">× ' + x.s.ng + (x.s.near ? ' △ ' + x.s.near : '') + ' / ' + x.s.n + '回</span><span class="jp">' + esc(x.it.ja) + '（第' + esc(x.it.ep) + '回）</span></li>';
+    return '<li><span class="en">' + esc(cleanWord(x.it.word)) + '</span><span class="cnt">× ' + x.s.ng + (x.s.near ? ' △ ' + x.s.near : '') + ' / ' + x.s.n + '回</span><span class="jp">' + esc(x.it.ja) + '（第' + esc(x.it.ep) + '回' + (lastWrong(x.s) ? '・最後に間違えた ' + fmtDay(lastWrong(x.s)) : '') + '）</span></li>';
   }).join('') : '<li><span class="jp">まだありません。</span></li>';
 }
 
 /* ============ 設定・記録の出し入れ ============ */
-function savePref() { PREF = { month: $('month').value, kind: $('kind').value, mode: $('mode').value, speed: PREF.speed || 'normal' }; lsSet(LS_PREF, PREF); }
-['month', 'kind', 'mode'].forEach(function (id) { $(id).addEventListener('change', function () { savePref(); next(); }); });
+function syncDateInputs() {
+  $('adate').hidden = !/date/.test($('asked').value);
+  $('wdate').hidden = !/date/.test($('wrong').value);
+  if (!$('adate').hidden && !$('adate').value) $('adate').value = dayKey(Date.now() - 864e5);
+  if (!$('wdate').hidden && !$('wdate').value) $('wdate').value = dayKey(Date.now() - 864e5);
+}
+function savePref() {
+  PREF = { v: 2, month: $('month').value, kind: $('kind').value, mode: $('mode').value, asked: $('asked').value, wrong: $('wrong').value,
+    adate: $('adate').value, wdate: $('wdate').value, speed: PREF.speed || 'normal' };
+  lsSet(LS_PREF, PREF);
+}
+['month', 'kind', 'mode', 'asked', 'wrong', 'adate', 'wdate'].forEach(function (id) { $(id).addEventListener('change', function () { syncDateInputs(); savePref(); next(); }); });
 Array.prototype.forEach.call(document.querySelectorAll('#speed button'), function (b) {
   b.onclick = function () {
     Array.prototype.forEach.call(document.querySelectorAll('#speed button'), function (x) { x.classList.toggle('on', x === b); });
@@ -526,7 +616,14 @@ function start(d, fromCache) {
   $('month').innerHTML = '<option value="">すべての月</option>' + months.map(function (m) { return '<option value="' + esc(m) + '">' + esc(m) + '月</option>'; }).join('');
   if (PREF.month && months.indexOf(PREF.month) >= 0) $('month').value = PREF.month;
   if (PREF.kind) $('kind').value = PREF.kind;
-  if (PREF.mode) $('mode').value = PREF.mode;
+  if (PREF.v === 2) {   /* v2 より前に保存した出し方は使わず、おまかせから始める */
+    if (PREF.mode) $('mode').value = PREF.mode;
+    if (PREF.asked) $('asked').value = PREF.asked;
+    if (PREF.wrong) $('wrong').value = PREF.wrong;
+    if (PREF.adate) $('adate').value = PREF.adate;
+    if (PREF.wdate) $('wdate').value = PREF.wdate;
+  }
+  syncDateInputs();
   if (PREF.speed === 'slow') document.querySelector('#speed [data-s=slow]').click();
   $('status').textContent = ITEMS.length + ' 語句（' + (d.updated || '') + ' 更新' + (fromCache ? '・前回読み込んだデータ' : '') + '）';
   renderWeak(); next();
