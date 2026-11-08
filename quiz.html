@@ -101,6 +101,7 @@
 
   details.weak { margin-top: 22px; background: var(--surface); border: 1px solid var(--rule-soft); border-radius: 12px; padding: 10px 14px; }
   details.weak summary { cursor: pointer; font-weight: 600; font-size: .92rem; }
+  .wbar { margin: 8px 0 0; }
   .wl { list-style: none; margin: 8px 0 0; padding: 0; }
   .wl li { padding: 6px 0; border-top: 1px solid var(--rule-soft); display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; font-size: .88rem; }
   .wl .en { font-family: var(--font-en); font-weight: 700; }
@@ -156,7 +157,19 @@
 <div id="stage"></div>
 
 <details class="weak" id="weakBox">
-  <summary>苦手なもの（間違いの多い順）</summary>
+  <summary>苦手なもの<span id="weakCnt"></span></summary>
+  <div class="bar wbar">
+    <select id="wkDay" aria-label="間違えた日">
+      <option value="">間違えた日: すべて</option>
+      <option value="in:0">今日間違えた</option><option value="in:1">昨日間違えた</option>
+      <option value="in:0-6">過去1週間に間違えた</option><option value="in:0-29">過去30日に間違えた</option>
+      <option value="in:date">日付を指定</option>
+    </select>
+    <input type="date" id="wkDate" aria-label="間違えた日を指定" hidden>
+    <select id="wkSort" aria-label="並び順">
+      <option value="new">間違えた日が新しい順</option><option value="old">間違えた日が古い順</option><option value="count">間違いの多い順</option>
+    </select>
+  </div>
   <ul class="wl" id="weakList"></ul>
 </details>
 <details class="weak" id="mastBox">
@@ -683,13 +696,26 @@ function renderHist() {
   }).join(' · ') + (log.length > 20 ? ' …ほか' + (log.length - 20) + '回' : '');
 }
 function renderWeak() {
-  var list = ITEMS.map(function (it) { return { it: it, s: stat(it.key) }; })
-    .filter(function (x) { return isWeak(x.s); })
-    .sort(function (a, b) { return (b.s.ng + b.s.near * .5) - (a.s.ng + a.s.near * .5) || errRate(b.s) - errRate(a.s); })
-    .slice(0, 50);
-  $('weakList').innerHTML = list.length ? list.map(function (x) {
-    return '<li><span class="en">' + esc(cleanWord(x.it.word)) + '</span><span class="cnt">× ' + x.s.ng + (x.s.near ? ' △ ' + x.s.near : '') + ' / ' + x.s.n + '回</span><span class="jp">' + esc(x.it.ja) + '（第' + esc(x.it.ep) + '回' + (lastWrong(x.s) ? '・最後に間違えた ' + fmtDay(lastWrong(x.s)) : '') + '）</span></li>';
-  }).join('') : '<li><span class="jp">まだありません。</span></li>';
+  var day = $('wkDay').value, dval = $('wkDate').value, sort = $('wkSort').value;
+  $('wkDate').hidden = day !== 'in:date';
+  if (day === 'in:date' && !dval) { dval = $('wkDate').value = dayKey(Date.now() - 864e5); }
+  var all = ITEMS.map(function (it) { return { it: it, s: stat(it.key) }; }).filter(function (x) { return isWeak(x.s); });
+  var list = all.map(function (x) {
+      /* 絞り込んだ期間の中で、いちばん新しい間違えた時刻 */
+      var ts = x.s.log.filter(function (l) { return l[1] !== 'o' && (!day || dayMatch(day, [l[0]], dval)); }).map(function (l) { return l[0]; });
+      x.wt = ts.length ? Math.max.apply(null, ts) : 0; x.wn = ts.length; return x;
+    })
+    .filter(function (x) { return !day || x.wn > 0; })
+    .sort(function (a, b) {
+      if (sort === 'count') return (b.s.ng + b.s.near * .5) - (a.s.ng + a.s.near * .5) || b.wt - a.wt;
+      return sort === 'old' ? a.wt - b.wt : b.wt - a.wt;
+    });
+  $('weakCnt').textContent = '　' + (day ? list.length + '/' : '') + all.length + '件';
+  var shown = list.slice(0, 200);
+  $('weakList').innerHTML = shown.length ? shown.map(function (x) {
+    return '<li><span class="en">' + esc(cleanWord(x.it.word)) + '</span><span class="cnt">× ' + x.s.ng + (x.s.near ? ' △ ' + x.s.near : '') + ' / ' + x.s.n + '回</span><span class="jp">' + esc(x.it.ja) + '（第' + esc(x.it.ep) + '回' + (x.wt ? '・間違えた ' + fmtTime(x.wt) : '') + (day && x.wn > 1 ? '（この期間に' + x.wn + '回）' : '') + '）</span></li>';
+  }).join('') + (list.length > 200 ? '<li><span class="jp">…ほか' + (list.length - 200) + '件</span></li>' : '')
+    : '<li><span class="jp">' + (day ? 'この期間に間違えたものはありません。' : 'まだありません。') + '</span></li>';
   var mast = ITEMS.map(function (it) { return { it: it, s: stat(it.key) }; })
     .filter(function (x) { return isMastered(x.s); })
     .sort(function (a, b) { return b.s.log[0][0] - a.s.log[0][0]; });
@@ -698,6 +724,7 @@ function renderWeak() {
     return '<li><span class="en">' + esc(cleanWord(x.it.word)) + '</span><span class="cnt"><button class="pill" data-back="' + esc(x.it.key) + '">出題に戻す</button></span><span class="jp">' + esc(x.it.ja) + '（第' + esc(x.it.ep) + '回・' + fmtDay(x.s.log[0][0]) + ' に一発正解' + (x.s.n > 1 ? '・その後 ' + (x.s.n - 1) + '回復習' : '') + '）</span></li>';
   }).join('') : '<li><span class="jp">まだありません。</span></li>';
 }
+['wkDay', 'wkDate', 'wkSort'].forEach(function (id) { $(id).addEventListener('change', renderWeak); });
 function setBack(key) { var s = stat(key); s.back = true; REC[key] = s; lsSet(LS_REC, REC); renderWeak(); renderScore(); }
 document.addEventListener('click', function (e) {
   var b = e.target.closest && e.target.closest('[data-back]');
