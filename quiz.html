@@ -175,27 +175,85 @@ function note(html) { $('help').innerHTML = html; $('help').hidden = false; }
 
 /* ============ 読み上げ ============ */
 var TTS = (function () {
-  var synth = window.speechSynthesis, voice = null, rate = 0.92;
-  if (!synth) return { say: function () {}, stop: function () {}, setRate: function () {} };
+  /* 端末の読み上げ（speechSynthesis）で読む。Android の Chrome で鳴らないとき用に、
+     ・直前の読み上げを止めた直後は少し待ってから読む（cancel 直後の speak が無音になる不具合）
+     ・Android では音声を決め打ちせず、端末の英語の既定音声に任せる
+     ・マイクを止めた直後は少し待つ
+     ・それでも 2 秒ほど始まらなければ、Google 翻訳の音声（mp3）で鳴らす */
+  var synth = window.speechSynthesis, voice = null, rate = 0.92, keep = [], seq = 0, audio = null;
+  var android = /Android/i.test(navigator.userAgent), useAudio = !synth, quietUntil = 0, curBtn = null, told = false;
   function pick() {
+    if (!synth || android) return;
     var en = synth.getVoices().filter(function (v) { return /^en(-|_)/i.test(v.lang); });
     if (!en.length) return;
     var pref = ['Google US English', 'Microsoft Aria', 'Microsoft Jenny', 'Samantha', 'Microsoft Zira'];
     for (var i = 0; i < pref.length && !voice; i++) for (var j = 0; j < en.length; j++) if (en[j].name.indexOf(pref[i]) >= 0) { voice = en[j]; break; }
-    if (!voice) voice = en.filter(function (v) { return /^en-US/i.test(v.lang); })[0] || en[0];
+    if (!voice) voice = en.filter(function (v) { return /^en(-|_)US/i.test(v.lang); })[0] || en[0];
   }
-  pick(); if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = pick;
-  return {
-    say: function (text, btn) {
-      synth.cancel(); if (!text) return;
-      var u = new SpeechSynthesisUtterance(text);
-      if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
+  if (synth) { pick(); if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = pick; }
+  function btnOff() { if (curBtn) curBtn.classList.remove('on'); curBtn = null; }
+  function stop() {
+    seq++; btnOff();
+    if (audio) { try { audio.pause(); } catch (e) {} audio = null; }
+    if (synth && (synth.speaking || synth.pending)) synth.cancel();
+  }
+  /* Google 翻訳の音声。長い文は 180 文字ほどで区切って順に鳴らす */
+  function playAudio(text, my) {
+    if (!told) { told = true; note('この端末の読み上げ機能が使えなかったので、Google 翻訳の音声で読み上げています（通信が必要です）。'); }
+    var parts = (text.match(/[^.?!;,]+[.?!;,]*\s*/g) || [text]), chunks = [], buf = '';
+    parts.forEach(function (p) { if ((buf + p).length > 180 && buf) { chunks.push(buf); buf = ''; } buf += p; });
+    if (buf.trim()) chunks.push(buf);
+    var k = 0;
+    (function nextChunk() {
+      if (my !== seq) return;
+      if (k >= chunks.length) { btnOff(); return; }
+      var a = new Audio('https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=' + encodeURIComponent(chunks[k++].trim()));
+      audio = a;
+      a.playbackRate = rate < 0.8 ? 0.75 : 1;
+      a.onended = nextChunk;
+      a.onerror = function () { if (my === seq) { btnOff(); note('音声を再生できませんでした。通信状態と、スマホの音量（メディアの音量）を確認してください。'); } };
+      var pr = a.play(); if (pr && pr.catch) pr.catch(function () { if (my === seq) btnOff(); });
+    })();
+  }
+  function say(text, btn) {
+    stop(); if (!text) return;
+    var my = seq; curBtn = btn || null; if (curBtn) curBtn.classList.add('on');
+    if (useAudio) { playAudio(text, my); return; }
+    var wait = Math.max(android ? 150 : 60, quietUntil - Date.now());
+    setTimeout(function () {
+      if (my !== seq) return;
+      if (!voice) pick();
+      var u = new SpeechSynthesisUtterance(text), started = false, given = false;
+      u.lang = 'en-US';
+      if (voice) { u.voice = voice; u.lang = voice.lang.replace('_', '-'); }
       u.rate = rate;
-      if (btn) { btn.classList.add('on'); u.onend = u.onerror = function () { btn.classList.remove('on'); }; }
+      u.onstart = function () { started = true; };
+      u.onend = u.onerror = function () {
+        var i = keep.indexOf(u); if (i >= 0) keep.splice(i, 1);
+        if (my !== seq || given) return;
+        if (!started) { given = true; useAudio = true; playAudio(text, my); return; }
+        btnOff();
+      };
+      keep.push(u);   /* 読み上げ中に u が片付けられて途中で止まるのを防ぐ */
+      try { synth.resume(); } catch (e) {}
       synth.speak(u);
-    },
-    stop: function () { synth.cancel(); },
-    setRate: function (r) { rate = r; }
+      setTimeout(function () {
+        if (my !== seq || started || given || synth.speaking) return;
+        given = true; useAudio = true; synth.cancel(); playAudio(text, my);
+      }, 2000);
+    }, wait);
+  }
+  /* 最初に画面を触ったとき、無音の読み上げを一度流して読み上げ機能を起こしておく */
+  function unlock() {
+    document.removeEventListener('pointerdown', unlock, true);
+    if (!synth) return;
+    try { var u = new SpeechSynthesisUtterance(' '); u.volume = 0; u.lang = 'en-US'; synth.speak(u); } catch (e) {}
+  }
+  document.addEventListener('pointerdown', unlock, true);
+  return {
+    say: say, stop: stop,
+    setRate: function (r) { rate = r; },
+    afterMic: function () { quietUntil = Date.now() + 500; }
   };
 })();
 
@@ -218,7 +276,7 @@ function startRecog(input, btn, onFinal) {
   recog.onerror = function (e) {
     if (e.error === 'not-allowed' || e.error === 'service-not-allowed') note('マイクの使用が許可されていません。アドレスバーの🔒からマイクを許可してください。');
   };
-  recog.onend = function () { recogOn = false; btn.classList.remove('on'); if (finalText.trim()) onFinal(); };
+  recog.onend = function () { recogOn = false; TTS.afterMic(); btn.classList.remove('on'); if (finalText.trim()) onFinal(); };
   recogOn = true; btn.classList.add('on');
   try { recog.start(); } catch (e) { recogOn = false; btn.classList.remove('on'); }
 }
