@@ -1,0 +1,1171 @@
+1	<文法問題集 1000本ノックのNo> <unknown>	意味
+1	3 Donations to the A are	Aへの寄付は
+1	3 Donating to the A is	Aへの寄付は
+1	6 load A onto B	AをBに積み込む
+1	7 provide A with B	AにBを提供する
+1	7 dependable service	信頼できるサービス
+1	8 observe	（規則など）を守る
+1	8 besides	以外に、加えて ※副詞、前置詞
+1	≒beside	そばにある ※前置詞
+1	9 make a decision	決定する
+1	9 point out that S V	SがVすると示す
+1	9 indicate that S V	SがVすると述べる
+1	10 difficulty	困難
+1	10 managed to V	なんとかVする、思いかけずVする
+1	11 origin	起源
+1	12 have been effective in A	Aにおいて成果を上げている
+1	12 which A	どのA（疑問形容詞）
+1	12 pursue	～を追求する
+1	13 reliable	信頼のある
+1	14 near	近づく
+1	14 nearness	近さ
+1	16 improvement toward A	Aに向けた改善
+1	18 feel S V	SがVしていると感じている
+1	18 respondent	回答者
+1	18 habit	習慣
+1	18 habitually	習慣的に
+1	20 be excited about A	Aにワクワクする、Aに期待している
+1	20 bring A to B	AをBにもってくる
+1	21 prestigious	権威ある
+1	21 grant	助成金
+1	21 come as <感情、状態> to <人>	<感情、状態>という形で<人>に受けとめられる
+1	21 someone(anyone) familiar with A	Aをよく知っている人 ※who isを省略
+1	22 each other	その他の各々（代名詞）※単数
+1	24 effectively address	効果的に対処する
+1	25 profitability	収益性
+1	26 anticipated	期待された
+1	26 be distinct from A	Aと違った
+1	26 A be no less remarkable	Aも同じくらい素晴らしい
+1	27 representative	代表
+1	31 not ～ anytime soon	まだしばらくかかる
+1	31 globally	世界に
+1	32 be leaV-ing	去る予定である
+1	33 legislation	法律 ※不加算
+1	33 transportation council	運輸審議会
+1	34 professional appearance	プロっぽい格好
+1	36 keep up-to-date	最新化する
+1	36 by V-ing	Vすることで（手段）
+1	39 reputation for A	Aについての評判
+1	39 largely	主に
+2	40 day off	休暇
+2	40 in light of	～を考慮して
+2	40 changes made to the schedule	スケジュールに加えられた変更
+2	41 specialized skills	専門技術
+2	43 have required	求めている
+2	48 substitute for A	Aの代役
+2	49 on foot	歩いて
+2	50 change hands	所有者が変わる
+2	50 pointing	目地仕上げ
+2	50 pointed	とがった、辛辣な
+2	50 pointless	無意味な
+2	51 with an eye toward A	Aを意図する
+2	51 possible improvement	改善可能な点
+2	51 harsh	辛辣な
+2	54 reveal	披露する
+2	55 requirement	必要条件
+2	59 increasingly	ますます
+2	61 pleasant	心地よい、楽しい
+2	62 leave of absence	休職
+2	64 conduct an extensive analysis	詳細な分析を行う
+2	65 speak to A for B	AとBについて話をする
+2	66 at reduced prices	値引き価格で
+2	66 price reduction	値下げ
+2	68 be committed to A	Aに真剣に取り組む
+2	70 whoever	誰でも ※(Anyone who is ～)の形
+2	71 president	社長
+2	75 conclude	締めくくる
+2	77 a diverse group of A	多様なAの層
+2	78 somewhat	多少、いくぶん
+2	79 spread A within B	AをBに広げる
+2	78 evenly	均等に
+2	80 extend A to B	A（感謝・挨拶など）をBに示す
+2	80 apology	謝罪
+2	81 Unless you mention that ～	～の申し出がない限り
+2	82 personnel	従業員 ※不加算
+2	82 have A with them at all time	Aを常に携帯する
+2	84 memorable	記憶に残る、忘れられない
+2	85 countless	数えられないほどの
+2	87 most likely	おそらく
+2	89 infrequently	たまに
+2	90 by the time	～の時までに
+2	91 make a splash	大評判になる
+2	92 negotiate with A	Aと交渉する
+2	92 negotiate A with B	AについてBと交渉する
+2	93 coincide with A	Aと同時に起こる
+2	93 proceed with A	Aを進める
+2	93 agree with A	Aに同意する
+2	94 movement	行動
+2	94 for a short time	少しの間
+3	98 be in attendance	出席する
+3	99 prosperous business relationships	良好な取引関係
+3	100 for five consequtive years	5年連続で
+3	100 name A B	AをBに任命する
+3	101 deliberation	審議、討議
+3	102 delight	～を喜ばせる
+3	102 heritage	遺産
+3	102 federal	連邦の
+3	104 be rated	評価される
+3	104 engage in A	Aに参加する
+3	106 endorse	宣伝する、推奨する
+3	106 celebration	お祝い
+3	107 building insulation regulation	断熱建築基準
+3	107 fossil fuel	化石燃料
+3	107 state	国
+3	107 dependency	依存
+3	108 lighter	より軽い
+3	108 consistent	着実な
+3	108 consistency	一貫性
+3	108 consistently	安定して、着実に
+3	109 in terms of A	Aの観点で
+3	110 reorganization	再編
+3	111 simplification	単純化
+3	111 A yet B	AだがB
+3	112 suit	～に合う
+3	112 suitable	適した
+3	112 It is important that S V原形	SがVすることが重要だ
+3	112 It is necessary that S V原形	SがVすることが必要だ
+3	113 intriguing	興味をそそる
+3	113 A be drawn to B	AはBに引きつかれる
+3	114 promising sign	明るい兆し
+3	114 statistic	統計
+3	114 strengthen	～を改善する
+3	114 strengthening economy	景気改善
+3	115 inside the station	駅の中で
+3	117 regrettably	残念ながら
+3	118 swiftly	素早く
+3	118 swift	迅速な、アマツバメ
+3	118 swiftness	迅速さ
+3	120 be working with A	Aを扱う仕事をしている
+3	121 obtain a loan to A of B from C	BをAに借用する許可をCから得る
+3	121 be instrumental in V-ing	Vするために貢献する
+3	124 have had a successful year	成功した一年を送っている
+3	124 under the direction of A	Aの指揮のもと
+3	126 durability	耐久性
+3	127 receive no attention	注目されていない
+3	128 intend to V	Vするつもりである
+3	130 demonstrate respect for A	Aに尊敬を示す
+3	130 give recognition to A	Aを評価する
+4	130 subordinate	部下
+4	131 expert	専門の ※形容詞
+4	131 advice	助言 ※不加算(opinion/request/proposalは加算)
+4	132 founder	創設者
+4	132 interact with	交流する
+4	133 break people's dependance on A	Aへの人々の依存を断つ
+4	135 preliminary	準備の、前置きの
+4	136 diagnostic tool	診断ツール(≠diagnosed tool 診断されたツール)
+4	138 dwindle	減少する
+4	138 jeopardize	危険にさらす
+4	139 cautiously optimistic	慎重ながらも楽観的な
+4	142 credit	功績
+4	143 look forward to A	Aを楽しみにしている
+4	144 be subjected to A	Aの対象になる
+4	144 conform	従う
+4	144 testing	検査 ※目的語がないと動名詞ではない
+4	144 extensively	幅広く
+4	144 extension	延長
+4	145 compliment A for V-ing	VすることのAを称賛する
+4	145 organize	～を取りまとめる
+4	145 expertly	巧みに
+4	146 be acquainted with A	Aに精通している
+4	147 impending	いまにも起ころうとしている
+4	147 confidential	内密の、機密の
+4	149 devote A to B	AをBに割く
+4	150 rank	ランク付けする
+4	150 tuition rate	授業料
+4	150 financial aid	経済支援
+4	150 affordability	値段の手ごろさ
+4	151 same-day return ticket	日帰りチケット
+4	152 <期間> into A	Aに入って<期間>で
+4	153 suburban	郊外の
+4	154 mark	～を祝う
+4	154 founding	創設時の
+4	157 landlord	大家、地主
+4	159 another <期間>	さらに<期間>
+4	160 show consideration	配慮する
+4	160 refrain from V-ing	Vすることを控える
+4	160 converse	会話する
+4	162 unexpectedly	予想外に
+4	163 Over the past few years	ここ数年
+4	163 mature	成熟する、発達する
+4	163 turn to A	Aに目を向ける
+4	164 as long as	～しさえすれば
+4	164 since then	それ以来
+4	165 in favor of A	Aに賛成する
+4	166 approval	承認
+4	167 institute	～(制度など)を導入する
+4	169 as early as <時期>	早ければ<時期>に
+5	169 in <時期> at the earliest	早くとも<時期>に
+5	172 copies of materials	資料のコピー
+5	173 markedly	著しく
+5	173 Like A	Aと同様、
+5	174 Institute School	私学
+5	174 prominent	卓越した
+5	176 correspondent	記者
+5	176 correspond	一致する
+5	176 correspondingly	それに応じて
+5	177 be unsure of oneself	自分に自信がない
+5	177 be committed to V-ing	Vすることに尽力している
+5	178 timeliness	タイミングの良さ
+5	179 reasonable	妥当な、理にかなった
+5	179 incur	～(出費など)を招く
+5	181 obtain loans	借り入れを利用する
+5	182 noticeably	著しく
+5	183 inquire	問合せ
+5	183 warranty form	取扱説明書
+5	183 email address provided A	Aに記載のアドレス
+5	184 same-day delivery	同日配送
+5	186 sometimes	場合によっては
+5	186 be expected to V	Vすることが求められる
+5	187 display signal reception	信号受信を表示する
+5	187 accurately	正確に
+5	191 opposite A	Aの向かい
+5	191 across from A	Aの向かい
+5	191 next to A	Aのとなり
+5	191 nearby A	近くのA ※形容詞 or 副詞（前置詞でない、後に冠詞はない）
+5	191 near A	近くのA ※前置詞(後に冠詞あり)、形容詞 or 副詞
+5	193 shorten A by two minutes	Aを2分短縮する
+5	193 thereby	それによって ※副詞（接続しない）
+5	193 thereby V-ing	それゆえVした
+5	193 meet requirements	要件を満たす
+5	193 because/since/as	※主語の省略はできない(sinceは「～のため」の接続詞）
+5	194 implicate	～を巻き込む
+5	194 implication	予想される結果
+5	196 draw near	徐々に近づく
+5	198 relevant	関連した
+5	198 relevancy	関連
+5	198 possess a degree	学位がある
+5	199 at the rate of A	Aの割合で
+5	200 starting	～から ※前置詞
+5	202 present a lecture	講義する
+5	202 present a demonstration	実演する
+5	202 present at <venue>	<会議など>に出席する
+5	202 talk about A	Aについて話す
+5	202 talk to A	Aと話す
+5	203 thin	薄い
+5	203 leather stretched around B	Bの周辺に張られた革
+6	204 be under pressure to V	Vする必要に迫られる
+6	204 under the burden of A	Aの負担を抱えて
+6	204 under the rule of A	Aの規則に従って
+6	204 wearer of A	Aを着けている人
+6	208 so [does/did] S	Sも[そうする / そうした] ※倒置
+6	210 allow A to V	AにVすることを許可する
+6	212 residential customer	個人顧客
+6	←→corporate customer	法人顧客
+6	212 sign up A for B	AとBを契約する
+6	213 have A done	Aは～してもらう
+6	←→have A do	Aが～する
+6	214 as of tomorrow	明日以降
+6	216 correspondingly	それに応じて
+6	216 at a correspondingly higher rate	それに応じた高めの料金で
+6	217 Like ～,	～と同様に
+6	217 photography	写真撮影
+6	218 Should you	(= If you should)
+6	218 require	～を求める
+6	219 A as well as B	AもBも
+6	221 accordingly	それに応じて
+6	223 perform daily flights	毎日運航する
+6	224 Largely	主に、ほとんど
+6	224 Altogether	合計で
+6	225 qualify for A	Aの資格を得る
+6	226 the <最上級> possible	可能な限り<形容詞>の
+6	226 to ensure that S V	確実にSがVするために
+6	228 be worth a A	Aの価値がある ※前置詞 worth
+6	228 worthless	価値がない
+6	229 honor	～を称える
+6	231 aside from A	Aに加えて
+6	233 accept a liability	法的責任を負う
+6	233 losses caused by A	Aによる損害
+6	235 identify	識別する
+6	235 identity	正体、個性
+6	235 identifiable	特定できる
+6	236 A commonly found	よく見られるA
+6	237 turn A around	Aを好転させる
+6	239 barrier	柵
+6	239 restrict A from V-ing	AがVすることを制限する
+6	240 be poised to V	まさにVしそうだ
+6	= be about to V	まさにVしそうだ
+6	241 The fact that S V	SがVするという事実は
+6	241 on the mend	好転して
+6	242 offer to V	Vすると申し出る
+6	243 theatrical	演劇の
+6	245 extraordinary	並外れた
+6	245 potential	可能性 ※不加算
+6	245 potentiality	可能性 ※加算
+6	246 benefit	利益を得る ※自動詞、～の役に立つ ※他動詞
+7	246 substantially	おおいに
+7	246 substance	物質
+7	247 potential	可能性のある、将来の ※形容詞
+7	247 successor	後継者
+7	249 Naturally	当然ながら
+7	250 enthusiast	熱心な人、ファン
+7	251 conventionally	従来の方法で
+7	251 energy efficient	エネルギー効率の良い
+7	252 outcome	成果
+7	252 be not always	必ずしも～というわけではない
+7	252 be indicative of A	Aを示している
+7	252 indication	兆し
+7	253 offer to V	Vすると申し出る
+7	253 allow A to V	AがVすることを許す
+7	254 valued at A	Aの価値があると評価する
+7	254 value of A	Aの価値
+7	256 sublet	又貸し
+7	256 comply with the provisions	条項を順守する
+7	257 though/before/after/when	※主語の省略ができる
+7	257 Though promising,	有望ではあるが
+7	257 therefore	したがって ※副詞（接続しない）
+7	261 have since <過去分詞V>	その後Vした
+7	262 no matter how(=however) <形容詞>	どんなに<形容詞>でも
+7	262 no matter where(=wherever)	どこで～しようとも
+7	263 turn down A	Aを却下する
+7	263 plot	構想
+7	263 predictable	予想できる、ありきたり
+7	265 programs instituted by A	Aによって導入されたプログラム
+7	265 recruit	新入社員
+7	265 recruitment	採用
+7	268 imperfection	欠陥
+7	268 Before being <受動態V>	Vされる前に ※Be動詞なしで直接<受動態V>の形はない
+7	268 After being <受動態V>	Vされた後に ※Be動詞なしで直接<受動態V>の形はない
+7	272 statistic	統計
+7	272 verify	～を検証する
+7	273 meet	～を満たす
+7	273 eligibility requirement	必要条件
+7	273 reply to	返信する
+7	274 alphabetically	アルファベット順に
+7	275 spokesperson	広報担当者
+7	277 praise	～を称賛する
+7	277 deal with	～を扱う
+7	277 expertly	巧みに
+7	277 manage relationship	関係に対応する
+7	278 proceed with	進める
+7	278 negotiation	交渉
+7	281 rather than	～ではなく
+7	281 so that S V	SがVするように
+7	282 by ○ %	差を表すby
+8	284 receive interest	興味を引く
+8	284 attractive package	魅力的な福利厚生
+8	285 seasonal	季節限定
+8	286 preventive measure	予防策
+8	288 barely	ほとんど～しない、かろうじて、やっと
+8	289 undergraduate student	大学生
+8	289 interest	関心
+8	289 demonstrate	～をはっきり示す
+8	289 demonstrated	明確な
+8	292 fall semester	秋学期
+8	292 file	～を提出する
+8	292 consider	～を検討する
+8	292 applicability	妥当性
+8	292 aid	支援
+8	292 prompt	迅速な、促す
+8	294 pertain (to)	（～に）関係する
+8	295 welfare	福祉
+8	295 commitment	真剣な取り組み
+8	296 It is among A	Aの中の一つ
+8	297 short-term relief	一過性の対策
+8	297 drought	干ばつ
+8	298 viability	実現可能性
+8	298 costly	費用のかかる ※形容詞
+8	298 viability	実現可能性
+8	299 overall	全体的な
+8	299 A, B as well as C	AもBもCも
+8	300 upon	～した途端に
+8	301 every two years	２年毎に
+8	302 accept old equipments	古い装置を引き取る
+8	302 likewise	同様に
+8	302 disposal	処分
+8	302 be required to V	Vすることが求められる
+8	303 overwhelmingly approve	圧倒的多数で承認する
+8	304 with the exception	～を除いて
+8	304 be slated for A	Aを予定する
+8	304 demolition	解体
+8	305 exclusive	高級な
+8	306 acknowledgements	謝辞
+8	306 table of contents	目次
+8	306 following	(= after)
+8	307 so as	もし～ならば、するように
+8	307 A only to B	Aしたが結果Bであった
+8	311 market conditions	市況
+8	312 add a touch of A	Aをそえる
+8	312 room divider	間切り
+8	313 compliment	～を称賛する
+8	313 add a touch of	～のニュアンスを添える
+8	313 several of A	何人かのA ※Aは複数形、名詞は単数扱い
+8	314 set forth	説明する、～を表明する
+9	315 foreman	現場監督
+9	316 qualified	免許を持つ
+9	317 across from	～の向かいに
+9	320 prior to	～の前に
+9	321 last	以前に ※副詞
+9	322 In accordance with	～に従って
+9	323 on the condition that	～という条件で
+9	326 specifically	明確に
+9	328 be to blame	責任がある、要因である
+9	329 several of which	そのうちのいくつかは
+9	332 such as ours	当社のように
+9	334 prompt A to V	AがVするように促す
+9	334 outlet	店舗
+9	336 strictly	厳密に、完全に
+9	337 a round of A	一連のA（面接など）※Aは複数形
+9	338 <時間> prior to	～<時間>より前に
+9	338 no later than	～までに
+9	339 health inspection	衛生検査
+9	340 excellently	素晴らしく
+9	342 be likely to	可能性がある
+9	342 cause a delay	遅れを引き起こす
+9	= cause A to delay	Aを遅らせる
+9	342 delays	遅れ
+9	342 cause delays in the delivery	配送の遅れを引き起こす可能性がある
+9	343 on behalf of	～を代表して
+9	345 reliably	確実に
+9	347 publicity	宣伝
+9	347 to ensure that S V	確実にSがVするために
+9	348 giveaway	景品
+9	348 cliché	ありきたりのもの
+9	349 wise	賢い
+9	349 wisely	賢く
+9	349 relocate the business	事務所を変える
+9	350 well-paid	高給取り
+9	351 step-by-step	順番に
+9	352 only weeks away	残り数週間
+9	352 still ~ not	まだ～ない
+9	352 not ~ yet	まだ～ない
+9	354 specialize in A	Aを専門とする
+9	355 dairy	酪農
+9	356 be doubtful that S V	SがVすることに懐疑的である
+9	357 readily	簡単に、すぐに
+9	358 subscription	購読料
+9	358 whether submitted electrically or by mail	電子か郵送かを問わず
+9	360 arterial	幹線の
+9	360 identify strategies	施策を見つける
+9	360 process with A	Aの処理を進める
+9	360 new strategies	新しい施策
+9	363 Situated ～ is A※文頭	Aは～の場所にある ※倒置形
+10	363 situation	状況 ※場所の意味はない
+10	364 produce	農産物
+10	366 advance to A	Aに昇進する
+10	366 promote X to A	XをAに昇進する ※Xは省略できない
+10	368 rotating	交代制の
+10	368 on a rotating basis	交代制で
+10	369 pass registration	法律を可決する
+10	370 neatly	きちんと
+10	370 underneath	～の下に
+10	372 the single largest investment	単独で一番大きな投資
+10	372 for most indivisuals	ほとんどの人が
+10	372 investment	投資
+10	373 as part of	一環として
+10	373 purposely	故意に
+10	373 concealed	隠された状態で
+10	373 conceal	隠れる
+10	374 whereas	～であるのに対して
+10	374 throughout	～の間ずっと
+10	375 refrain from V-ing	Vすることを避ける
+10	375 prevent A from V-ing	AがVすることを避ける。
+10	378 for the length of A	Aの期間中
+10	382 sophisticated	洗練された
+10	384 conduct	ふるまい
+10	385 be working on the work schedule	勤務スケジュールを調整中である
+10	385 toward A to B	AにBを送る
+10	386 subsequently	その後
+10	387 every two hours	2時間おきに
+10	388 much	多くのこと ※単数扱い
+10	388 much has been said about A	Aについて多くのことが語られている
+10	389 while in some foreign countries	海外にいる間
+10	389 while traveling through A	Aを旅行中に
+10	390 be pleased to V	喜んでVする
+10	390 be pleased with V-ing	Vすることに満足する
+10	392 reside	住む
+10	393 private details	個人情報
+10	393 consent	同意
+10	394 competitively priced A	価格競争力のあるA
+10	396 corporate prosperity	企業の繁栄
+10	397 dependence	依存
+10	397 educate	～を啓蒙する
+10	397 non-renewable	非再生の
+10	398 on one's own	独力で
+10	399 moreover	さらに(≠more over ※こんな表現はない)
+10	399 suburb	郊外
+10	400 considerable	かなり、相当の
+10	401 go on A	Aをしに行く
+10	401 study on A	Aに関する研究をする
+10	401 choose from A	Aから選ぶ
+10	402 until after	～の後まで
+11	403 clerical error	事務的なエラー
+11	403 preventable	予防可能な
+11	404 dedication	献身
+11	406 compartment	区画
+11	406 comfort	快適さ
+11	407 B be regarded as A	AとみなされているB
+11	407 regard A as B	AをBとみなす
+11	408 limits	（複数の）制限 ※加算名詞
+11	409 a broad variety of A	幅広い種類のA
+11	410 acrylic landscape painting	アクリル風景画
+11	411 transform A from B to C	AをBからCに変える
+11	411 transform A into C	AをCに変える
+11	412 secure	（予算など）を確保する
+11	412 room rate of $〇	部屋代〇$
+11	412 excluding taxes	税抜き
+11	413 look as if	～のようだ
+11	414 entrant	参加者
+11	415 bustling	活気のある
+11	417 those with A	Aな人々
+11	417 them	※withなどで修飾できない
+11	418 net income	純利益
+11	419 sleek	洗練された
+11	421 with care	注意して(=careful)
+11	421 canned food	缶詰
+11	421 bump	ぶつかること
+11	421 scrap	こすること
+11	422 take on X	Xしようと決める
+11	422 aggression	敵意
+11	422 aggressor	侵略者
+11	423 premises	敷地
+11	423 move	移転
+11	423 necessitate	～を必要とする
+11	424 was supposed to V	Vすることになっている（
+11	424 be supposed to V	Vするはずだった
+11	425 well in advance	十分余裕をもって事前に
+11	426 associate A with B	AとBを関連付ける
+11	427 tie	連携
+11	427 even <比較級>	～よりもさらにいっそう<比較級>
+11	428 retail	小売り ※不加算
+11	429 business day	営業日
+11	430 coal	石炭
+11	430 a way of V-ing	Vするための方法
+11	433 afford	～を提供する
+11	434 e-commerce	電子商取引
+11	435 be home to A	Aを所蔵している
+11	436 meet with A	Aという結果を得る
+11	436 put up with A	Aを我慢する
+11	436 rejuvenation	再生
+11	436 pothole	深い穴
+12	437 management expertise	経営の専門知識
+12	439 handout	配布資料
+12	441 report to work	出社する（≒ commute to work）
+12	442 A of one's own	～自身のA(=one's own A)
+12	443 retain	～を維持する、持ち続ける
+12	444 width	横幅
+12	444 wide	幅広い、完全に
+12	444 widen	拡張する
+12	444 widening	拡張
+12	444 during the V-ing	Vしている間
+12	445 foundation	創業
+12	445 founder	創設者
+12	446 prospect	見通し、可能性
+12	447 maneuverable	操作しやすい
+12	447 lawnmower	芝刈り機
+12	447 easy to handle	扱いやすい
+12	448 secure access	安全なアクセス権
+12	449 consist of A	Aで構成される
+12	453 fill orders	注文に応じる
+12	454 affix to a box	箱に貼り付ける
+12	454 cut A open	Aを切って開ける
+12	456 scores of A	たくさんのA
+12	456 later for	のちに
+12	457 credit A to B	AをBのおかげとする
+12	457 20 years earlier	20年前に
+12	458 durability	耐久性
+12	458 withstanding	耐える
+12	459 tasty	おいしい
+12	459 taste	味
+12	459 tasting	試飲会
+12	460 brightly	明るい色
+12	460 be intended to V	Vすることを目的にしている
+12	461 formerly	以前は
+12	461 be influential in A	Aに影響を与える
+12	= be influencing in A	Aに影響を与える
+12	463 ever since	それ以来ずっと
+12	463 until	までずっと
+12	464 more	追加するもの ※不加算名詞の代名詞
+12	464 few	少量のもの ※代名詞になるが加算名詞のみ
+12	465 providing (that)	～する場合に限り(= provided that)
+12	465 according to	～に従えば ※文頭以外
+12	465 carry out	～を実行する
+12	465 manufacturers specifications	メーカー仕様書
+12	467 be deemed	見なされる
+12	469 announce to A that ～	Aに～と発表する
+12	469 investor	投資家
+12	470 hope will be A	Aとなることを願う
+12	471 distinctly	はっきりと
+12	471 a sense of A	A感
+13	471 exclusivity	独占性
+13	471 sense of exclusivity	特別感
+13	472 exemplify	例証する
+13	472 amenities	生活を良くする施設、設備
+13	473 be forwarded to	転送される
+13	473 consideration	考慮
+13	474 discount	割引 ※可算名詞
+13	475 clearly	はっきり、明らかに
+13	475 be stated quite clearly	明確に書かれている
+13	477 research	調査 ※不可算名詞
+13	479 production	生産
+13	479 producer	生産業者
+13	480 guest to the restaurant	レストランの客
+13	480 assume A that S V	SがVすることをAに保証する
+13	480 recommend that S V	SがVすることを勧める
+13	481 initiative	新しい計画
+13	481 as part of A	Aの一環として
+13	481 growth initiative	新計画
+13	483 aircraft production	航空機の生産
+13	483 product	製品 ※可算名詞
+13	483 production	生産品 ※不可算名詞
+13	484 place emphasis A	Aに重点を置く
+13	487 decide on <動名詞V>	Vすることを決める
+13	487 decide against <動名詞V>	Vしないことを決める
+13	488 notwithstanding	～にもかかわらず
+13	488 excessive request	多くのリクエスト
+13	490 Of all the A, <最上級>	Aの中で<最上級>
+13	492 driveway	車寄せ
+13	496 a week from today	今日から1週間後 ※前置詞不要
+13	497 ease	和らげる
+13	497 congestion	混雑
+13	498 playground	運動場
+13	500 industrial	産業用の
+13	502 acquisition	買収、取得
+13	503 remark	意見、感想
+13	504 cure for A	Aの解決策
+13	504 conservation	保護
+13	504 be committed to V	Vすることに尽力する
+13	508 proof of identification	身分証明書
+13	511 extract	抜粋
+13	511 extractability	抽出性
+13	513 firmly	しっかりと ※形容詞、↓と連動
+13	513 so not <形容詞> as to V	Vしない程度の<形容詞>で
+13	513 so <形容詞> as to V	Vするほどの<形容詞>で
+13	515 turnout	人出、観客数
+13	515 planing	立案 ※不加算
+13	515 plan	計画 ※加算
+13	515 planner	計画者 ※加算
+13	515 careful planning	綿密な計画
+14	518 make a point of V-ing	必ずVするように心がける
+14	519 than anticipated	予想された以上に
+14	520 can indicate	指標になる
+14	521 post	～を配属する
+14	521 be posted to A	Aに配属される
+14	522 last-minute	駆け込みの
+14	523 meet a guideline	基準を満たす
+14	523 meet a low	法律を満たす
+14	524 be interested in V-ing	Vすることに興味がある
+14	525 over the telephone	電話越しに
+14	526 reproduction	複製
+14	527 visit A	Aを訪れる ※他動詞
+14	527 examine A	Aを調べる ※他動詞
+14	527 request A	Aを求める ※他動詞
+14	527 transfer to A	Aに移る ※自動詞
+14	528 feature on	～を特集する／～大きく紹介される
+14	528 feature in	～に掲載する／～に出演する
+14	528 below	下部に
+14	529 motivational talk	士気を高める話
+14	530 understanding	理解
+14	531 register for A	Aに登録する
+14	533 arrival time	到着時間
+14	533 arriving guests	到着客
+14	534 keep A informed about B	AにBを周知する
+14	534 be critical of A	Aについて批判的な
+14	534 be criticized for A	Aのことで批判される
+14	535 delivery	配送 ※不加算
+14	535 delivery	配送品 ※加算
+14	537 No matter what A S V	どのAをSがVしても
+14	540 fun run	市民マラソン
+14	541 a letter of acceptance	合格通知
+14	542 sequel	続編
+14	542 finalize	最終決定する
+14	543 email address you have provided	提出されたアドレス
+14	547 conscientious	誠実な
+14	548 conscientious	誠実な、入念な
+14	548 considerably	大幅に、かなり
+14	549 halt	止める
+14	550 nutrition	栄養学
+14	551 receive a promotion	昇進する
+14	552 those A	Aの人々 (=people who are A)
+14	553 undertaken	～を引き受ける
+14	554 attribute A to B	Aの要因はBだ、AがBに起因すると考える
+14	555 most	ほとんど ※複数形名詞
+14	555 expansion	発展
+14	555 invest	投資する
+14	556 managerial	管理職の
+14	557 meal preference	食事の好み
+14	560 dawn	始まり、幕開け
+15	561 be asked	求められる
+15	562 on many occasions	何度も、たびたび
+15	562 on several occasions	何度か
+15	562 pigeons	鳩
+15	562 cooing	鳴き声
+15	565 chamber of commerce	商工会議所
+15	565 tirelessly	休むことなく
+15	565 established	定着した
+15	566 by oneself	独力で (=on one's own）
+15	567 even A	Aでさえ
+15	567 only A	Aでさえ
+15	570 nation	国
+15	570 nationality	国籍
+15	576 advertising	広告業、広告 ※不加算、単数名詞
+15	578 envy	うらやましいと思う
+15	578 enviable	うらやましいほどの
+15	578 develop a reputation	評判を築く
+15	579 rendition	演奏、上演
+15	579 stellar	輝くように素晴らしい
+15	579 delight	喜ばせる
+15	579 alike	同じように
+15	581 celebrated	著名な
+15	583 set aside	(お金、時間など)取っておく
+15	583 undergo a training	トレーニングを受ける
+15	584 deliver	（演説など）を行う
+15	585 unless (S V) otherwise ～	別の方法で～されない限り
+15	586 on a monthly basis	月単位で
+15	587 swiftly	すぐに
+15	589 hold A accountable	Aに責任がある
+15	592 promptly	即座に、すぐに
+15	592 chronological	年代順の
+15	593 comforting	慰めになる
+15	594 differentiate	差別化する
+15	595 allocate A B	AにBを割り当てる
+15	596 obstacle	障害
+15	597 notably	特にVするために
+15	601 in hot weather	暑い中で
+15	602 consultation	相談 ※不加算
+15	602 consultant	相談者 ※加算
+15	603 would V	Vしている ※過去の習慣
+15	603 curator	館長
+15	604 inscribe	～を刻み付ける
+15	606 remarkably	驚くほど
+15	612 <形容詞> enough to V	Vするほどの<形容詞>で
+15	613 in excess of A	Aを超えて
+15	614 the requests are filed	申請される
+15	615 change	(自ら)変化する ※自動詞
+15	616 a fraction of A	わずかなA
+15	616 retail value	小売価格
+16	616 at the value	その価格で
+16	618 take on	～を引き受ける
+16	618 take on a responsibility	責任を負う
+16	618 municipal	地方自治の
+16	621 omission	除外、遺漏
+16	621 deliberate	意図的な、故意の
+16	624 adverse	好ましくない
+16	625 as to A	Aについて
+16	627 resolutely	断固として
+16	627 grounded	基づいている
+16	627 clarity	明瞭さ
+16	628 compassion	思いやり、同情
+16	631 shortly	間もなく
+16	632 benefit from A	Aから恩恵を受ける
+16	632 proliferate	急増する
+16	633 selection	品揃え
+16	633 contemporary	現代の
+16	634 nearly	ほぼ ※「ほぼ超えた」など
+16	635 supplement	～を補う
+16	636 arrange for A to V	AがVするよう手配する
+16	636 on one's behalf	～の代理で
+16	636 obligation	義務、責務
+16	638 parting	別れの
+16	639 for the summer	夏の間だけ
+16	640 feature	呼び物にする
+16	641 each of the <複数名詞>	呼び物にする
+16	642 drive out	追い出す
+16	642 prices below cost	原価以下
+16	642 in an effort to V	Vしようとして
+16	643 grant A B	AにBを与える
+16	643 beneficiary	受益者
+16	644 as predicted	予想通りに
+16	645 stranded	立ち往生した
+16	645 a strand of X	一束のX
+16	645 leave A B	AをBのままにする
+16	647 appoint A B	AをBに任命する
+16	647 promote A to B	AがBに昇進する
+16	648 be serviced	点検される
+16	649 be concerned	心配する
+16	649 almost	もう少しで ※副詞
+16	650 outline	～を説明する
+16	651 only <形容詞> if ～	～した場合のみ<形容詞>
+16	654 be responsible for A	Aの責任がある
+16	655 miniature	ミニチュア、小型模型
+16	656 house	～を収容する
+16	657 be situated in A	Aにある
+16	661 make advances	革新する ※advanceが加算
+16	661 in advance	事前に ※advanceが不加算
+16	662 acknowledgement letter	受領通知書
+17	663 adjacent	隣接
+17	663 entrance to A	Aの入り口
+17	663 be located on A	Aにある
+17	666 attendance	参加者数
+17	= the number of attendees	参加者数
+17	667 the first of which is A	その一つ目はAである
+17	668 fill out	記入する
+17	669 cartoon	漫画
+17	671 perception	理解、認識
+17	671 fair	公平な
+17	671 performance evaluation	勤務評価
+17	671 be dependent on A	Aに左右される
+17	673 furniture purchase	家具の購入品
+17	674 hand out	配布する
+17	676 in <色>	<色>の
+17	680 company directory	社員名簿
+17	681 be sure to V	Vすることを忘れないようにする
+17	681 proofread	校正する
+17	682 journal	専門誌
+17	684 nevertheless	それにもかかわらず
+17	685 exclusively	だけに
+17	685 exclusive	限定の、独占記事
+17	685 exclusivity	独占
+17	685 exclusiveness	独占
+17	688 do one's part	役割を果たす
+17	690 arrangement	手配
+17	691 high degree	高い程度
+17	692 challenge	異議を唱える
+17	692 challenged	障害のある
+17	692 challenging	やりがいのある
+17	692 challengingly	挑発的に
+17	693 present	～をプレゼントする
+17	695 practical	実質的な、実習
+17	695 practically	ほとんど、実質的に
+17	695 practically every morning	ほぼ毎日
+17	698 alike	同じように
+17	698 refreshing stay	疲れをいやす滞在
+17	701 cut back on A	Aを削減する
+17	701 fleet sale	車両販売
+17	701 intentionally	意図的に
+17	701 individual customer	個人顧客
+17	701 profitably	有益に
+17	702 be derived from A	Aから派生して
+17	702 moderately	適度に
+17	703 creation	創作物
+17	703 creator	クリエイター
+17	706 provide A of B	AをBに提供する
+17	706 provide A with B	BをAに提供する
+17	707 generator	発電機
+18	708 approximation	概算、近似
+18	708 apploximately <数詞(five to seven)>	およそ <数詞>
+18	710 characteristic	特徴
+18	710 characterization	人物描写
+18	712 in support of A	Aを支持して
+18	712 issue a statement	声明を出す
+18	712 issue a statement	声明を出す
+18	714 diaper	おむつ
+18	714 necessity	必需品
+18	715 in order of A	Aの順番で
+18	717 courtesy	礼儀
+18	718 emulate	～を見習う
+18	718 economize	節約する
+18	718 economical use	経済的な利用方法
+18	719 follow-up interview	再面接
+18	720 aspire	熱望する
+18	720 peer	同僚
+18	722 the fire department	消防署
+18	723 promising candidate	有望な候補者
+18	723 identify	見極める
+18	726 rate	評価する
+18	726 cleanliness	清潔さ
+18	727 length	長さ
+18	727 lengthy	長い
+18	727 lengthily	長々と
+18	727 lengthen	伸ばす
+18	730 evident	明らか
+18	730 confident	自信がある
+18	730 confidence	自信
+18	731 designated	指定の
+18	732 be crowded with A	Aで混雑している
+18	732 crowd	群衆、押し寄せる
+18	733 excellent opportunity	絶好の機会
+18	733 acquaint oneself with A	Aについてよく知る
+18	735 promote	～を売りにする
+18	737 increase	増加
+18	738 practice	医療業務に従事する
+18	739 throughout	～のいたる所に
+18	739 among A	Aの間に ※Aは複数形
+18	741 along with A	Aを添えて
+18	742 casual dress	普段着
+18	743 ventilate	～を喚起する
+18	743 in a secure manner	安全な方法で
+18	743 open	開けたままにしておく
+18	744 absent is anticipated	不在予定
+18	744 only a brief	ほんのわずかの
+18	744 even if	たとえ～でも
+18	746 register a complaint	苦情を申し立てる
+18	746 of all the A	すべてのAのうち
+19	747 advance	～を促進する
+19	748 gauge	(価値など)を評価する、ゲージ ※名詞
+19	749 annual leave day	年次休暇
+19	749 fall on	(その日に)当たる
+19	750 a wealth of A	豊富なA
+19	750 knowledge on A	Aの知識
+19	751 specifically to V	特にVするために
+19	752 very few	ほとんど～ない
+19	753 pay	給料
+19	754 underestimate	過少評価する
+19	754 how much they can learn	どれだけ学べるかということ
+19	755 each other	互いに
+19	755 one another	互いに
+19	756 experience	経験する、経験
+19	756 experiential	経験に基づいた
+19	758 cooperation	連携
+19	760 assuredly	間違いなく
+19	761 relative	相対的な、親戚
+19	761 relatively	比較的
+19	762 grant interviews	インタビューに応じる
+19	763 encourage	～を励ます ※無生物は受動態にならない
+19	763 encouraging sign	励みになる兆候
+19	764 neatly file	きちんと整理する
+19	765 have an edge	優位性を持つ
+19	766 address A	Aについて話しかける
+19	766 remark on A	Aについて述べる
+19	767 evoke	(感情など)を呼び起こす
+19	768 arguably	議論の余地はあるが、おそらく
+19	768 invention	発明品
+19	769 occupant	乗員
+19	769 technologies designed	設計された技術
+19	769 be equipped with A	Aを装備している
+19	770 relocate	移転する、～を移転する ※自他両刀
+19	772 preventive	予防の
+19	773 preference	優先権
+19	777 evaluate	評価する
+19	777 conservation	自然保護
+19	778 be dedicated to <動名詞V>	Vすることに専念する
+19	778 meteorologist	気象学者
+19	779 invaluable	きわめて貴重な
+19	781 offer A B	AにBを提供する
+19	782 lucrative	儲かる
+19	784 acumen	洞察力、判断力
+19	784 managerial acumen	経営判断力
+19	784 attribute A to B	AはBに起因していると考える
+19	786 exclusive to us	私たちに限定された
+19	786 for a limited time	期間限定で
+19	787 lend oneself to A	Aに適している
+19	788 none	1つも～ない ※複数扱い
+20	791 a large stock	大量の在庫 ※加算名詞stockは単数扱い
+20	793 veterinary	獣医学の
+20	793 develop a plan	計画を立てる
+20	793 studied phenomenon	検証された現象
+20	795 advertisement	広告（物）、宣伝（物） ※加算名詞
+20	795 advertising	広告（活動）、宣伝（業） ※不加算名詞
+20	795 advertise	広告する、宣伝する ※名詞にならない
+20	797 loyalty card	ポイントカード、会員カード
+20	797 additive	添加物
+20	798 commission	～を委託する
+20	798 be commissioned	委託される
+20	799 fast	早く ※副詞
+20	799 growing	成長している
+20	802 provided (that)	～という条件で(=providing that)
+20	802 deliver	～を配達する ※他動詞、名詞の意味はない
+20	802 delivery	配達、配達品
+20	808 defective	欠陥のある
+20	808 defect	欠陥
+20	808 defection	亡命
+20	810 acquaint	知らせる、精通させる
+20	810 acquaintance	知人
+20	811 circulation	貸し出し
+20	812 precisely	ちょうど、正確に
+20	813 so that	SがVするために ※節には理由でなく目的
+20	815 an estimated 30 percent	推定30%
+20	816 merge with	～と合併する
+20	816 acquire	～を買収する
+20	817 each <単数名詞>	各<単数名詞>
+20	817 individual	個人
+20	820 within walking distance of A	Aの徒歩圏内
+20	822 Once	いったん～したらすぐに ※未来の条件
+20	824 firm	固い
+20	824 firmness	固さ
+20	825 If not, S V	そうでなければ
+20	826 reply to	～に返事する
+20	827 for a fee	有料で
+20	828 be unlikely to V	Vしそうもない
+20	829 accomplish	成し遂げる
+20	829 accomplishment	達成
+20	829 accomplished	熟練した
+20	830 speculation	憶測、推測
+20	830 replacement	後任
+20	834 consistent	首尾一貫した
+20	836 established	既存の、定番の
+20	837 as to	～に関して
+20	837 uncertainty	半信半疑、不確かさ
+20	839 airport security	空港の安全
+20	842 complete the survey	アンケートに記入する
+20	843 after ～	（功績など）を残した後に
+21	845 tour A	Aのツアーをする
+21	849 given (that)	～を考慮に入れると
+21	≒given	～を考慮に入れると ※前置詞
+21	850 proficient	堪能な
+21	850 be proficient in A	Aのスキルが高い
+21	851 vacant	空いている ※形容詞
+21	851 vacancy	空き ※名詞
+21	851 vacate	明け渡す
+21	852 company owned	社用のもの
+21	853 qualified	適任の
+21	855 polished	上品な、洗練された
+21	855 show oneself	自分で証明して見せる
+21	856 wealthy customer	富裕層顧客
+21	856 be successful at V-ing	Vすることに成功している
+21	860 import	～を輸入する ※他動詞
+21	860 import	輸入品
+21	860 consist of A	Aを構成する
+21	862 accompanied	添付された
+21	866 wholesaler	卸売業者
+21	868 understandably	当然のことながら
+21	868 understandably so	それも当然のことである
+21	870 the right to V	Vする権利
+21	870 abide by A	Aに従う
+21	871 commend	～をほめる
+21	871 commendably	立派に
+21	872 collectible	収集する価値のある
+21	877 stronger customer	厳しい顧客
+21	878 in case	～するといけないので
+21	878 only if	～の場合に限り
+21	879 consequent	それに伴い
+21	881 be compliant with A	Aを順守する
+21	882 If time allows	時間が許すなら
+21	883 be to retire	退職する予定である
+21	883 be to V	Vする予定である
+21	883 be V-ing	Vする予定である
+21	885 invoice	請求書
+21	885 have yet to V	まだVしていない
+21	885 have until [due time] to V	Vするには[期限]まで時間がある
+21	886 reminder	再確認
+21	890 modification form	改修用紙
+21	890 employment prospects	雇用可能性
+21	890 qualifications	資格
+21	891 in operation	操業中
+21	892 convey	～に伝える
+21	895 leftover	残りの
+21	895 charity	慈善団体
+21	895 donate A to B	AをBに寄付する
+21	895 notable achievement	特筆すべき業績
+21	895 enthusiast	熱心な人、ファン
+22	896 enthusiasm	やる気
+22	898 unlike	～と違って
+22	899 medal wear	メダルを飾る
+22	899 astound	～を愕然とする
+22	902 caterer	出前業者
+22	902 florist	花屋
+22	903 secretary	議長
+22	904 must be filed in	記入しなければならない
+22	906 stimulating	刺激的な
+22	907 whichever	～するどちらの…でも
+22	912 concerning	～に関する
+22	913 never～ , nor…	～を一度もしていないし、…もない
+22	913 intention	意図
+22	915 whether to do	～すべきかどうか
+22	915 which to do	どれを～すべきか
+22	917 hardly	ほとんど～ない ※名詞は修飾しない
+22	917 hardly create new job	ほとんど新しい仕事が作られない ※副詞の位置
+22	917 create few new job	ほとんど新しい仕事が作られない ※形容詞の位置
+22	918 enlist	求める
+22	919 happier V-ing A than V-ing B	AするよりもBしたい
+22	920 demanding on A	Aによるが
+22	920 job openings	仕事の空き
+22	921 seemed	～のように見える
+22	923 legible	読みやすい
+22	923 acceptable	許容できる
+22	923 It is acceptable for A to V	AにVすることを許可している
+22	926 fill	(注文などに)応じる
+22	927 put an emphasis on A	Aを重視する
+22	928 Enclosed is survey	同封のアンケート ※倒置形
+22	928 Enclosure	同封物 ※加算名詞
+22	929 mining	採掘
+22	930 decline	～を丁寧に断る
+22	930 comment on A	Aについて意見を述べる
+22	932 study the feasibility of A	Aの実現性を調査する
+22	932 retool	機械を入れ替える
+22	935 complication	やっかいな問題
+22	936 seemingly	外見上は、見たところ
+22	937 surely	確かに
+22	938 be vital to A	Aにおいて不可欠である
+22	939 likely	適した ※形容詞
+22	941 solely	もっぱら
+22	941 entirely private	完全に非公開の
+22	941 privatize	～を民営化する
+22	941 privately	密かに
+22	947 remedy	改善する
+22	948 in appreciation of A	Aに感謝して
+22	949 unsure	確信がない
+22	951 inquire about A	Aを尋ねる
+22	952 appealing	魅力的な
+23	954 turn around A	Aを立て直す
+23	955 textile	布地、織物
+23	956 stock is limited	在庫がない
+23	957 withhold	差し控える
+23	959 value	～を重んじる
+23	960 profitable	利益のある
+23	961 prospective	見込みのある
+23	964 exclusively	独占的に
+23	964 in the employ of A	Aに雇われて
+23	965 diligently	入念に
+23	971 declare A B	AはBだと宣言される
+23	971 invalid	無効な
+23	971 invalidity	就労不能
+23	971 invalided	兵役免除された
+23	973 struggle	苦闘する
+23	974 come with a warranty	保証が付く
+23	978 a wide variety of A	様々なA
+23	980 Whether A or B	AであろうとＢであろうと
+23	983 by means of A	Aという手段で
+23	984 transcript	記録
+23	985 restock A with B	AにBを補充する
+23	987 surrounding area	周辺地域
+23	989 preparer	作成者
+23	994 respectfully	丁寧に
+23	995 anticipate	～を期待して待つ
+23	995 hope for	～を期待する
+23	996 probationary	見習いの
+23	996 close to A	Aの近くで
+23	996 work very closely A	Aと密に働く
+23	998 precisely	ちょうどに
+23	1002 confirm	固める
+23	1004 dependable	信頼できる
+23	1004 universal	普遍的に
+23	1004 be universally recognizable	誰にでもわかりやすい
+23	1006 objectionable	不快な
+23	1008 evacuation	避難
+23	1009 prestidigitation	手品
+23	1010 increasing	ますます増える
+23	1011 attract donations	寄付が寄せられる
+23	1011 secure funds	資金を確保する
+23	1011 likewise	同様に
+23	1014 development	成長
+23	1017 contention	議論、首長
+23	1022 free	～を自由にする
+23	1023 ethical	倫理的な
+23	1023 patient information	患者情報
+23	1023 informative	有益な
+23	1025 fuel consumption	燃費
+23	1027 number	～の数に達する
+24	1028 expect A to V	AがVすることを期待する
+24	1028 constant	不変の
+24	1032 in the past A years	A年の間に
+24	1039 study	習慣
+24	1039 exhaustively	徹底的に
+24	1040 hiring decision	採用に関する決定
+24	1043 considering V-ing	Vすることを考慮している
+24	1043 determine to V	Vすることに決定する
+24	1043 agree to V	Vすることに賛成する
+24	1043 decide to V	Vすることに決める
+24	1044 exceedingly	非常に
+24	1045 effective <時>	<時>から有効な
+24	1047 inform A that S V	AにSがVすると伝える
+24	1049 peak at	～に達する
+25	分詞構文（現在形）①	同時進行（～しながら）
+25	分詞構文（現在形）②	理由・原因（～なので）
+25	分詞構文（現在形）③	時（～したとき、～すると）
+25	分詞構文（過去形）①	付帯状況・様態（～という状態で）
+25	分詞構文（過去形）②	理由・原因（～されたので）
+25	分詞構文（過去形）③	時（～されると）
+25	<無生物> resulted in ～	<無生物>が原因で～という結果になる
+25	that節が原型動詞になる動詞	request、ask、demand、insist、recommend、suggest
+25	that節が原型動詞になる形容詞	important、necessary、essentialなど
+25	to V-ingの形	look forward to V-ing
+25	動詞・名詞同形の単語	increase
+25		～すべきだと（要求・提案・命令など）する	(unpaired)
+25		重要である、必要である、当然である、望ましい、など	(unpaired)
+25		object to V-ing	(unpaired)
+25		contribute to V-ing	(unpaired)
+25		be accustomed to V-ing ～に慣れている	(unpaired)
+25		be used to V-ing ～に慣れている	(unpaired)
+25		adhere to V-ing	(unpaired)
+25		be dedicated to V-ing	(unpaired)
+25		be devoted to V-ing	(unpaired)
+25		in addition to V-ing	(unpaired)
+25		when it comes to V-ing ～ということになると	(unpaired)
+25		what do you say to V-ing ～してはどうですか？（提案）	(unpaired)
+25		resort to V-ing	(unpaired)
+25		prior to V-ing ～することに先立って	(unpaired)
+25		decreas	(unpaired)
+25		estimate	(unpaired)
+25		forecast	(unpaired)
+25		recruit	(unpaired)
+25		respect	(unpaired)
