@@ -115,6 +115,12 @@
   .wl .jp { color: var(--muted); grid-column: 1; }
   .wl .cnt { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-size: .78rem; color: var(--ng); font-variant-numeric: tabular-nums; }
   .tools { margin-top: 14px; font-size: .8rem; color: var(--faint); display: flex; gap: 12px; flex-wrap: wrap; }
+  .sync { margin-top: 12px; font-size: .8rem; color: var(--faint); }
+  .sync b { color: var(--text, inherit); font-weight: 600; }
+  .sync button { font: inherit; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; text-decoration: underline; margin-right: 10px; }
+  .sync input { font: inherit; width: 9.5em; padding: 2px 6px; margin-right: 6px; }
+  .sync code { font-size: .9rem; letter-spacing: .05em; margin-right: 10px; }
+  .sync .note { margin: 4px 0; }
   .tools button { font: inherit; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; text-decoration: underline; }
   .empty { color: var(--muted); text-align: center; padding: 30px 0; }
   @media (max-width: 480px) { .ja { font-size: 1.15rem; } .kbd { display: none; } .card { padding: 14px; } }
@@ -189,6 +195,18 @@
   <button id="btnImport">記録を読み込む</button>
   <button id="btnReset">記録を消す</button>
   <input type="file" id="importFile" accept=".json,application/json" hidden>
+</div>
+<div class="sync" id="syncBox">
+  <b>スマホとPCで記録を共有</b>
+  <div id="syncOff">
+    <p class="note">片方の端末で「共有を始める」を押し、出てきた共有コード（またはリンク）をもう片方の端末で入れると、どちらで解いても同じ記録になります。</p>
+    <button id="btnSyncNew">共有を始める</button> または <input id="syncInput" placeholder="XXXX-XXXX-XXXX" autocomplete="off" aria-label="共有コード"><button id="btnSyncJoin">コードでつなぐ</button>
+  </div>
+  <div id="syncOn" hidden>
+    <p class="note">共有コード <code id="syncCode"></code></p>
+    <button id="btnSyncCopy">別の端末用のリンクをコピー</button><button id="btnSyncNow">今すぐ同期</button><button id="btnSyncOff">共有をやめる</button>
+    <p class="note" id="syncMsg"></p>
+  </div>
 </div>
 </div>
 
@@ -604,7 +622,8 @@ function record(key, v, prev) {
     s[v]++; s.n++; s.h = (s.h + mk).slice(-10); s.t = Date.now();
     s.log.push([s.t, mk]); if (s.log.length > 200) s.log = s.log.slice(-200);
   }
-  REC[key] = s; lsSet(LS_REC, REC);
+  s.u = Date.now();
+  REC[key] = s; lsSet(LS_REC, REC); markDirty(key);
 }
 
 /* ============ 画面 ============ */
@@ -875,7 +894,7 @@ function renderWeak() {
   }).join('') : '<li><span class="jp">まだありません。</span></li>';
 }
 ['wkDay', 'wkDate', 'wkSort'].forEach(function (id) { $(id).addEventListener('change', renderWeak); });
-function setBack(key) { var s = stat(key); s.back = true; REC[key] = s; lsSet(LS_REC, REC); renderWeak(); renderScore(); }
+function setBack(key) { var s = stat(key); s.back = true; s.u = Date.now(); REC[key] = s; lsSet(LS_REC, REC); markDirty(key); renderWeak(); renderScore(); }
 document.addEventListener('click', function (e) {
   var b = e.target.closest && e.target.closest('[data-back]');
   if (b) setBack(b.getAttribute('data-back'));
@@ -909,11 +928,118 @@ $('importFile').onchange = function () {
   var f = this.files[0]; if (!f) return;
   f.text().then(function (t) {
     var d = JSON.parse(t); if (!d || !d.rec) throw new Error();
-    Object.keys(d.rec).forEach(function (k) { var a = REC[k], b = d.rec[k]; if (!a || (b.t || 0) > (a.t || 0)) REC[k] = b; });
+    Object.keys(d.rec).forEach(function (k) { REC[k] = mergeRec(REC[k], d.rec[k]); markDirty(k); });
     lsSet(LS_REC, REC); renderWeak(); renderScore(); note('記録を読み込みました。');
   }).catch(function () { note('記録ファイルを読み込めませんでした。'); });
 };
-$('btnReset').onclick = function () { if (confirm('これまでの解答記録をすべて消します。よろしいですか？')) { REC = {}; lsSet(LS_REC, REC); renderWeak(); next(); } };
+$('btnReset').onclick = function () { if (confirm(SYNC.id ? 'これまでの解答記録をすべて消します。共有している別の端末の記録も消えます。よろしいですか？' : 'これまでの解答記録をすべて消します。よろしいですか？')) { REC = {}; lsSet(LS_REC, REC); if (SYNC.id) { SYNC.dirty = {}; syncNow(false, true); } renderWeak(); next(); } };
+
+/* ============ 端末どうしで記録を共有（Apps Script に保存） ============ */
+var LS_SYNC = 'unkquiz_sync_v1', SYNC = lsGet(LS_SYNC, {}), SYNC_URL = DATA_URL.replace(/\?.*$/, '');
+SYNC.dirty = SYNC.dirty || {};
+/* 1語分の記録を足し合わせる。log の時刻で突き合わせ、片方にしか無い回答を足す（Apps Script の drillMerge_ と同じ） */
+function mergeRec(a, b) {
+  if (!a) return b; if (!b) return a;
+  var ua = a.u || a.t || 0, ub = b.u || b.t || 0, base = ub >= ua ? b : a, other = base === a ? b : a;
+  var la = base.log || [], have = {};
+  la.forEach(function (l) { have[l[0]] = 1; });
+  var extra = (other.log || []).filter(function (l) { return !have[l[0]]; });
+  var m = Object.assign({}, base);
+  if (a.back || b.back) m.back = true;
+  if (!extra.length) return m;
+  extra.forEach(function (l) { m.n = (m.n || 0) + 1; var k = l[1] === 'o' ? 'ok' : l[1] === '△' ? 'near' : 'ng'; m[k] = (m[k] || 0) + 1; });
+  var log = la.concat(extra).sort(function (x, y) { return x[0] - y[0]; }).slice(-200);
+  var older = (base.h || '').slice(0, Math.max(0, (base.h || '').length - la.length));
+  m.log = log; m.h = (older + log.map(function (l) { return l[1]; }).join('')).slice(-10);
+  m.t = Math.max(a.t || 0, b.t || 0); m.u = Math.max(ua, ub);
+  return m;
+}
+function syncSave() { lsSet(LS_SYNC, SYNC); }
+function markDirty(key) {
+  if (!SYNC.id) return;
+  SYNC.dirty[key] = 1; syncSave();
+  clearTimeout(markDirty.t); markDirty.t = setTimeout(function () { syncNow(false); }, 2500);
+}
+var syncBusy = false, syncAgain = false;
+function syncNow(full, replace) {
+  if (!SYNC.id) return Promise.resolve();
+  if (syncBusy) { syncAgain = true; return Promise.resolve(); }
+  syncBusy = true; syncStatus('同期中…');
+  var sent = SYNC.dirty, sub = {};
+  SYNC.dirty = {}; syncSave();
+  Object.keys(full ? REC : sent).forEach(function (k) { if (REC[k]) sub[k] = REC[k]; });
+  return fetch(SYNC_URL + '?sync=' + encodeURIComponent(SYNC.id), { method: 'POST', body: JSON.stringify({ rec: replace ? {} : sub, want: !!full, replace: !!replace }) })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d || d.error) throw new Error(d && d.error);
+      var changed = false;
+      if (d.resetAt && d.resetAt > (SYNC.reset || 0)) {   /* 別の端末で「記録を消す」をした */
+        Object.keys(REC).forEach(function (k) { var s = REC[k]; if ((s.u || s.t || 0) <= d.resetAt) { delete REC[k]; changed = true; } });
+        SYNC.reset = d.resetAt;
+      }
+      if (d.rec) Object.keys(d.rec).forEach(function (k) {
+        var m = mergeRec(REC[k], d.rec[k]);
+        if (JSON.stringify(m) !== JSON.stringify(REC[k])) { REC[k] = m; changed = true; }
+      });
+      SYNC.last = Date.now(); syncSave();
+      if (changed) { lsSet(LS_REC, REC); renderWeak(); renderScore(); }
+      syncStatus('同期済み ' + fmtTime(SYNC.last) + '（' + d.count + ' 語の記録）');
+    })
+    .catch(function () {
+      Object.keys(sent).forEach(function (k) { SYNC.dirty[k] = 1; }); syncSave();   /* 送れなかった分は次回また送る */
+      syncStatus('同期できませんでした（通信が戻ったら自動で送ります）');
+    })
+    .then(function () { syncBusy = false; if (syncAgain) { syncAgain = false; syncNow(false); } });
+}
+/* 画面を閉じる・隠すときに未送信分を送る（応答は待たない） */
+function syncBeacon() {
+  if (!SYNC.id || !Object.keys(SYNC.dirty).length || !navigator.sendBeacon) return;
+  var sub = {}; Object.keys(SYNC.dirty).forEach(function (k) { if (REC[k]) sub[k] = REC[k]; });
+  navigator.sendBeacon(SYNC_URL + '?sync=' + encodeURIComponent(SYNC.id), new Blob([JSON.stringify({ rec: sub })], { type: 'text/plain' }));
+}
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState === 'hidden') syncBeacon();
+  else if (SYNC.id && ITEMS.length) syncNow(true);   /* 戻ってきたら別の端末の分を取り込む */
+});
+window.addEventListener('pagehide', syncBeacon);
+function newSyncCode() {
+  var ch = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', a = new Uint8Array(12), s = '';
+  crypto.getRandomValues(a);
+  for (var i = 0; i < 12; i++) { s += ch[a[i] % ch.length]; if (i === 3 || i === 7) s += '-'; }
+  return s;
+}
+function normCode(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/^(.{4})(.{4})(.{4})$/, '$1-$2-$3'); }
+function syncStatus(msg) { var e = $('syncMsg'); if (e) e.textContent = msg; }
+function renderSync() {
+  var on = !!SYNC.id;
+  $('syncOff').hidden = on; $('syncOn').hidden = !on;
+  if (on) { $('syncCode').textContent = SYNC.id; if (SYNC.last) syncStatus('同期済み ' + fmtTime(SYNC.last)); }
+}
+function joinSync(code) {
+  SYNC.id = code; SYNC.dirty = {}; SYNC.reset = 0; syncSave(); renderSync();
+  return syncNow(true);   /* この端末の記録も全部送って、向こうの記録と合わせる */
+}
+$('btnSyncNew').onclick = function () { joinSync(newSyncCode()); };
+$('btnSyncJoin').onclick = function () {
+  var c = normCode($('syncInput').value);
+  if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(c)) { note('共有コードは「XXXX-XXXX-XXXX」の12文字です。'); return; }
+  joinSync(c);
+};
+$('btnSyncNow').onclick = function () { syncNow(true); };
+$('btnSyncCopy').onclick = function () {
+  var url = location.href.replace(/#.*$/, '') + '#sync=' + SYNC.id;
+  (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { note('別の端末用のリンクをコピーしました。その端末で開くと、同じ記録を使うようになります。'); })
+    .catch(function () { prompt('このリンクを別の端末で開いてください', url); });
+};
+$('btnSyncOff').onclick = function () {
+  if (!confirm('この端末の共有をやめます（記録はこの端末に残ります）。よろしいですか？')) return;
+  SYNC = { dirty: {} }; syncSave(); renderSync();
+};
+(function () {   /* #sync=コード 付きのリンクで開いたとき */
+  var m = location.hash.match(/sync=([A-Za-z0-9-]+)/);
+  if (m) { var c = normCode(m[1]); history.replaceState(null, '', location.href.replace(/#.*$/, '')); if (/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(c) && c !== SYNC.id) { SYNC.id = c; SYNC.dirty = {}; SYNC.reset = 0; syncSave(); } }
+  renderSync();
+})();
 
 function start(d, fromCache) {
   SCRIPT = d.script || {}; SCRIPT2 = d.script2 || {};
@@ -935,6 +1061,7 @@ function start(d, fromCache) {
   if (PREF.speed === 'slow') document.querySelector('#speed [data-s=slow]').click();
   $('status').textContent = ITEMS.length + ' 語句（' + (d.updated || '') + ' 更新' + (fromCache ? '・前回読み込んだデータ' : '') + '）';
   renderWeak(); next();
+  if (SYNC.id) syncNow(true);
 }
 var cached = lsGet(LS_DATA, null);
 fetch(DATA_URL).then(function (r) { return r.json(); }).then(function (d) {
