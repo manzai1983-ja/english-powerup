@@ -79,6 +79,12 @@
   .simlist li.hit { background: var(--near-tint); }
   .simlist .en { font-family: var(--font-en); font-weight: 700; }
   .simlist .jp { color: var(--muted); }
+  .grouphd { font-size: .88rem; background: var(--accent-tint); border-radius: 8px; padding: 6px 10px; margin: 0 0 12px; }
+  .q + .q { border-top: 1px dashed var(--rule); margin-top: 16px; padding-top: 14px; }
+  .qn { background: var(--accent); color: var(--on-accent); border-radius: 999px; padding: 0 8px; font-weight: 700; }
+  .cloze { margin: 4px 0 10px; }
+  .blank { display: inline-block; min-width: 3.4em; height: 1.1em; border-bottom: 2px solid var(--accent); margin: 0 3px; vertical-align: -3px; }
+  .acts[hidden] { display: none; }
   .kbd { font-size: .72rem; color: var(--faint); margin-left: auto; align-self: center; }
 
   .result { margin-top: 14px; border-top: 1px solid var(--rule-soft); padding-top: 12px; }
@@ -117,8 +123,8 @@
 <div class="wrap">
 <header>
   <h1>Unknown 英作文ドリル</h1>
-  <p>ラジオ英会話の Unknown words/phrases から出題します。日本語を見て、<b>英語を自分で書くか🎤で言って</b>ください。
-     間違えたものほどよく出ます。<a href="idioms.html">イディオム例文集</a> · <a href="./">聞き取れなかった英文</a></p>
+  <p>ラジオ英会話の Unknown words/phrases から出題します。日本語の意味と本文の例文を見て、<b>空所に入る英語を書くか🎤で言って</b>ください。
+     似た意味の語句はまとめて出ます。間違えたものほどよく出ます。<a href="idioms.html">イディオム例文集</a> · <a href="./">聞き取れなかった英文</a></p>
 </header>
 
 <div class="bar">
@@ -613,122 +619,195 @@ function renderScore() {
     '<span>出題範囲 <b>' + p.length + '</b></span><span>これまでに解いた <b>' + done + '</b>/' + all + '</span>' +
     '<span class="ng">苦手 <b>' + weak + '</b></span><span class="ok">一発正解（出題しない） <b>' + mast + '</b></span>';
 }
-function shapeOf(word) {
-  /* 語数とかたちのヒント: 頭文字だけ見せる */
-  return expandAlt(cleanWord(word))[0].split(/\s+/).map(function (t) {
-    if (PH.test(t.replace(/[,.?!]$/, '')) || /^[A-Z][,.?!]?$/.test(t) && t.length <= 2 && /^(A|B|S|V|O)/.test(t)) return t;
-    return t.replace(/[A-Za-z]/g, function (c, i) { return i === 0 ? c : '_'; });
-  }).join('  ');
+/* ============ 穴あき（本文の例文の中で、その語句を空所にする） ============ */
+var BE = { be: 1, is: 1, am: 1, are: 1, was: 1, were: 1, been: 1, being: 1 };
+function normW(s) { return String(s).toLowerCase().replace(/[’‘`]/g, "'").replace(/[^a-z0-9']/g, ''); }
+function phraseToks(word) {
+  var raw = expandAlt(cleanWord(word))[0].replace(/[～〜~…]/g, ' ～ ').split(/\s+/).filter(Boolean);
+  return raw.map(function (t, i) {
+    var bare = t.replace(/^[^\w～'’-]+|[^\w～'’-]+$/g, '');
+    var article = bare === 'A' && i === 0 && /^[a-z]/.test(raw[1] || '');
+    if (!bare || bare === '～' || (PH.test(bare) && !article)) return { ph: true };
+    return { k: normW(bare) };
+  }).filter(function (t) { return t.ph || t.k; });
+}
+/* 例文の語 n が語句の語 k に当たるか（活用・be動詞を許す） */
+function wm(n, k) {
+  if (!n || !k) return false;
+  if (n === k) return true;
+  if ((k === 'be' || BE[k]) && BE[n]) return true;
+  if (k.length > 4 && n.indexOf(k.slice(0, Math.max(4, k.length - 2))) === 0) return true;
+  return k.length >= 2 && n.indexOf(k) === 0 && n.length - k.length <= 3;
+}
+function cloze(ex, word) {
+  var ph = phraseToks(word);
+  while (ph.length && ph[0].ph) ph.shift();
+  while (ph.length && ph[ph.length - 1].ph) ph.pop();
+  if (!ph.length) return null;
+  var parts = String(ex).split(/(\s+)/), wi = [];
+  parts.forEach(function (p, i) { if (/\S/.test(p)) wi.push(i); });
+  var norm = wi.map(function (i) { return normW(parts[i]); });
+  function rec(pi, ei) {
+    if (pi === ph.length) return [];
+    var t = ph[pi], r;
+    if (t.ph) { for (var s = 0; s <= 4; s++) { r = rec(pi + 1, ei + s); if (r) return r; } return null; }
+    if (ei < norm.length && wm(norm[ei], t.k)) { r = rec(pi + 1, ei + 1); if (r) return [ei].concat(r); }
+    return null;
+  }
+  var hit = null;
+  for (var st = 0; st < norm.length && !hit; st++) hit = rec(0, st);
+  if (!hit) {   /* 語順どおりに見つからないときは語ごとに探す（半分以上見つかれば使う） */
+    var used = {}, words = ph.filter(function (t) { return !t.ph; });
+    hit = [];
+    words.forEach(function (t) { for (var e = 0; e < norm.length; e++) if (!used[e] && wm(norm[e], t.k)) { used[e] = 1; hit.push(e); break; } });
+    if (!hit.length || hit.length < Math.ceil(words.length / 2)) return null;
+    hit.sort(function (a, b) { return a - b; });
+  }
+  var set = {}, runs = 0, prev = -2;
+  hit.forEach(function (e) { set[wi[e]] = 1; if (e !== prev + 1) runs++; prev = e; });
+  var html = [], ans = [];
+  parts.forEach(function (p, i) {
+    if (!set[i]) { html.push(esc(p)); return; }
+    var m = p.match(/^([^A-Za-z0-9'’]*)(.*?)([^A-Za-z0-9'’]*)$/);
+    ans.push(m[2]);
+    html.push(esc(m[1]) + '<span class="blank" aria-label="空所"></span>' + esc(m[3]));
+  });
+  return { html: html.join(''), answer: ans.join(' '), split: runs > 1 };
+}
+/* 空所に入る語（例文の形）でも、語句の形（辞書形・A/V入り）でも正解にする */
+function judgeQ(it, user) {
+  var a = judge(user, it.word);
+  if (!it.cz || a.v === 'ok') return a;
+  var b = judge(user, it.cz.answer);
+  if (b.v === 'ok') return b;
+  return a.v === 'near' && b.v !== 'near' ? a : b;
+}
+
+var GROUP_MAX = 5;   /* 似た意味をまとめて出すときの最大問題数 */
+function groupOf(head) {
+  var sib = head.sib.slice().sort(function (a, b) { return weight(b) - weight(a); }).slice(0, GROUP_MAX - 1);
+  return [head].concat(sib).sort(function (a, b) { return (+a.ep) - (+b.ep); });
 }
 function next() {
   TTS.stop();
-  cur = pick();
+  var head = pick();
   var st = $('stage');
-  if (!cur) {
+  if (!head) {
+    cur = null;
     st.innerHTML = '<div class="card empty">' + ($('mode').value === 'onlyweak' ? 'この範囲に苦手なものはありません。' : $('mode').value === 'mastered' ? 'この範囲に一発正解したものはまだありません。' : $('mode').value === 'new' ? 'この範囲はぜんぶ一度は解きました。' : ($('asked').value || $('wrong').value) ? '出題日・間違えた日の条件に合う問題がありません。' : '出題できるものがありません。') + '</div>';
     renderScore(); return;
   }
-  cur.done = false; cur.v = null; cur.hinted = false;   /* 同じ問題がまた出たとき前回の状態を持ち越さない */
-  recent.push(cur.key); if (recent.length > 30) recent.shift();
-  var s = stat(cur.key), kindLabel = { phrase: '熟語・イディオム', word: '単語', sent: '文・セリフ' }[cur.kind];
-  var hasPH = toks(cleanWord(cur.word), true).indexOf('\u0000') >= 0;
-  st.innerHTML =
-    '<div class="card">' +
-      '<div class="meta"><span>' + esc(cur.month) + '月 第' + esc(cur.ep) + '回</span><span class="tag">' + kindLabel + '</span>' +
+  var items = groupOf(head), multi = items.length > 1, more = head.sib.length + 1 - items.length;
+  cur = { items: items, done: false };
+  items.forEach(function (it) { it.v = null; it.cz = it.ex ? cloze(it.ex, it.word) : null; recent.push(it.key); });
+  while (recent.length > 30) recent.shift();
+  var html = '<div class="card">' +
+    (multi ? '<div class="grouphd"><b>似た意味の語句 ' + items.length + '問</b>をまとめて出題' + (more > 0 ? '（ほか' + more + '件はまた別のときに）' : '') + '。例文の場面で使い分けを覚えましょう。</div>' : '');
+  items.forEach(function (it, i) {
+    var s = stat(it.key), kindLabel = { phrase: '熟語・イディオム', word: '単語', sent: '文・セリフ' }[it.kind];
+    var hasPH = toks(cleanWord(it.word), true).indexOf('\u0000') >= 0;
+    html += '<div class="q">' +
+      '<div class="meta">' + (multi ? '<span class="qn">' + (i + 1) + '</span>' : '') + '<span>' + esc(it.month) + '月 第' + esc(it.ep) + '回</span><span class="tag">' + kindLabel + '</span>' +
         (s.n ? '<span>これまで ' + s.ok + '/' + s.n + ' 正解 ' + esc(s.h.slice(-5)) + '</span><span>前回 ' + fmtDay(s.t) + '</span>' +
           (lastWrong(s) ? '<span>最後に間違えた ' + fmtDay(lastWrong(s)) + '</span>' : '') : '<span>はじめて</span>') +
-        (isWeak(s) ? '<span class="tag weak">苦手</span>' : '') +
-        (cur.sib.length ? '<span class="tag sim">似た意味 ほか' + cur.sib.length + '件</span>' : '') + '</div>' +
-      '<div class="ja">' + (cur.sib.length ? '<span class="simmark" title="似た日本語の問題がほかにもあります">≒</span>' : '') + esc(cur.ja) + '</div>' +
-      (cur.sib.length ? '<div class="simnote">同じような日本語の問題がほかに <b>' + cur.sib.length + '件</b> あります。どれを聞かれているか分かるように、<b>ヒントで語数と頭文字を見てから</b>答えましょう。</div>' : '') +
-      (hasPH ? '<div class="note">A・V などの記号はそのまま書いても、具体的な語を入れても正解です。</div>' : '') +
-      '<div class="shape" id="shape"></div>' +
-      '<div class="inrow"><input id="ans" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="英語で答える" aria-label="答え">' +
-        '<button class="iconbtn" id="mic" title="英語で言う" aria-label="英語で言う">' + ICON.mic + '</button></div>' +
-      '<div class="acts"><button class="primary" id="check">答え合わせ</button><button id="hint"' + (cur.sib.length ? ' class="nudge"' : '') + '>ヒント' + (cur.sib.length ? 'を見る' : '') + '</button><button id="giveup">わからない</button>' +
-        '<span class="kbd">Enter で答え合わせ → Enter で次へ</span></div>' +
-      '<div id="result"></div>' +
+        (isWeak(s) ? '<span class="tag weak">苦手</span>' : '') + '</div>' +
+      '<div class="ja">' + esc(it.ja) + '</div>' +
+      (it.cz ? '<div class="ex cloze">' + it.cz.html + '</div>' +
+          (it.cz.split ? '<div class="note">空所が離れています。空所に入る語を前から順に書いてください。</div>' : '')
+        : '<div class="note">例文がないので、日本語から英語で答えてください。' + (hasPH ? 'A・V などの記号はそのまま書いても、具体的な語を入れても正解です。' : '') + '</div>') +
+      '<div class="inrow"><input id="ans' + i + '" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="' + (it.cz ? '空所に入る英語' : '英語で答える') + '" aria-label="答え ' + (i + 1) + '">' +
+        '<button class="iconbtn" id="mic' + i + '" title="英語で言う" aria-label="英語で言う">' + ICON.mic + '</button></div>' +
+      '<div id="res' + i + '"></div>' +
     '</div>';
-  var ans = $('ans');
-  ans.focus();
-  ans.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); if (cur && cur.done) next(); else check(false); }
   });
+  html += '<div class="acts" id="qacts"><button class="primary" id="check">答え合わせ</button><button id="giveup">わからない</button>' +
+      '<span class="kbd">' + (multi ? 'Enter で次の問題の空所へ → 最後で答え合わせ' : 'Enter で答え合わせ → Enter で次へ') + '</span></div>' +
+    '<div id="after"></div></div>';
+  st.innerHTML = html;
+  items.forEach(function (it, i) {
+    var inp = $('ans' + i);
+    function advance() { if (i < items.length - 1) $('ans' + (i + 1)).focus(); else check(false); }
+    inp.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' || e.isComposing) return;
+      e.preventDefault();
+      if (cur && cur.done) next(); else advance();
+    });
+    $('mic' + i).onclick = function () { startRecog(inp, $('mic' + i), function () { if (cur && !cur.done) advance(); }); };
+  });
+  $('ans0').focus();
   $('check').onclick = function () { check(false); };
   $('giveup').onclick = function () { check(true); };
-  $('hint').onclick = function () { $('shape').textContent = shapeOf(cur.word); cur.hinted = true; this.classList.remove('nudge'); ans.focus(); };
-  if (cur.sib.length) ans.placeholder = 'ヒントを見てから英語で答える';
-  $('mic').onclick = function () { startRecog(ans, $('mic'), function () { if (!cur.done) check(false); }); };
   renderScore();
 }
 function check(giveup) {
   if (!cur || cur.done) return;
-  var user = $('ans').value.trim();
-  if (!user && !giveup) { $('ans').focus(); return; }
-  var r = giveup ? { v: 'ng', alt: expandAlt(cleanWord(cur.word))[0], at: toks(expandAlt(cleanWord(cur.word))[0], true), ut: [] } : judge(user, cur.word);
+  var items = cur.items;
+  var vals = items.map(function (it, i) { return giveup ? '' : $('ans' + i).value.trim(); });
+  if (!giveup && vals.every(function (v) { return !v; })) { $('ans0').focus(); return; }
+  cur.done = true;
+  items.forEach(function (it, i) { checkOne(it, i, vals[i], items); $('ans' + i).readOnly = true; });
+  $('qacts').hidden = true;
+  $('after').innerHTML = '<div class="acts"><button class="primary" id="next">次の問題 →</button></div>';
+  $('next').onclick = next;
+  $('ans' + (items.length - 1)).focus();
+  if (items.length === 1 && items[0].v === 'ok') TTS.say(items[0].ex || cleanWord(items[0].word));
+  renderScore(); renderWeak();
+}
+function checkOne(it, i, user, items) {
+  var r = user ? judgeQ(it, user) : { v: 'ng', at: [], ut: [] };
   /* 似た意味の別の問題の答えを書いたとき */
   var other = null;
-  if (r.v !== 'ok' && user) cur.sib.some(function (o) { if (judge(user, o.word).v === 'ok') { other = o; return true; } return false; });
+  if (r.v !== 'ok' && user) items.concat(it.sib).some(function (o) { if (o !== it && judge(user, o.word).v === 'ok') { other = o; return true; } return false; });
   if (other) r.v = 'near';
-  cur.done = true; cur.v = r.v;
-  record(cur.key, r.v);
+  it.v = r.v;
+  record(it.key, r.v);
   session.n++; if (r.v === 'ok') session.ok++;
   var label = other ? '似た意味の別の語句です（「' + cleanWord(other.word) + '」第' + other.ep + '回）'
-    : { ok: '正解！', near: '惜しい（つづりや語が少しちがう）', ng: giveup ? 'わからなかった' : '不正解' }[r.v];
-  var simHtml = cur.sib.length ? '<div class="lbl">似た意味の語句（区別して覚えよう）</div><ul class="simlist">' +
-    cur.sib.slice(0, 12).map(function (o) { return '<li' + (o === other ? ' class="hit"' : '') + '><span class="en">' + esc(cleanWord(o.word)) + '</span> <span class="jp">' + esc(o.ja) + '（第' + esc(o.ep) + '回）</span></li>'; }).join('') +
-    (cur.sib.length > 12 ? '<li class="jp">…ほか' + (cur.sib.length - 12) + '件</li>' : '') + '</ul>' : '';
-  if (cur.hinted) { var lg = stat(cur.key).log; if (lg.length) { lg[lg.length - 1][2] = 'h'; lsSet(LS_REC, REC); } }
-  var exHtml;
-  if (cur.ex) {
-    exHtml = '<div class="lbl">' + (cur.exSrc === 'made' ? '例文（本文に無いので作った文）' : '本文の例文' + (cur.exSrc === 'self' ? '（番組のセリフそのまま）' : '') + ' <span class="ex-src">— 第' + esc(cur.ep) + '回</span>') + '</div>' +
-      '<div class="ex">' + (cur.exSrc === 'self' ? esc(cur.ex) : markExample(cur.ex, cur.word)) + '</div>' +
-      '<div class="acts"><button class="pill" id="sayEx">' + ICON.play + '例文を聞く</button><button class="pill" id="repeat">' + ICON.mic + '例文を言ってみる</button></div>' +
-      '<div class="note" id="repRes"></div>';
-  } else {
-    exHtml = '<div class="lbl">本文の例文</div><div class="noex">この語は本文に例文が見つかりませんでした。</div>';
-  }
-  $('result').innerHTML =
+    : { ok: '正解！', near: '惜しい（つづりや語が少しちがう）', ng: user ? '不正解' : 'わからなかった' }[r.v];
+  var phrase = cleanWord(it.word), ansText = it.cz ? it.cz.answer : phrase;
+  var exHtml = it.ex
+    ? '<div class="lbl">' + (it.exSrc === 'made' ? '例文（本文に無いので作った文）' : '本文の例文' + (it.exSrc === 'self' ? '（番組のセリフそのまま）' : '') + ' <span class="ex-src">— 第' + esc(it.ep) + '回</span>') + '</div>' +
+      '<div class="ex">' + (it.exSrc === 'self' ? esc(it.ex) : markExample(it.ex, it.word)) + '</div>' +
+      '<div class="acts"><button class="pill" id="sayEx' + i + '">' + ICON.play + '例文を聞く</button><button class="pill" id="repeat' + i + '">' + ICON.mic + '例文を言ってみる</button></div>' +
+      '<div class="note" id="repRes' + i + '"></div>'
+    : '';
+  var s = stat(it.key);
+  $('res' + i).innerHTML =
     '<div class="result">' +
       '<span class="verdict ' + r.v + '">' + label + '</span>' +
       '<div class="lbl">答え</div>' +
-      '<div class="answer"><span>' + esc(cleanWord(cur.word)) + '</span><button class="pill" id="sayAns">' + ICON.play + '聞く</button></div>' +
-      (cur.jaNote ? '<div class="note">※' + esc(cur.jaNote) + '</div>' : '') +
-      (user && r.v !== 'ok' ? '<div class="lbl">あなたの答え（<span style="color:var(--ng)">赤線</span>は足りない語、取り消し線はちがう語）</div><div class="yours">' + diffHtml(r.ut, r.at) + '</div>' : '') +
-      exHtml + simHtml +
-      '<div class="fix">' +
-        (r.v !== 'ok' && user ? '<span>この答えでも合っている →</span><button id="fixOk">正解にする</button>' : '') +
-        (r.v === 'ok' ? '<span>自信がなかった →</span><button id="fixNg">不正解にする</button>' : '') +
+      '<div class="answer"><span>' + esc(ansText) + '</span>' + (ansText.toLowerCase() !== phrase.toLowerCase() ? '<span class="note">語句: ' + esc(phrase) + '</span>' : '') +
+        '<button class="pill" id="sayAns' + i + '">' + ICON.play + '聞く</button></div>' +
+      (it.jaNote ? '<div class="note">※' + esc(it.jaNote) + '</div>' : '') +
+      (user && r.v !== 'ok' && r.at ? '<div class="lbl">あなたの答え（<span style="color:var(--ng)">赤線</span>は足りない語、取り消し線はちがう語）</div><div class="yours">' + diffHtml(r.ut, r.at) + '</div>' : '') +
+      exHtml +
+      '<div class="fix" id="fix' + i + '">' +
+        (r.v !== 'ok' && user ? '<span>この答えでも合っている →</span><button id="fixOk' + i + '">正解にする</button>' : '') +
+        (r.v === 'ok' ? '<span>自信がなかった →</span><button id="fixNg' + i + '">不正解にする</button>' : '') +
       '</div>' +
-      (isMastered(stat(cur.key)) && stat(cur.key).n === 1 ? '<div class="simnote" id="mastNote">一発正解！ この問題は次から出題しません（下の「一発正解」に入ります）。 <button class="pill" id="mastBack">また出す</button></div>' : '') +
-      '<div class="hist" id="hist"></div>' +
-      '<div class="acts"><button class="primary" id="next">次の問題 →</button></div>' +
+      (isMastered(s) && s.n === 1 ? '<div class="simnote" id="mastNote' + i + '">一発正解！ この問題は次から出題しません（下の「一発正解」に入ります）。 <button class="pill" id="mastBack' + i + '">また出す</button></div>' : '') +
+      '<div class="hist" id="hist' + i + '"></div>' +
     '</div>';
-  renderHist();
-  if ($('mastBack')) $('mastBack').onclick = function () { setBack(cur.key); $('mastNote').textContent = 'この問題はこれからも出題します。'; };
-  $('sayAns').onclick = function () { TTS.say(expandAlt(cleanWord(cur.word))[0].replace(/[～〜~]/g, ''), this); };
-  if ($('sayEx')) $('sayEx').onclick = function () { TTS.say(cur.ex, this); };
-  if ($('repeat')) $('repeat').onclick = function () {
+  renderHist(it, i);
+  if ($('mastBack' + i)) $('mastBack' + i).onclick = function () { setBack(it.key); $('mastNote' + i).textContent = 'この問題はこれからも出題します。'; };
+  $('sayAns' + i).onclick = function () { TTS.say(it.cz ? it.cz.answer : expandAlt(phrase)[0].replace(/[～〜~]/g, ''), this); };
+  if ($('sayEx' + i)) $('sayEx' + i).onclick = function () { TTS.say(it.ex, this); };
+  if ($('repeat' + i)) $('repeat' + i).onclick = function () {
     var box = { value: '' }, btn = this;
-    startRecog({ set value(v) { box.value = v; $('repRes').textContent = '聞き取り: ' + v; }, get value() { return box.value; } }, btn, function () {
-      var a = toks(cur.ex, false), b = toks(box.value, false), hit = 0, used = {};
-      b.forEach(function (w) { var i = a.indexOf(w); while (i >= 0 && used[i]) i = a.indexOf(w, i + 1); if (i >= 0) { used[i] = 1; hit++; } });
+    startRecog({ set value(v) { box.value = v; $('repRes' + i).textContent = '聞き取り: ' + v; }, get value() { return box.value; } }, btn, function () {
+      var a = toks(it.ex, false), b = toks(box.value, false), hit = 0, used = {};
+      b.forEach(function (w) { var k = a.indexOf(w); while (k >= 0 && used[k]) k = a.indexOf(w, k + 1); if (k >= 0) { used[k] = 1; hit++; } });
       var pct = a.length ? Math.round(100 * hit / a.length) : 0;
-      $('repRes').innerHTML = '聞き取り: <span style="font-family:var(--font-en)">' + esc(box.value) + '</span> — 一致 <b>' + pct + '%</b>';
+      $('repRes' + i).innerHTML = '聞き取り: <span style="font-family:var(--font-en)">' + esc(box.value) + '</span> — 一致 <b>' + pct + '%</b>';
     });
   };
-  if ($('fixOk')) $('fixOk').onclick = function () { record(cur.key, 'ok', cur.v); if (cur.v !== 'ok') session.ok++; cur.v = 'ok'; this.parentNode.innerHTML = '<span>正解として記録しました。</span>'; renderScore(); renderHist(); renderWeak(); };
-  if ($('fixNg')) $('fixNg').onclick = function () { record(cur.key, 'ng', cur.v); session.ok--; cur.v = 'ng'; if ($('mastNote')) $('mastNote').remove(); this.parentNode.innerHTML = '<span>不正解として記録しました。</span>'; renderScore(); renderHist(); renderWeak(); };
-  $('next').onclick = next;
-  $('ans').readOnly = true;
-  $('ans').focus();
-  if (r.v === 'ok') TTS.say(cur.ex || cleanWord(cur.word));
-  renderScore(); renderWeak();
+  if ($('fixOk' + i)) $('fixOk' + i).onclick = function () { record(it.key, 'ok', it.v); if (it.v !== 'ok') session.ok++; it.v = 'ok'; $('fix' + i).innerHTML = '<span>正解として記録しました。</span>'; renderScore(); renderHist(it, i); renderWeak(); };
+  if ($('fixNg' + i)) $('fixNg' + i).onclick = function () { record(it.key, 'ng', it.v); session.ok--; it.v = 'ng'; if ($('mastNote' + i)) $('mastNote' + i).remove(); $('fix' + i).innerHTML = '<span>不正解として記録しました。</span>'; renderScore(); renderHist(it, i); renderWeak(); };
 }
 /* この問題の出題履歴（新しい順） */
-function renderHist() {
-  var el = $('hist'); if (!el || !cur) return;
-  var log = stat(cur.key).log.slice().reverse();
+function renderHist(it, i) {
+  var el = $('hist' + i); if (!el) return;
+  var log = stat(it.key).log.slice().reverse();
   el.innerHTML = '出題履歴: ' + log.slice(0, 20).map(function (l) {
     var c = l[1] === 'o' ? 'o' : l[1] === 'x' ? 'x' : 'n';
     return '<span class="' + c + '">' + fmtTime(l[0]) + ' ' + (l[1] === 'o' ? '○' : l[1]) + '</span>';
