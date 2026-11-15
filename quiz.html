@@ -83,7 +83,8 @@
   .q + .q { border-top: 1px dashed var(--rule); margin-top: 16px; padding-top: 14px; }
   .qn { background: var(--accent); color: var(--on-accent); border-radius: 999px; padding: 0 8px; font-weight: 700; }
   .cloze { margin: 4px 0 10px; }
-  .blank { display: inline-block; min-width: 3.4em; height: 1.1em; border-bottom: 2px solid var(--accent); margin: 0 3px; vertical-align: -3px; }
+  .ctx { color: var(--faint); }
+  .blank { display: inline-block; min-width: 5em; height: 1.1em; border-bottom: 2px solid var(--accent); margin: 0 3px; vertical-align: -3px; }
   .acts[hidden] { display: none; }
   .kbd { font-size: .72rem; color: var(--faint); margin-left: auto; align-self: center; }
 
@@ -665,14 +666,38 @@ function cloze(ex, word) {
   }
   var set = {}, runs = 0, prev = -2;
   hit.forEach(function (e) { set[wi[e]] = 1; if (e !== prev + 1) runs++; prev = e; });
-  var html = [], ans = [];
-  parts.forEach(function (p, i) {
-    if (!set[i]) { html.push(esc(p)); return; }
-    var m = p.match(/^([^A-Za-z0-9'’]*)(.*?)([^A-Za-z0-9'’]*)$/);
-    ans.push(m[2]);
-    html.push(esc(m[1]) + '<span class="blank" aria-label="空所"></span>' + esc(m[3]));
-  });
-  return { html: html.join(''), answer: ans.join(' '), split: runs > 1 };
+  /* 続いている語はまとめて空所1つ（語数が分からないように） */
+  var RE = /^([^A-Za-z0-9'’]*)(.*?)([^A-Za-z0-9'’]*)$/, html = [], ans = [], k = 0;
+  while (k < parts.length) {
+    if (!set[k]) { html.push(esc(parts[k])); k++; continue; }
+    var j = k, words = [];
+    while (set[j + 2]) j += 2;
+    for (var x = k; x <= j; x += 2) words.push(parts[x].match(RE)[2]);
+    ans.push(words.join(' '));
+    html.push(esc(parts[k].match(RE)[1]) + '<span class="blank" aria-label="空所"></span>' + esc(parts[j].match(RE)[3]));
+    k = j + 1;
+  }
+  return { html: html.join(''), answer: ans.join(' '), split: runs > 1, whole: hit.length === wi.length };
+}
+/* 文全体が問題のとき、本文（Main part）でその文の前後の文 */
+var SCRIPT = {};
+function normS(s) { return String(s).toLowerCase().replace(/[’‘`]/g, "'").replace(/[^a-z0-9]/g, ''); }
+var SCRIPT2 = {};
+function ctxOf(it) {
+  return ctxIn(SCRIPT[it.ep], it.ex) || ctxIn(SCRIPT2[it.ep], it.ex);
+}
+function ctxIn(ss, ex) {
+  var n = normS(ex);
+  if (!ss || n.length < 4) return null;
+  for (var i = 0; i < ss.length; i++) {
+    var m = normS(ss[i]);
+    if (!m || !(m === n || (m.length >= 6 && n.indexOf(m) >= 0) || (n.length >= 6 && m.indexOf(n) >= 0))) continue;
+    var j = i;
+    while (j + 1 < ss.length && normS(ss[j + 1]).length >= 4 && n.indexOf(normS(ss[j + 1])) >= 0) j++;
+    if (!ss[i - 1] && !ss[j + 1]) return null;
+    return { prev: ss[i - 1] || '', next: ss[j + 1] || '' };
+  }
+  return null;
 }
 /* 空所に入る語（例文の形）でも、語句の形（辞書形・A/V入り）でも正解にする */
 function judgeQ(it, user) {
@@ -699,7 +724,11 @@ function next() {
   }
   var items = groupOf(head), multi = items.length > 1, more = head.sib.length + 1 - items.length;
   cur = { items: items, done: false };
-  items.forEach(function (it) { it.v = null; it.cz = it.ex ? cloze(it.ex, it.word) : null; recent.push(it.key); });
+  items.forEach(function (it) {
+    it.v = null; it.cz = it.ex ? cloze(it.ex, it.word) : null;
+    it.ctx = it.cz && it.cz.whole ? ctxOf(it) : null;
+    recent.push(it.key);
+  });
   while (recent.length > 30) recent.shift();
   var html = '<div class="card">' +
     (multi ? '<div class="grouphd"><b>似た意味の語句 ' + items.length + '問</b>をまとめて出題' + (more > 0 ? '（ほか' + more + '件はまた別のときに）' : '') + '。例文の場面で使い分けを覚えましょう。</div>' : '');
@@ -712,7 +741,10 @@ function next() {
           (lastWrong(s) ? '<span>最後に間違えた ' + fmtDay(lastWrong(s)) + '</span>' : '') : '<span>はじめて</span>') +
         (isWeak(s) ? '<span class="tag weak">苦手</span>' : '') + '</div>' +
       '<div class="ja">' + esc(it.ja) + '</div>' +
-      (it.cz ? '<div class="ex cloze">' + it.cz.html + '</div>' +
+      (it.cz ? '<div class="ex cloze">' +
+          (it.ctx && it.ctx.prev ? '<span class="ctx">' + esc(it.ctx.prev) + '</span> ' : '') + it.cz.html +
+          (it.ctx && it.ctx.next ? ' <span class="ctx">' + esc(it.ctx.next) + '</span>' : '') + '</div>' +
+          (it.ctx ? '<div class="note">薄い字は本文の前後のセリフです。</div>' : '') +
           (it.cz.split ? '<div class="note">空所が離れています。空所に入る語を前から順に書いてください。</div>' : '')
         : '<div class="note">例文がないので、日本語から英語で答えてください。' + (hasPH ? 'A・V などの記号はそのまま書いても、具体的な語を入れても正解です。' : '') + '</div>') +
       '<div class="inrow"><input id="ans' + i + '" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="' + (it.cz ? '空所に入る英語' : '英語で答える') + '" aria-label="答え ' + (i + 1) + '">' +
@@ -884,6 +916,7 @@ $('importFile').onchange = function () {
 $('btnReset').onclick = function () { if (confirm('これまでの解答記録をすべて消します。よろしいですか？')) { REC = {}; lsSet(LS_REC, REC); renderWeak(); next(); } };
 
 function start(d, fromCache) {
+  SCRIPT = d.script || {}; SCRIPT2 = d.script2 || {};
   build(d.rows || []);
   var months = [];
   ITEMS.forEach(function (it) { if (months.indexOf(it.month) < 0) months.push(it.month); });
