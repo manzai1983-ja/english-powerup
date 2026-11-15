@@ -189,6 +189,20 @@
 var DATA_URL = 'https://script.google.com/macros/s/AKfycbzkCIdC6N_U6qZYhR07t2buQtzO96BQoO5wqlan7Wy3n2W4n_AhZtZOcVh4u7jyLli1/exec?data=unknown';
 /* 単語など、データに例文がないものを番組本文（main-part）から拾った分。キーは "回|語" */
 var EXTRA_EX = /*EXTRA*/{"3|properly":"Let's catch up properly...","4|heartfelt":"My heartfelt condolences to you and your family.","8|hedge":"I was trimming my hedges earlier.","8|chilly":"It's a bit chilly this morning, isn't it?","8|humid":"Hey, Quite humid today, don't you think?","13|explanation":"The explanation about the supply and demand curves.","16|noticeable":"Our latest customer satisfaction report shows a noticeable drop.","18|Honestly":"Honestly, I think they make a great couple.","18|thoughtful":"They're both kind and thoughtful.","19|double":"Our biggest client just doubled their order for next year.","21|scatter":"Clark dropped his notes, and they scattered everywhere.","21|embarrass":"Really that must have been embarrassing.","22|brighten":"They brighten the whole street.","23|anyway":"I'm heading there after class anyway.","23|back-to-back":"I've got back-to-back lectures all afternoon.","23|Nope":"Nope.","23|Deal":"Deal.","27|outsell":"You know I read somewhere that EV might outsell gas-powered cars in the near future.","27|true":"True.","27|roar":"Some people still love the roar of a real engine.","27|realistic":"[That's a nice idea / That would be nice], but I'm not sure it's a realistic right now.","33|Never":"Never.","33|maze":"This station is like a maze!","36|startup":"A startup based in San Francisco.","39|intrude":"I shouldn't let work intrude on family time.","41|leave":"You need to leave earlier.","44|sluggish":"More or less, but I still feel sluggish during the day.","44|self-conscious":"I feel so self-conscious there.","47|fertilizer":"No special fertilizer or tricks?","47|trick":"No special fertilizer or tricks?","49|Hopefully":"Hopefully there's one left.","51|Neighbor":"Neighbors look out for each other.","51|anyway":"What did you order, anyway?","52|tricky":"The librarian said it's tricky.","53|texture":"The texture looks very soft, even on camera.","54|formula":"Can we check the formula together first?","61|crave":"I've been craving their double cheeseburger all morning.","62|thank":"Justin, thank you for taking my call.","62|shortly":"I'll send the details shortly.","63|restrictions":"Justin, before we place our orders, may I ask if you have any food allergies or dietary restrictions?","63|substitutions":"We've arranged a special menu, but substitutions are always possible.","67|plush":"I was wondering if we might add a speaking function to the plush.","68|errand":"Yes, but it's starting to feel a bit too loud for everyday errands.","68|hassle":"It draws attention, and parking it for grocery runs is a hassle.","68|fuel-efficient":"It's up to you, though I'd lean toward a fuel-efficient compact.","69|juggle":"I've been juggling my part-time job and classes.","69|Midterms":"Midterms are coming up, and I've been cutting back on sleep to finish everything.","71|barely":"I just feel like I'm barely keeping up.","71|midterm":"What if I mess up my midterms?","72|deck":"Go grab the deck.","74|childcare":"Flexible hours, temporary remote work, and help finding childcare.","76|fancy":"Just an idea, but he'd probably love something homemade more than anything fancy.","81|lively":"It should be a lively month.","83|insane":"This burger's insane.","86|refine":"Then we should refine the specs tonight.","86|specs":"Then we should refine the specs tonight.","86|Whatever":"— Whatever.","87|stunning":"Daichi, I passed by your shop the other day and saw a stunning red vintage sports car out front.","89|bark":"My neighbor’s dog has been barking for three days straight.","92|beat":"I can't beat him these days.","93|poetry":"Haiku is a short form of poetry that captures a moment, often in nature.","93|syllable":"It's about feeling, not just counting syllables.","94|intuitive":"The navigation and search could be more intuitive.","96|intuitive":"He agreed that the navigation and search could be more intuitive.","97|allowance":"Well, she said she might give us some allowance.","97|hectic":"Things have been hectic.","97|overwhelmed":"I'm a bit overwhelmed right now.","102|Basically":"Basically, he wants a quick update on what we've improved so far and what still needs work.","103|complicated":"Though the delivery will be a bit complicated.","104|scholarships":"I cut back on my weekend shifts, and I'm planning to apply for scholarships for next year.","106|make":"Let's see you make this next one.","116|decent":"His math is decent, but it would be great if he could raise his scores a bit.","116|extra":"I wondered why there are two __extra__ plates on the table.","117|convinced":"I'm not convinced.","121|overslept":"You overslept again.","123|Certainly":"Certainly, I'll have my team investigate it right away.","126|sprained":"Your ankle sprained, but it's not broken.","128|-not even":"You cannot bring them to class-not even note-taking.","128|note-taking":"You cannot bring them to class-not even note-taking.","129|It's [better / best] not to V":"It's [better / not] not to drive when you're tired.","133|mess":"Ethan, your room is still a mess.","134|be present":"I should be more present.","134|afterwards":"And maybe a bar afterwards.","139|bag":"Would you like a bag?","139|double-bag":"Can you bag the cleaning products separately, and double-bag the heavy stuff?"};
+/* 例文が無い・「～」「A」「,」で終わるなど不完全なものの差し替え。[例文, 1=本文から / 0=本文に無いので作成] */
+var EX_FIX = {"13|[ You ] Got a moment?":["Have you got a moment?",1],"72|[Maybe] We could V":["Maybe we could grab a burger.",1],"2|Got any A?":["Got any plans for the weekend?",0],"2|Deal":["Deal. I'll see you at six, then.",0],"3|properly":["Let's catch up properly over lunch sometime.",1],"3|Let's V properly":["Let's catch up properly over lunch sometime.",1],"3|If it isn't A!":["Well, if it isn't Ms. Green! What a nice surprise.",0],"4|I was saddened to hear about ～.":["I was saddened to hear about your grandfather.",0],"6|How did A go?":["How did the exam go?",1],"6|～, maybe?":["A road trip, maybe?",1],"6|road trip":["How about a road trip this summer?",0],"7|What have you done with A?":["What have you done with my umbrella?",0],"8|scorching":["It's scorching today, so let's stay inside.",0],"8|freezing":["It's freezing outside, so wear a warm coat.",0],"9|How's ～ coming along?":["Hey, how's your homework coming along?",1],"9|How did ～ go?":["How did the board meeting go?",1],"11|I'm a friend of A.":["I'm a friend of Tom's.",1],"13|It didn't quite":["It didn't quite make sense to me.",1],"18|Did you hear that ～?":["Did you hear that Takumi and Kate are seeing each other?",1],"18|Do you know any～?":["Do you know any good restaurants around here?",1],"18|Is it true～?":["Is it true you got a new job?",1],"18|What do you think about～?":["What do you think about living in Nara?",1],"19|I've been dying to V":["I've been dying to go there.",0],"21|beat":["My grandma plays online games and beats teenagers every night.",1],"24|So let me ask you this～.":["So let me ask you this: what made you choose our company?",0],"24|Well I'm wondering ～.":["Well, I'm wondering if you could help me with this.",0],"24|Now I'm curious about ～.":["Now I'm curious about how the meeting went.",0],"26|～, but I'll have to pass this time.":["Thank you for the offer, but I'll have to pass this time.",1],"31|where the nearest A is.":["Do you know where the nearest gas station is?",1],"36|startup":["She works for a startup based in San Francisco.",0],"36|based in":["She works for a startup based in San Francisco.",0],"36|Could you take a quick look at A?":["Sorry to bother you, but could you take a quick look at this report?",1],"37|Would it be OK if I V?":["Would it be OK if I got it to you tomorrow morning?",1],"48|You mean as A?":["You mean as support?",1],"48|Would you like me to V?":["Would you like me to join the meeting?",1],"54|Would you care for A?":["Would you care for dessert?",1],"54|Can I offer you A?":["Can I offer you some wine?",1],"56|Would you like some more A?":["Would you like some more rice?",1],"56|Do you want some more A?":["Do you want some more coffee?",0],"56|Would you care for some more A?":["Would you care for some more tea?",0],"56|Can I get you some more A?":["Can I get you some more water?",1],"58|Is there any chance I could V?":["Is there any chance I could check in a bit early?",1],"64|help keep you out of trouble":["A guide from Garage Hiroto might help keep you out of trouble.",1],"68|Still V-ing?":["Still driving that Hiroto 2000GT?",1],"72|What about ～?":["What about grabbing a burger?",1],"79|I'd like to V, if possible.":["I'd like to return this, if possible.",0],"82|get renewed":["\"Big West Garage\" got renewed for another season.",1],"82|got renewed for another season":["\"Big West Garage\" got renewed for another season.",1],"93|You work hard":["You work hard every day, so take a break.",0],"93|You worked hard to get here":["You worked hard to get here, so enjoy it.",0],"94|Mind if I V?":["Mind if I take a look?",1],"97|In that case":["In that case, yeah, I'm in.",1],"101|that's unexpected":["That's unexpected, but kind of nice.",1],"102|be asking about the progress since 〜":["He's asking about the progress since our last meeting.",1],"107|How did you know〜?":["How did you know he was a great guy?",1],"107|What is the reason for〜?":["What is the reason for your success?",1],"107|How come〜?":["How come everyone's wearing formal clothes today?",1],"107|build it":["How come they built it?",1],"108|〜 and things just developed from there.":["We stayed in touch after the conference and things just developed from there.",1],"108|What made you〜?":["What made you so angry?",1],"108|You're always〜. Why is that?":["You're always so calm. Why is that?",0],"114|more about〜 than...":["So it's more about usability than current features.",1],"114|I'm not saying〜. What I'm saying is...":["I'm not saying it's bad. What I'm saying is it could be simpler.",0],"114|I didn't say〜. What I did say was...":["I didn't say we should cancel it. What I did say was we should wait.",0],"114|It's not that〜. It's just that...":["It's not that I don't like it. It's just that it's too expensive.",0],"123|This is A speaking.":["Hello, this is Sato Yukiko speaking.",1],"123|I'll keep A posted.":["I'll keep you posted.",1],"123|I'd like you to V":["I'd like you to take a close look at it.",0],"126|Make sure to rest A for the next few days.":["Make sure to rest your ankle for the next few days.",1],"126|make sure that S V":["Make sure that the door is locked before you leave.",0],"127|Don't you dare～":["Don't you dare tell anyone about this.",0],"127|please refrain from V-ing":["Please refrain from using your phone during the meeting.",0],"128|I was just trying to V":["I was just trying to get the work done faster.",1],"128|get the work done":["I was just trying to get the work done faster.",1],"128|I don't think you should V":["I don't think you should send company files to your personal account.",0],"129|There are ～ for a reason.":["There are safety rules for a reason.",1],"129|Try not to V":["Try not to touch anything in this area.",0],"129|Remind not to V":["Remind me not to leave my keys in the car.",0],"131|Mark my words, ～":["Mark my words, you'll regret it.",0],"133|You forget yourself":["You forget yourself. I'm still your mother.",0],"136|How's ～ coming along?":["How's your science project coming along, Theo?",1],"136|Heads up":["Heads up! There's a car coming.",0],"136|mind the gap":["Please mind the gap when you get off the train.",0],"137|as a precaution":["Take this money as a precaution.",0],"137|get to the airport":["We should get to the airport by noon.",0],"137|at least three hours early":["Let's get to the airport at least three hours early.",0],"137|take our time and relax":["If we leave early, we can take our time and relax.",0],"142|don't tell me〜?":["Jason, don't tell me you forgot.",1],"142|Would it be possible to V ?":["Would it be possible to change my reservation?",1],"142|Could you possibly V ?":["Could you possibly help me carry these boxes?",1],"142|turn my project in":["Is there any chance you could let me turn my project in late?",1],"142|late":["Is there any chance you could let me turn my project in late?",1],"143|If it's convenient for you,":["If it's convenient for you, could you water my flowers this weekend?",0],"143|If you have [a chance / a minute],":["If you have a minute, could you check this for me?",0],"143|There's no rush, but〜":["There's no rush, but could you send me the file this week?",0],"146|No worries":["No worries. We can go another time.",0],"146|whole weekend blocked off":["I've got the whole weekend blocked off.",1],"148|Just 〜":["Just don't tell her.",1],"148|please don't hesitate to V":["If you need anything, please don't hesitate to ask.",0],"64|can get ～":["That area can get chaotic.",1],"64|get chaotic":["That area can get chaotic.",1]};
+/* データの手直し（スプレッドシートはそのまま、ここで直す）。キーは "回|語" */
+var DROP = { "72|Go grab A": 1, "101|What did you say?": 1, "101|Sorry, what was that?": 1 };   /* 重複（54 go grab／32 にある） */
+var FIX = { "11|specializes in A": { word: "specialize in A" }, "63|restrictions": { word: "restriction" }, "74|can be very": { word: "can be" } };
+var SPLIT = { "64|can get chaotic": [{ word: "can get ～", meaning: "～することがある" }, { word: "get chaotic", meaning: "ごちゃごちゃ混んでいる" }] };
+/* 似た意味の手直し: UNSIM は結ばない組、SIM_GROUPS は同じ仲間として結ぶ（英語の頭で判定） */
+var UNSIM = [[/^specialize in/, /^go with/], [/^go with$/, /^(hear of|double)$/], [/^if it isn't/, /^it's not that$/], [/^if it isn't/, /^don't tell me/], [/^it's not that$/, /^don't tell me/],
+  [/^totally$/, /^is it true/], [/^for real$/, /^are you sure you/], [/^should have/, /^good for/]];
+var SIM_GROUPS = [
+  [/^either way is fine/, /^i couldn't care less/],
+  [/where you're coming from/, /^i get your point/, /^i see what you mean/, /^good point$/, /^i can understand how you feel/, /^i understand your concern/,
+   /^i know this is frustrating/, /^i understand things happen/, /^i know you want to do well/, /^i get the appeal/]
+];
 var LS_REC = 'unkquiz_rec_v1', LS_DATA = 'unkquiz_data_v1', LS_PREF = 'unkquiz_pref_v1';
 
 var ICON = {
@@ -421,28 +435,44 @@ function kindOf(w) {
   return /\s/.test(w.trim()) ? 'phrase' : 'word';
 }
 function build(rows) {
-  var seen = {};
+  var seen = {}, list = [];
   ITEMS = [];
   rows.forEach(function (r) {
+    var k = r.ep + '|' + String(r.word || '').trim();
+    if (DROP[k]) return;
+    if (SPLIT[k]) { SPLIT[k].forEach(function (p) { list.push(Object.assign({}, r, p, { example: '' })); }); return; }
+    list.push(FIX[k] ? Object.assign({}, r, FIX[k], { key: k }) : r);   /* 語を直しても記録は元のキーのまま */
+  });
+  list.forEach(function (r) {
     var word = String(r.word || '').trim(), meaning = String(r.meaning || '').trim();
     if (!word || !meaning || /[ぁ-んァ-ン一-龥]/.test(word)) return;
-    var key = r.ep + '|' + word;
+    var key = r.key || (r.ep + '|' + word);
     if (seen[key]) return; seen[key] = 1;
     var ex = String(r.example || '').trim(), src = 'main';
     if (!ex && EXTRA_EX[key]) ex = EXTRA_EX[key];
+    if (EX_FIX[key]) { ex = EX_FIX[key][0]; src = EX_FIX[key][1] ? 'main' : 'made'; }
     var kind = kindOf(word);
     if (!ex && kind === 'sent') { ex = cleanWord(word); src = 'self'; }
+    if (/\[[^\]]*\/[^\]]*\]/.test(ex)) ex = expandAlt(ex)[0];   /* [a / b] は最初の形で */
+    if (ex && !fullSentence(ex)) ex = '';   /* ～・A・V が残る／「,」で終わる等は例文にしない */
     var mParts = meaning.split('※');
     ITEMS.push({ key: key, no: r.no, month: String(r.month), ep: String(r.ep), word: word, ja: mParts[0].trim(), jaNote: mParts.slice(1).join('※').trim(),
       ex: ex, exSrc: ex ? src : '', kind: kind, sib: [] });
   });
   findSimilar();
 }
+/* 例文として使える完全な文か */
+function fullSentence(s) {
+  s = String(s).trim();
+  if (/[～〜~\[\]]|(\.\.\.|…|,|-)$/.test(s)) return false;
+  if (/(^|[\s(])(V|S V|V-ing|V-ed|to V)(?=[\s?.!,)]|$)/.test(s) || /\sA(?=[\s?.!,)]|$)/.test(s)) return false;
+  return /[.?!]["”]?$/.test(s);
+}
 /* 日本語の意味が似ている問題どうしを結ぶ（同じ意味・片方を含む・2文字ずつの重なりが 75% 以上） */
 function jaNorm(s) {
   return String(s).replace(/[（(][^）)]*[）)]/g, '')
     .replace(/[\sA-Za-z0-9～〜~…・、。，．,.!?！？「」『』\[\]\/／:：;；-]/g, '')
-    .replace(/(です|ます|だよ|だね|よね|ね|よ|な|わ)+$/g, '');
+    .replace(/分か|判/g, 'わか').replace(/(です|ます|だよ|だね|よね|ね|よ|な|わ)+$/g, '');
 }
 function findSimilar() {
   var F = ITEMS.map(function (it) {
@@ -450,6 +480,14 @@ function findSimilar() {
     if (n.length < 2) { g[n] = 1; c = 1; } else for (var i = 0; i < n.length - 1; i++) if (!g[n.substr(i, 2)]) { g[n.substr(i, 2)] = 1; c++; }
     return { n: n, g: g, c: c, en: cleanWord(it.word).toLowerCase().replace(/[^a-z' ]/g, '').trim() };
   });
+  /* 2つの英語が同じ組の別々の型に当たるか（group=true なら同じ型どうしも可） */
+  function forced(a, b, sets, group) {
+    return sets.some(function (set) {
+      var ia = -1, ib = -1;
+      set.forEach(function (re, n) { if (ia < 0 && re.test(a)) ia = n; if (ib < 0 && re.test(b)) ib = n; });
+      return ia >= 0 && ib >= 0 && (group || ia !== ib);
+    });
+  }
   function sim(a, b) {
     if (!a.n || !b.n) return false;
     if (a.n === b.n) return true;
@@ -460,7 +498,7 @@ function findSimilar() {
   }
   for (var i = 0; i < ITEMS.length; i++) for (var j = i + 1; j < ITEMS.length; j++) {
     if (F[i].en === F[j].en) continue;   /* 英語が同じ（別の回で再登場）は数えない */
-    if (sim(F[i], F[j])) { ITEMS[i].sib.push(ITEMS[j]); ITEMS[j].sib.push(ITEMS[i]); }
+    if (forced(F[i].en, F[j].en, SIM_GROUPS, true) || (!forced(F[i].en, F[j].en, UNSIM, false) && sim(F[i], F[j]))) { ITEMS[i].sib.push(ITEMS[j]); ITEMS[j].sib.push(ITEMS[i]); }
   }
 }
 
@@ -642,7 +680,7 @@ function check(giveup) {
   if (cur.hinted) { var lg = stat(cur.key).log; if (lg.length) { lg[lg.length - 1][2] = 'h'; lsSet(LS_REC, REC); } }
   var exHtml;
   if (cur.ex) {
-    exHtml = '<div class="lbl">本文の例文' + (cur.exSrc === 'self' ? '（番組のセリフそのまま）' : '') + ' <span class="ex-src">— 第' + esc(cur.ep) + '回</span></div>' +
+    exHtml = '<div class="lbl">' + (cur.exSrc === 'made' ? '例文（本文に無いので作った文）' : '本文の例文' + (cur.exSrc === 'self' ? '（番組のセリフそのまま）' : '') + ' <span class="ex-src">— 第' + esc(cur.ep) + '回</span>') + '</div>' +
       '<div class="ex">' + (cur.exSrc === 'self' ? esc(cur.ex) : markExample(cur.ex, cur.word)) + '</div>' +
       '<div class="acts"><button class="pill" id="sayEx">' + ICON.play + '例文を聞く</button><button class="pill" id="repeat">' + ICON.mic + '例文を言ってみる</button></div>' +
       '<div class="note" id="repRes"></div>';
