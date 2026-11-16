@@ -37,6 +37,16 @@
   header a { color: var(--accent); }
   .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0 10px; }
   .bar select { font: inherit; font-size: .88rem; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); max-width: 100%; }
+  .rng { display: flex; align-items: center; gap: 4px; font-size: .88rem; color: var(--muted); }
+  .rng input { font: inherit; font-size: .9rem; width: 5.2em; padding: 6px 6px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .rng button, .seqbar button { font: inherit; font-size: .8rem; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .seqbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: .82rem; color: var(--muted); margin: 0 0 10px; }
+  .seqbar[hidden] { display: none; }
+  .seqbar input { font: inherit; font-size: .85rem; width: 5.2em; padding: 4px 6px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); }
+  .exja { font-size: .92rem; color: var(--muted); background: var(--paper); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 6px 10px; margin: -4px 0 10px; }
+  .exja[hidden] { display: none; }
+  .exja b { color: var(--faint); font-weight: 400; font-size: .75rem; margin-right: 6px; }
+  .say { font: inherit; font-size: .8rem; font-family: var(--font-jp); font-weight: 400; vertical-align: middle; margin-left: 8px; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--rule); background: var(--surface); color: var(--accent); cursor: pointer; }
   .status { font-size: .82rem; color: var(--faint); margin: 0 0 10px; }
   .help { font-size: .85rem; background: var(--near-tint); border-radius: 8px; padding: 8px 10px; margin: 0 0 10px; }
   .score { display: flex; gap: 14px; flex-wrap: wrap; font-size: .82rem; color: var(--muted); margin: 0 0 10px; }
@@ -101,19 +111,21 @@
 <div class="wrap">
 <header>
   <h1>文法1000本ノック 意味ドリル</h1>
-  <p>問題集のメモ（unknown）から出題します。<b>英語の語句と問題集の例文を見て、日本語の意味を書くか🎤で言って</b>ください。
+  <p>問題集のメモ（unknown）から出題します。<b>英語の語句と問題集の例文を見て、日本語の意味を書くか🎤で言って</b>ください。答え合わせで例文の訳も出ます。
      同じ問題番号の語句はまとめて出ます。間違えたものほどよく出ます。<a href="quiz.html">Unknown 英作文ドリル</a></p>
 </header>
 
 <div class="bar">
-  <select id="range" aria-label="問題番号の範囲"><option value="">すべての問題番号</option></select>
+  <span class="rng">No.<input id="rFrom" type="number" min="1" max="1049" inputmode="numeric" aria-label="範囲のはじめ">〜<input id="rTo" type="number" min="1" max="1049" inputmode="numeric" aria-label="範囲のおわり"><button type="button" id="rAll">全部</button></span>
   <select id="mode" aria-label="出し方">
+    <option value="seq">番号順（範囲のはじめから順に）</option>
     <option value="auto">おまかせ（まだ出ていないもの→苦手多め）</option>
     <option value="weak">苦手を多めにランダム</option><option value="onlyweak">苦手だけ</option>
     <option value="new">まだ出ていないもの</option><option value="flat">完全ランダム</option>
     <option value="mastered">一発正解したもの（ふだんは出ない）</option>
   </select>
 </div>
+<div class="seqbar" id="seqbar" hidden>次は <b id="seqNext"></b>　<label>No.<input id="seqJump" type="number" min="1" max="1049" inputmode="numeric"></label><button type="button" id="seqGo">から始める</button><button type="button" id="seqTop">範囲のはじめに戻る</button></div>
 <p class="status" id="status"></p>
 <p class="help" id="help" hidden></p>
 <div class="score" id="score"></div>
@@ -189,6 +201,11 @@ function markEx(ex, en) {
     if (isAns) t = '<span class="ans">' + t + '</span>';
     return hit[i] ? '<mark>' + t + '</mark>' : t;
   }).join('');
+}
+/* 語句の読み上げ用：日本語・記号・説明を外す（A/B/S/V はそのまま読む） */
+function sayText(en) {
+  return String(en).replace(/<[^>]*>|＜[^＞]*＞|（[^）]*）/g, ' ').replace(/V-ing/g, 'doing').replace(/[^\x20-\x7E]/g, ' ')
+    .replace(/[\[\]()\/~+=]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 function plainEx(ex) { return ex.replace(/\[|\]/g, ''); }
 
@@ -268,16 +285,25 @@ function regrade(it, r) {   /* 直前の判定を自分で直す */
 
 /* ============ 出題 ============ */
 var NOS = Object.keys(BYNO).map(Number).sort(function (a, b) { return a - b; });
+var RNG = [1, 1049];
 (function () {
-  var sel = $('range');
-  for (var a = 1; a <= 1049; a += 100) { var b = Math.min(a + 99, 1049); var o = document.createElement('option'); o.value = a + '-' + b; o.textContent = 'No.' + pad4(a) + '〜' + pad4(b); sel.appendChild(o); }
-  sel.value = lsGet('range', ''); $('mode').value = lsGet('mode', 'auto');
+  var r = lsGet('range', ''); if (r) { var p = String(r).split('-'); RNG = [+p[0] || 1, +p[1] || 1049]; }
+  $('rFrom').value = RNG[0]; $('rTo').value = RNG[1]; $('mode').value = lsGet('mode', 'auto');
 })();
-function inRange(it) { var r = $('range').value; if (!r) return true; var p = r.split('-'); return it.no >= +p[0] && it.no <= +p[1]; }
+function clampNo(v, d) { v = parseInt(v, 10); if (isNaN(v)) return d; return Math.max(1, Math.min(1049, v)); }
+function setRange() {
+  var a = clampNo($('rFrom').value, 1), b = clampNo($('rTo').value, 1049); if (a > b) { var t = a; a = b; b = t; }
+  $('rFrom').value = a; $('rTo').value = b;
+  if (a === RNG[0] && b === RNG[1]) return;
+  RNG = [a, b]; lsSet('range', a + '-' + b); seqNo = a - 1; lsSet('seqNo', seqNo); next();
+}
+function inRange(it) { return it.no >= RNG[0] && it.no <= RNG[1]; }
+var seqNo = lsGet('seqNo', 0);
 function pool() {
   var mode = $('mode').value;
   return ITEMS.filter(function (it) {
     if (!inRange(it)) return false;
+    if (mode === 'seq') return true;
     var s = stat(it.key);
     if (mode === 'mastered') return isMastered(s);
     if (isMastered(s)) return false;
@@ -297,6 +323,12 @@ function weight(it) {
 var recent = lsGet('recent', []);
 function pickGroup() {
   var p = pool(); if (!p.length) return [];
+  if ($('mode').value === 'seq') {
+    var nos = p.map(function (it) { return it.no; }), nx = nos.filter(function (n) { return n > seqNo; });
+    var no = nx.length ? Math.min.apply(null, nx) : Math.min.apply(null, nos);
+    if (!nx.length && seqNo >= RNG[0]) note('範囲の最後まで終わったので、はじめ（No.' + pad4(no) + '）に戻りました。');
+    return p.filter(function (it) { return it.no === no; }).slice(0, GROUP_MAX);
+  }
   var cand = p.filter(function (it) { return recent.indexOf(it.no) < 0; }); if (!cand.length) cand = p;
   var tot = 0, ws = cand.map(function (it) { var w = weight(it); tot += w; return w; }), r = Math.random() * tot, head = cand[0];
   for (var i = 0; i < cand.length; i++) { r -= ws[i]; if (r <= 0) { head = cand[i]; break; } }
@@ -317,11 +349,12 @@ function next() {
   if (cur.length > 1) h += '<div class="grouphd">No.' + pad4(no) + ' の語句 ' + cur.length + ' つをまとめて出しています。</div>';
   h += '<div class="ex-src">問題集 No.' + pad4(no) + ' の例文 <button type="button" id="say">▶ 読み上げ</button></div>';
   h += '<div class="ex" id="exbox">' + markEx(ex, cur.map(function (it) { return it.en; }).join(' ')) + '</div>';
+  h += '<div class="exja" id="exja" hidden><b>訳</b>' + esc(DATA.knockJa[no] || '（訳がありません）') + '</div>';
   cur.forEach(function (it, i) {
     var s = stat(it.key);
     h += '<div class="q" id="q' + i + '"><div class="meta">' + (cur.length > 1 ? '<span class="qn">' + (i + 1) + '</span>' : '') +
       (s.n ? '<span class="tag' + (isWeak(s) ? ' weak' : '') + '">' + s.n + '回目' + (isWeak(s) ? '・苦手' : '') + '</span>' : '<span class="tag">はじめて</span>') + '</div>' +
-      '<div class="phrase">' + (it.rel ? '<span class="rel">' + esc(it.rel) + '</span>' : '') + esc(it.en) + '</div>' +
+      '<div class="phrase">' + (it.rel ? '<span class="rel">' + esc(it.rel) + '</span>' : '') + esc(it.en) + (sayText(it.en) ? '<button type="button" class="say" id="sayp' + i + '" aria-label="読み上げ">▶ 読む</button>' : '') + '</div>' +
       '<div class="inrow"><input id="ans' + i + '" placeholder="日本語の意味" autocomplete="off" enterkeyhint="' + (i < cur.length - 1 ? 'next' : 'done') + '">' +
       '<button class="iconbtn" id="mic' + i + '" type="button" aria-label="声で答える">' + MIC + '</button></div>' +
       '<div id="res' + i + '"></div></div>';
@@ -337,12 +370,13 @@ function next() {
       e.preventDefault(); if (i < cur.length - 1) $('ans' + (i + 1)).focus(); else check(false);
     };
     $('mic' + i).onclick = function () { startRecog(inp, this); };
+    if ($('sayp' + i)) $('sayp' + i).onclick = function () { speak(sayText(it.en)); };
   });
   $('btnCheck').onclick = function () { check(false); };
   $('btnGive').onclick = function () { check(true); };
   $('btnNext').onclick = next;
   if (!('ontouchstart' in window)) $('ans0').focus();
-  updateStatus();
+  updateStatus(); updateSeq();
 }
 var VTXT = { o: '○ 正解', n: '△ おしい', x: '× 不正解' }, VCLS = { o: 'ok', n: 'near', x: 'ng' };
 function check(giveup) {
@@ -354,6 +388,8 @@ function check(giveup) {
     record(it, r, user); sess.n++; if (r === 'o') sess.o++; else if (r === 'x') sess.x++;
     showResult(it, i, r, user);
   });
+  $('exja').hidden = false;
+  if ($('mode').value === 'seq') { seqNo = cur[0].no; lsSet('seqNo', seqNo); }
   $('qacts').hidden = true; $('nacts').hidden = false; $('btnNext').focus();
   updateStatus(); renderLists();
 }
@@ -380,6 +416,10 @@ function histHtml(it) {
     return '<span class="' + (l[1] === 'o' ? 'o' : l[1] === 'n' ? 'n' : 'x') + '">' + (l[1] === 'o' ? '○' : l[1] === 'n' ? '△' : '×') + '</span>' + fmtTime(l[0]);
   }).join('　') + '</div>';
 }
+function updateSeq() {
+  var on = $('mode').value === 'seq'; $('seqbar').hidden = !on; if (!on) return;
+  $('seqNext').textContent = cur.length ? 'No.' + pad4(cur[0].no) + '（範囲 ' + RNG[0] + '〜' + RNG[1] + '）' : '';
+}
 function updateStatus() {
   var all = ITEMS.filter(inRange), seen = all.filter(function (it) { return stat(it.key).n > 0; }).length;
   var mast = all.filter(function (it) { return isMastered(stat(it.key)); }).length;
@@ -401,8 +441,13 @@ function renderLists() {
   [].forEach.call($('mastList').querySelectorAll('button'), function (b) { b.onclick = function () { stat(b.getAttribute('data-k')).back = true; save(); renderLists(); updateStatus(); }; });
 }
 
-$('range').onchange = function () { lsSet('range', this.value); next(); };
+$('rFrom').onchange = setRange; $('rTo').onchange = setRange;
+[$('rFrom'), $('rTo')].forEach(function (el) { el.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); setRange(); } }; });
+$('rAll').onclick = function () { $('rFrom').value = 1; $('rTo').value = 1049; setRange(); };
 $('mode').onchange = function () { lsSet('mode', this.value); next(); };
+$('seqGo').onclick = function () { var v = clampNo($('seqJump').value, NaN); if (isNaN(v)) return; if (v < RNG[0] || v > RNG[1]) { note('No.' + v + ' は範囲（' + RNG[0] + '〜' + RNG[1] + '）の外です。'); return; } seqNo = v - 1; lsSet('seqNo', seqNo); next(); };
+$('seqJump').onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); $('seqGo').click(); } };
+$('seqTop').onclick = function () { seqNo = RNG[0] - 1; lsSet('seqNo', seqNo); next(); };
 $('btnExport').onclick = function () {
   var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ stat: ST }, null, 1)], { type: 'application/json' }));
   a.download = 'grammar1000-record-' + new Date().toISOString().slice(0, 10) + '.json'; a.click();
